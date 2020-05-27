@@ -2,21 +2,11 @@ import cv2
 import numpy as np
 from enum import IntEnum
 from matplotlib import pyplot as plt
-from CMC_pkg import cmc_io
+from cmc import cmc_io
+from cmc.Configuration import Configuration
+import os
 
-# constants
-# consecutive frames
-SENSITIVITY = 20
-# outliers, range in which for mca is looked
-SPECIFICITY = 3
-# of frame inside which random features are created
-BORDER = 50
-# number of features to be tracked for optical flow
-NUMBER_OF_FEATURES = 100
-# difference to most common angle such that still considered as background movement
-ANGLE_DIFF_LIMIT = 20
-# the run mode for the classifier
-MODE = 0
+
 
 
 class ClassificationType(IntEnum):
@@ -126,38 +116,29 @@ class Runmodi(IntEnum):
     DEBUG_AND_SAVE_MODE = 3
 
 
-class OFCMClassifier:
-
-    def configure(self, config):
-        self.sensitivity = int(config["SENSITIVITY"])
-        self.specificity = int(config["SPECIFICITY"])
-        self.border = int(config["BORDER"])
-        self.number_of_features = int(config["NUMBER_OF_FEATURES"])
-        self.angle_diff_limit = int(config["ANGLE_DIFF_LIMIT"])
-        self.mode = Runmodi(int(config["MODE"]))
-        self.fpath = "/".join([config["INPUT_PATH"], config["INPUT_VIDEO"]])
-        self.sf = int(config["BEGIN_FRAME"])
-        self.ef = int(config["END_FRAME"])
+class OpticalFlow(object):
 
     # mode=0 ... not debugging
     # mode=1 ... debugging
     # mode=2 ... debugging
     # mode>2 ... debugging + saving
     def __init__(self,
-                 fpath="",
+                 video_frames=None,
+                 fPath="",
                  sf=0,
                  ef=1,
-                 mode=2,
+                 mode=0,
                  pan_classifier=AngleClassifier(ClassificationType.PAN),
                  tilt_classifier=AngleClassifier(ClassificationType.TILT),
-                 sensitivity=SENSITIVITY,
-                 specificity=SPECIFICITY,
-                 border=BORDER,
-                 number_of_features=NUMBER_OF_FEATURES,
-                 angle_diff_limit=ANGLE_DIFF_LIMIT,
+                 sensitivity=20,
+                 specificity=3,
+                 border=50,
+                 number_of_features=100,
+                 angle_diff_limit=20,
                  config=None):
 
-        self.fpath = fpath
+        self.video_frames = video_frames
+        self.fpath = fPath
         self.sf = sf
         self.ef = ef
         self.mode = Runmodi(mode)
@@ -170,14 +151,11 @@ class OFCMClassifier:
         if config is not None:
             self.configure(config)
 
-
         self.i = 1
         self.end = self.ef - self.sf
         self.most_common_angles = np.zeros([self.end - 1, 1])
         self.weights = np.zeros([self.end - 1, 1])
         self.frame_size = (0, 0)
-
-
 
         self.cap = None
 
@@ -203,9 +181,105 @@ class OFCMClassifier:
             ord('e'): self.annotate_nomove
         })
 
-
-
         print("Creating new OpticalFlowCameraMovementClassifier " + str(self))
+
+    # run optical flow computation
+    def run(self):
+
+        '''
+        self.cap = cv2.VideoCapture(self.fpath)
+        if self.ef==1:
+            self.re_init_ef(int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT)))
+        self.cap.set(1, self.sf)
+
+
+        print("\n".join(["Video path: " + self.fpath,
+                        "first frame to be captured: " + str(self.sf),
+                        "last frame to be captured: " + str(self.ef)]))
+
+        ret, curr_frame = self.cap.read()
+
+        if not ret:
+            raise Exception("Failing to open video file.")
+        '''
+
+        curr_frame = self.video_frames[0]
+        h, w, _ = curr_frame.shape
+        self.frame_size = (w, h)
+
+        if self.mode > Runmodi.DEBUG_MODE:
+            # need to compute output path
+            print("Running program in save mode: configuring outputs.")
+            self.out = self.init_outputs(self.fpath, self.sf, self.ef, (w, h))
+
+        curr_feat = self.create_random_features(self.number_of_features, self.range_of_frame(curr_frame))
+
+        while self.i < self.end:
+            prev_frame, prev_feat, curr_frame, curr_feat = self.step(curr_frame, curr_feat)
+
+            print("prev: ", prev_feat.__len__())
+            print("curr: ", curr_feat.__len__())
+
+            prev_feat, curr_feat = self.optical_flow(prev_frame, prev_feat, curr_frame)
+
+            most_common_angle = None
+            weight = 1
+            if self.i >= 2:
+                most_common_angle = self.most_common_angles[self.i - 2]
+                weight = self.weights[self.i - 2]
+
+                # classifiy movement
+                self.check_for_movement(most_common_angle, self.pan_counter, self.pan_classifier)
+                self.check_for_movement(most_common_angle, self.tilt_counter, self.tilt_classifier)
+
+            print("prev: ", prev_feat.__len__())
+            print("curr: ", curr_feat.__len__())
+
+            if prev_feat.__len__() == 0:
+                self.most_common_angles[self.i - 1] = self.most_common_angles[self.i - 2]
+                self.weights[self.i - 1] = self.weights[self.i - 2]
+            else:
+                self.most_common_angles[self.i - 1], curr_feat, self.weights[self.i - 1] = \
+                    self.estimate_background(prev_feat, curr_feat, most_common_angle, weight, curr_frame)
+            self.i = self.i + 1
+
+        self.pans = self.pan_counter.movements
+        self.tilts = self.tilt_counter.movements
+
+        #for (sf, ef) in self.pan_counter.movements:
+        #    movements.append([self.fpath, 'PAN', sf, ef])
+        #for (sf, ef) in self.tilt_counter.movements:
+        #    movements.append([self.fpath, 'TILT', sf, ef])
+
+        self.clear()
+
+        return self.pans, self.tilts
+
+    def clear(self):
+        print("Clear and release everything. Reset frame index.")
+
+        if self.mode > Runmodi.DEBUG_MODE:
+            self.clear_outputs()
+
+        if self.pan_counter.movement_created:
+            self.pan_counter.movements[self.pan_counter.movements.__len__() - 1][1] = self.i + self.sf
+        if self.tilt_counter.movement_created:
+            self.tilt_counter.movements[self.tilt_counter.movements.__len__() - 1][1] = self.i + self.sf
+        # reset i
+        self.i = 1
+        #self.cap.release()
+        cv2.destroyAllWindows()
+
+    def configure(self, config):
+        self.sensitivity = int(config["SENSITIVITY"])
+        self.specificity = int(config["SPECIFICITY"])
+        self.border = int(config["BORDER"])
+        self.number_of_features = int(config["NUMBER_OF_FEATURES"])
+        self.angle_diff_limit = int(config["ANGLE_DIFF_LIMIT"])
+        self.mode = Runmodi(int(config["MODE"]))
+        self.fpath = "/".join([config["INPUT_PATH"], config["INPUT_VIDEO"]])
+        self.sf = int(config["BEGIN_FRAME"])
+        self.ef = int(config["END_FRAME"])
 
     def __str__(self):
         return "\n".join(
@@ -259,12 +333,15 @@ class OFCMClassifier:
 
     def run_manual_evaluation(self):
         self.cap = cv2.VideoCapture(self.fpath)
+
         if self.ef == 1:
             self.re_init_ef(int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT)))
         self.cap.set(1, self.sf)
-        print("\n".join(["Video path: " + self.fpath,
-                        "first frame to be captured: " + str(self.sf),
-                        "last frame to be captured: " + str(self.ef)]))
+
+        if self.mode > Runmodi.DEBUG_MODE:
+            print("\n".join(["Video path: " + self.fpath,
+                            "first frame to be captured: " + str(self.sf),
+                            "last frame to be captured: " + str(self.ef)]))
 
         ret, curr_frame = self.cap.read()
 
@@ -308,85 +385,6 @@ class OFCMClassifier:
         self.tilts = self.tilt_counter.movements
 
         self.clear()
-
-    # run optical flow computation
-    def run(self):
-
-        self.cap = cv2.VideoCapture(self.fpath)
-        if self.ef==1:
-            self.re_init_ef(int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT)))
-        self.cap.set(1, self.sf)
-
-
-        print("\n".join(["Video path: " + self.fpath,
-                        "first frame to be captured: " + str(self.sf),
-                        "last frame to be captured: " + str(self.ef)]))
-
-        ret, curr_frame = self.cap.read()
-
-        if not ret:
-            raise Exception("Failing to open video file.")
-
-        h, w, _ = curr_frame.shape
-        self.frame_size = (w, h)
-
-        if self.mode > Runmodi.DEBUG_MODE:
-            # need to compute output path
-            print("Running program in save mode: configuring outputs.")
-            self.out = self.init_outputs(self.fpath, self.sf, self.ef, (w, h))
-
-        curr_feat = self.create_random_features(self.number_of_features, self.range_of_frame(curr_frame))
-
-        while self.i < self.end and self.cap.isOpened():
-            prev_frame, prev_feat, curr_frame, curr_feat = self.step(curr_frame, curr_feat)
-
-
-            print("prev: ", prev_feat.__len__())
-            print("curr: ", curr_feat.__len__())
-
-            prev_feat, curr_feat = self.optical_flow(prev_frame, prev_feat, curr_frame)
-
-            most_common_angle = None
-            weight = 1
-            if self.i >= 2:
-                most_common_angle = self.most_common_angles[self.i - 2]
-                weight = self.weights[self.i - 2]
-
-                # classifiy movement
-                self.check_for_movement(most_common_angle, self.pan_counter, self.pan_classifier)
-                self.check_for_movement(most_common_angle, self.tilt_counter, self.tilt_classifier)
-
-            print("prev: ", prev_feat.__len__())
-            print("curr: ", curr_feat.__len__())
-
-            if prev_feat.__len__() == 0:
-                self.most_common_angles[self.i - 1] = self.most_common_angles[self.i - 2]
-                self.weights[self.i - 1] = self.weights[self.i - 2]
-            else:
-                self.most_common_angles[self.i - 1], curr_feat, self.weights[self.i - 1] = \
-                    self.estimate_background(prev_feat, curr_feat, most_common_angle, weight, curr_frame)
-            self.i = self.i + 1
-
-        self.pans = self.pan_counter.movements
-        self.tilts = self.tilt_counter.movements
-
-        self.clear()
-
-    def clear(self):
-        print("Clear and release everything. Reset frame index.")
-
-
-        if self.mode > Runmodi.DEBUG_MODE:
-            self.clear_outputs()
-
-        if self.pan_counter.movement_created:
-            self.pan_counter.movements[self.pan_counter.movements.__len__() - 1][1] = self.i + self.sf
-        if self.tilt_counter.movement_created:
-            self.tilt_counter.movements[self.tilt_counter.movements.__len__() - 1][1] = self.i + self.sf
-        # reset i
-        self.i = 1
-        self.cap.release()
-        cv2.destroyAllWindows()
 
     @staticmethod
     def compute_output_path(name, sf, ef, info):
@@ -443,10 +441,7 @@ class OFCMClassifier:
     def step(self, curr_frame, curr_feat):
 
         prev_frame = curr_frame
-        ret, curr_frame = self.cap.read()
-
-        if not ret:
-            raise Exception("Failing to retrieve frame.")
+        curr_frame = self.video_frames[self.i]
 
         print("Update step: frame " + self.str_step_info())
 

@@ -1,5 +1,5 @@
 import sys
-from cmc import cmc_io, cmc_ofc
+from cmc import cmc_io, CMC
 
 def run(config_man):
    # ofc_man = cmc_ofc.OFCMClassifier(config=config_man)
@@ -7,7 +7,7 @@ def run(config_man):
    # ofc_man.to_csv("/".join([config_man["OUTPUT_PATH"], config_man["OUTPUT_CSV"]]))
    # ofc_man.to_png("/".join([config_man["OUTPUT_PATH"], config_man["OUTPUT_PLOT"]]))
 
-    ofc = cmc_ofc.OFCMClassifier(config=config)
+    ofc = CMC.OFCMClassifier(config=config)
     ofc.run()
 
     ofc.to_csv("/".join([config["OUTPUT_PATH"], config["OUTPUT_CSV"]]))
@@ -37,7 +37,7 @@ if __name__ == "__main__":
     config["INPUT_PATH"] = wd + config["INPUT_PATH"]
     config["OUTPUT_PATH"] = wd + config["OUTPUT_PATH"]
 
-    ofc = cmc_ofc.OFCMClassifier(config=config)
+    ofc = CMC.OFCMClassifier(config=config)
     ofc.run()
 
     name = config["INPUT_VIDEO"].split('.')[0]

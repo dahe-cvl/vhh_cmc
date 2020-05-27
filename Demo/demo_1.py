@@ -1,8 +1,8 @@
 import sys
-from cmc import cmc_io, cmc_ofc
+from cmc import cmc_io, CMC
 
 def run(config):
-    ofc = cmc_ofc.OFCMClassifier(config=config)
+    ofc = CMC.OFCMClassifier(config=config)
     # as in DEBUG_AND_SAVE_MODE a directory will be created with the name of the video where annotated videos are saved.
     ofc.run()
     # the result is plotted

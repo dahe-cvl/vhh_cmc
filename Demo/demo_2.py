@@ -1,9 +1,9 @@
 import sys
-from cmc import cmc_io, cmc_ofc
+from cmc import cmc_io, CMC
 
 def run(config):
 
-    ofc = cmc_ofc.OFCMClassifier(config=config)
+    ofc = CMC.OFCMClassifier(config=config)
     ofc.run()
 
     ofc.to_csv("/".join([config["OUTPUT_PATH"], config["OUTPUT_CSV"]]))

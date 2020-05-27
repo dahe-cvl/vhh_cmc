@@ -1,8 +1,5 @@
 import cv2
 import numpy as np
-from enum import IntEnum
-from matplotlib import pyplot as plt
-from cmc import cmc_io
 from cmc.Configuration import Configuration
 from cmc.PreProcessing import PreProcessing
 import os

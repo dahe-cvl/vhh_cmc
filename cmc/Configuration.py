@@ -12,7 +12,7 @@ class Configuration:
         the yaml file is separated in multiple sections
         config['Development']
         config['PreProcessing']
-        config['StcCore']
+        config['CmcCore']
         config['Evaluation']
 
         whereas each section should hold related and meaningful parameters.

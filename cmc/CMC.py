@@ -4,13 +4,14 @@ from enum import IntEnum
 from matplotlib import pyplot as plt
 from cmc import cmc_io
 from cmc.Configuration import Configuration
+from cmc.PreProcessing import PreProcessing
 import os
 from cmc.OpticalFlow import OpticalFlow
 
 
 class CMC(object):
     """
-    Main class of shot type classification (stc) package.
+    Main class of camera movements classification (cmc) package.
     """
     def __init__(self, config_file: str):
         """
@@ -31,6 +32,8 @@ class CMC(object):
         if (self.config_instance.debug_flag == True):
             print("DEBUG MODE activated!")
             self.debug_results = "/data/share/maxrecall_vhh_mmsi/videos/results/cmc/develop/"
+
+        self.pre_processing_instance = PreProcessing(config_instance=self.config_instance)
 
     def runOnSingleVideo(self, shots_per_vid_np=None, max_recall_id=-1):
         """
@@ -79,7 +82,7 @@ class CMC(object):
             # print(ret)
             # print(cap.get(cv2.CAP_PROP_FRAME_COUNT))
             if (ret == True):
-                frame = self.pre_process(frame)
+                frame = self.pre_processing_instance.applyTransformOnImg(frame)
                 frame_l.append(frame)
             else:
                 break
@@ -137,10 +140,6 @@ class CMC(object):
 
         # export results
         self.exportCmcResults(str(max_recall_id), results_cmc_np)
-
-    def pre_process(self, frame):
-        frame = cv2.resize(frame, self.config_instance.resize_dim)
-        return frame
 
     def loadSbdResults(self, sbd_results_path):
         """

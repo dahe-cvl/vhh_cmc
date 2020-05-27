@@ -38,6 +38,9 @@ class Configuration:
         self.save_debug_pkg_flag = -1
 
         # pre-processing section
+        self.flag_convert2Gray = -1
+        self.center_crop_flag = -1
+        self.flag_downscale = -1
         self.resize_dim = None
 
         # optical flow section
@@ -89,6 +92,9 @@ class Configuration:
         self.save_debug_pkg_flag = int(developer_config['SAVE_DEBUG_PKG'])
 
         # pre-processing section
+        self.flag_convert2Gray = int(pre_processing_config['CONVERT2GRAY_FLAG'])
+        self.center_crop_flag = int(pre_processing_config['CENTER_CROP_FLAG'])
+        self.flag_downscale = int(pre_processing_config['DOWNSCALE_FLAG'])
         self.resize_dim = (int(pre_processing_config['RESIZE_DIM'].split(',')[0]),
                            int(pre_processing_config['RESIZE_DIM'].split(',')[1]))
 

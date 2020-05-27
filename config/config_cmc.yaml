@@ -7,7 +7,10 @@ Development:
   SAVE_DEBUG_PKG: 0
 
 PreProcessing:
-  RESIZE_DIM: 224, 224      # resize dimension -> height, width
+  CONVERT2GRAY_FLAG: 0
+  CENTER_CROP_FLAG: 1       # crop image (origin: image center) with maximum width or height
+  DOWNSCALE_FLAG: 1
+  RESIZE_DIM: 64, 64      # resize dimension -> height, width
 
 OpticalFlow:
   # ----------- DEFAULTS FOR THE OPTICAL FLOW CLASSIFIER ----------- #

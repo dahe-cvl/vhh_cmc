@@ -93,6 +93,8 @@ This section gives an overview of all classes and modules in *cmc* as well as an
 
    Configuration.rst
    CMC.rst
+   OpticalFlow.rst
+   PreProcessing.rst
 
 
 

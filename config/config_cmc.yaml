@@ -15,15 +15,15 @@ PreProcessing:
 OpticalFlow:
   # ----------- DEFAULTS FOR THE OPTICAL FLOW CLASSIFIER ----------- #
   # consecutive frames
-  SENSITIVITY: 20
+  SENSITIVITY: 10
   # outliers, range in which for mca is looked
   SPECIFICITY: 3
   # of frame inside which random features are created
-  BORDER: 50
+  BORDER: 10
   # number of features to be tracked for optical flow
   NUMBER_OF_FEATURES: 100
   # difference to most common angle such that still considered as background movement
-  ANGLE_DIFF_LIMIT: 20
+  ANGLE_DIFF_LIMIT: 10
   # the run mode for the classifier
   # NORMAL_MODE = 0
   # DEBUG_MODE = 1

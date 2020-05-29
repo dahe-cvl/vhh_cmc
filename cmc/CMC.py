@@ -62,7 +62,7 @@ class CMC(object):
             exit()
 
         if (self.config_instance.debug_flag == True):
-            num_shots = 2
+            num_shots = 10
         else:
             num_shots = len(shots_np)
 
@@ -95,13 +95,13 @@ class CMC(object):
             start = int(shots_np[idx][2])
             stop = int(shots_np[idx][3])
             shot_frames_np = all_frames_np[start:stop + 1, :, :, :]
-            print(shot_frames_np.shape)
 
             # run optical flow process
             optical_flow_instance = OpticalFlow(video_frames=shot_frames_np,
                                                 fPath=self.config_instance.path_videos + "/" + vid_name,
-                                                sf=0,
-                                                ef=len(shot_frames_np),
+                                                debug_path=self.config_instance.path_raw_results,
+                                                sf=start,
+                                                ef=stop,
                                                 mode=self.config_instance.mode,
                                                 sensitivity=self.config_instance.sensitivity,
                                                 specificity=self.config_instance.specificity,
@@ -111,27 +111,49 @@ class CMC(object):
                                                 config=None)
             pan_list, tilt_list = optical_flow_instance.run()
 
-            number_of_pans = len(pan_list)
-            number_of_tilts = len(tilt_list)
+            print(pan_list)
+            print(tilt_list)
 
-            print("---------------")
-            print(start)
-            print(stop)
+            number_of_all_frames = abs(start - stop)
+            if number_of_all_frames == 0:
+                number_of_all_frames = 0.000000000001
 
-            class_name = "NA"
-            if (number_of_pans >= 1) and (number_of_pans > number_of_tilts):
-                print("PAN")
+            number_of_pan_frames = 0
+            for sf, ef in pan_list:
+                diff = abs(sf - ef)
+                number_of_pan_frames = number_of_pan_frames + diff
+            pans_score = int((number_of_pan_frames * 100) / number_of_all_frames)
+            print(pans_score)
+
+            number_of_tilt_frames = 0
+            for sf, ef in tilt_list:
+                diff = abs(sf - ef)
+                number_of_tilt_frames = number_of_tilt_frames + diff
+            tilts_score = int((number_of_tilt_frames * 100) / number_of_all_frames)
+            print(tilts_score)
+
+            threshold = 80
+            if (pans_score >= threshold):
                 class_name = self.config_instance.class_names[0]
-            elif(number_of_tilts >= 1) and (number_of_tilts > number_of_pans):
-                print("TILT")
+            elif(tilts_score >= threshold):
                 class_name = self.config_instance.class_names[1]
-            elif(number_of_tilts == number_of_pans):
-                print("NA")
+            elif (pans_score >= threshold) and (tilts_score >= threshold):
+                class_name = self.config_instance.class_names[2]
+            else:
                 class_name = self.config_instance.class_names[2]
 
             # prepare results
             print(str(vid_name) + ";" + str(shot_id) + ";" + str(start) + ";" + str(stop) + ";" + str(class_name))
             results_cmc_l.append([str(vid_name) + ";" + str(shot_id) + ";" + str(start) + ";" + str(stop) + ";" + str(class_name)])
+
+            # save raw results
+            if(self.config_instance.save_raw_results == 1):
+                optical_flow_instance.to_csv(
+                    "/".join([self.config_instance.path_raw_results, self.config_instance.path_prefix_raw_results + str(vid_name) + ".csv"]))
+                optical_flow_instance.to_png(
+                    "/".join([self.config_instance.path_raw_results, self.config_instance.path_prefix_raw_results + str(vid_name) + ".png"]))
+                optical_flow_instance.to_avi(
+                    "/".join([self.config_instance.path_raw_results, self.config_instance.path_prefix_raw_results + str(vid_name) + ".avi"]))
 
         results_cmc_np = np.array(results_cmc_l)
 

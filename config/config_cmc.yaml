@@ -10,7 +10,7 @@ PreProcessing:
   CONVERT2GRAY_FLAG: 0
   CENTER_CROP_FLAG: 1       # crop image (origin: image center) with maximum width or height
   DOWNSCALE_FLAG: 1
-  RESIZE_DIM: 64, 64      # resize dimension -> height, width
+  RESIZE_DIM: 512, 512      # resize dimension -> height, width
 
 OpticalFlow:
   # ----------- DEFAULTS FOR THE OPTICAL FLOW CLASSIFIER ----------- #
@@ -29,7 +29,7 @@ OpticalFlow:
   # DEBUG_MODE = 1
   # SAVE_MODE = 2
   # DEBUG_AND_SAVE_MODE = 3
-  MODE: 0
+  MODE: 2
 
 CmcCore:
   CLASS_NAMES: ["PAN","TILT","NA"]

@@ -23,7 +23,7 @@ class AngleClassifier:
         if self.classification_type == ClassificationType.PAN:
             self.main_angles = np.array([180, 0])
         elif self.classification_type == ClassificationType.TILT:
-            self.main_angles = np.array([90])
+            self.main_angles = np.array([90, 270])
 
     def classify(self, angle):
         print("Checking for " + self.classification_type.name + ": " + str(angle) + " degrees.")
@@ -125,6 +125,7 @@ class OpticalFlow(object):
     def __init__(self,
                  video_frames=None,
                  fPath="",
+                 debug_path="",
                  sf=0,
                  ef=1,
                  mode=0,
@@ -137,6 +138,7 @@ class OpticalFlow(object):
                  angle_diff_limit=20,
                  config=None):
 
+        self.debug_path = debug_path
         self.video_frames = video_frames
         self.fpath = fPath
         self.sf = sf
@@ -153,6 +155,8 @@ class OpticalFlow(object):
 
         self.i = 1
         self.end = self.ef - self.sf
+        if(self.end == 0): self.end = 1
+
         self.most_common_angles = np.zeros([self.end - 1, 1])
         self.weights = np.zeros([self.end - 1, 1])
         self.frame_size = (0, 0)
@@ -185,23 +189,6 @@ class OpticalFlow(object):
 
     # run optical flow computation
     def run(self):
-
-        '''
-        self.cap = cv2.VideoCapture(self.fpath)
-        if self.ef==1:
-            self.re_init_ef(int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT)))
-        self.cap.set(1, self.sf)
-
-
-        print("\n".join(["Video path: " + self.fpath,
-                        "first frame to be captured: " + str(self.sf),
-                        "last frame to be captured: " + str(self.ef)]))
-
-        ret, curr_frame = self.cap.read()
-
-        if not ret:
-            raise Exception("Failing to open video file.")
-        '''
 
         curr_frame = self.video_frames[0]
         h, w, _ = curr_frame.shape
@@ -245,14 +232,16 @@ class OpticalFlow(object):
 
         self.pans = self.pan_counter.movements
         self.tilts = self.tilt_counter.movements
-
-        #for (sf, ef) in self.pan_counter.movements:
-        #    movements.append([self.fpath, 'PAN', sf, ef])
-        #for (sf, ef) in self.tilt_counter.movements:
-        #    movements.append([self.fpath, 'TILT', sf, ef])
+        '''
+        for (sf, ef) in self.pan_counter.movements:
+            print(sf)
+            print(ef)
+        for (sf, ef) in self.tilt_counter.movements:
+            print(sf)
+            print(ef)
+        '''
 
         self.clear()
-
         return self.pans, self.tilts
 
     def clear(self):
@@ -398,14 +387,12 @@ class OpticalFlow(object):
 
     # size=(width, height) of frame
     def init_outputs(self, fpath, sf, ef, size):
-
         s = fpath.split('/')
         s = s[s.__len__() - 1].split('.')
 
         import os
-        opath = os.getcwd()
         try:
-            opath = opath + "/" + s[0]
+            opath = self.debug_path + "/" + s[0]
             os.mkdir(opath)
             print("successfully created output path ", opath)
         except OSError:

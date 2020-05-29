@@ -4,11 +4,27 @@ from cmc.Configuration import Configuration
 
 
 class PreProcessing(object):
+    """
+    This class is used to pre-process frames.
+    """
+
     def __init__(self, config_instance: Configuration):
+        """
+        Constructor
+
+        :param config_file: [required] path to configuration file (e.g. PATH_TO/config.yaml)
+                            must be with extension ".yaml"
+        """
         print("create instance of pre-processing ... ")
         self.config_instance = config_instance
 
     def applyTransformOnImg(self, image: np.ndarray) -> np.ndarray:
+        """
+        This method is used to apply the configured pre-processing methods on a numpy frame.
+
+        :param image: This parameter must hold a valid numpy image (WxHxC).
+        :return: This methods returns the preprocessed numpy image.
+        """
         image_trans = image
 
         # convert to grayscale image
@@ -26,20 +42,25 @@ class PreProcessing(object):
 
         return image_trans
 
-    def applyTransformOnImgSeq(self, img_seq: np.ndarray) -> np.ndarray:
-        #printCustom("NOT IMPLEMENTED YET", STDOUT_TYPE.INFO);
-        img_seq_trans_l = []
-        for i in range(0, len(img_seq)):
-            img_seq_trans_l.append(self.applyTransformOnImg(img_seq[i]))
-        img_seq_trans = np.array(img_seq_trans_l)
-        return img_seq_trans
-
     def convertRGB2Gray(self, img: np.ndarray):
+        """
+        This method is used to convert a RBG numpy image to a grayscale image.
+
+        :param img: This parameter must hold a valid numpy image.
+        :return: This method returns a grayscale image (WxHx1).
+        """
         img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         img_gray = np.expand_dims(img_gray, axis=-1)
         return img_gray
 
     def crop(self, img: np.ndarray, dim: tuple):
+        """
+        This method is used to crop a specified region of interest from a given image.
+
+        :param img: This parameter must hold a valid numpy image.
+        :param dim: This parameter must hold a valid tuple including the crop dimensions.
+        :return: This method returns the cropped image.
+        """
         crop_w, crop_h = dim
 
         crop_h_1 = 0
@@ -70,6 +91,13 @@ class PreProcessing(object):
         return img_crop
 
     def resize(self, img: np.ndarray, dim: tuple):
+        """
+        This method is used to resize a image.
+
+        :param img: This parameter must hold a valid numpy image.
+        :param dim: This parameter must hold a valid tuple including the resize dimensions.
+        :return: This method returns the resized image.
+        """
         img_resized = cv2.resize(img, dim)
         return img_resized
 

@@ -8,14 +8,27 @@ import os
 
 
 class ClassificationType(IntEnum):
+    """
+    Class holds enum values to specify PAN and TILT.
+    """
     PAN = 0,
     TILT = 1
 
 
-class AngleClassifier:
+class AngleClassifier(object):
+    """
+    This class is used to classify different camera movements (e.g. Tilt and Pan).
+    """
 
     # r ... range of angles allowed
     def __init__(self, classification_type, r=np.array([-25, 25])):
+        """
+        Constructor
+
+        :param classification_type:
+        :param r: This parameter specifies the range of valid angles (e.g. [-25, 25])
+        """
+
         self.r = r
         self.classification_type = classification_type
         if self.classification_type == ClassificationType.PAN:
@@ -24,6 +37,13 @@ class AngleClassifier:
             self.main_angles = np.array([90, 270])
 
     def classify(self, angle):
+        """
+        This method is used to classify a given angle to one out of the classes PAN or TILT.
+
+        :param angle: This parameter represents a angle (e.g. value in range [0, 360])
+        :return: This method returns a boolean flag which is set to TRUE if the angle corresponds to a specified range of TILT or PAN.
+        """
+
         print("Checking for " + self.classification_type.name + ": " + str(angle) + " degrees.")
         for i, a in enumerate(self.main_angles):
             print("Classifying: distance " + str(self.r) + " to angle " + str(a))
@@ -34,10 +54,15 @@ class AngleClassifier:
         return False
 
     def __str__(self):
+        """
+        This method is used to get the camera movement type.
+
+        :return: This method returns the name (string) of the camera movement (e.g. PAN or TILT).
+        """
         return self.classification_type.name
 
 
-class ClassificationCounter:
+class ClassificationCounter(object):
     # classification = [ frame index, is movement]
     # classification[i] = [ i, is movement ]
     # classification[:, 0] = [ ... , -i, ..., 0, ..., i, ... ]
@@ -108,6 +133,9 @@ class ClassificationCounter:
 
 
 class Runmodi(IntEnum):
+    """
+    This class holds enum values to specify runtime mode.
+    """
     NORMAL_MODE = 0
     DEBUG_MODE = 1
     SAVE_MODE = 2
@@ -115,11 +143,10 @@ class Runmodi(IntEnum):
 
 
 class OpticalFlow(object):
+    """
+    This class is used for optical flow calculation.
+    """
 
-    # mode=0 ... not debugging
-    # mode=1 ... debugging
-    # mode=2 ... debugging
-    # mode>2 ... debugging + saving
     def __init__(self,
                  video_frames=None,
                  fPath="",
@@ -135,7 +162,24 @@ class OpticalFlow(object):
                  number_of_features=100,
                  angle_diff_limit=20,
                  config=None):
+        """
+        Constructor.
 
+        :param video_frames: This parameter holds a valid numpy array representing a range of frames (e.g. NxWxHxchannels).
+        :param fPath: This parameter holds a valid path consisting of the absolute path and the correct video name.
+        :param debug_path: This parameter specifies a valid path to store results in debug mode.
+        :param sf: This parameter represents the starting frame index.
+        :param ef: This parameter represents the ending frame index.
+        :param mode: This parameter represents runtime mode (e.g. DEBUG_MODE=1 or SAVE_MODE=2).
+        :param pan_classifier: This parameter holds a valid object of class type AngleClassifier.
+        :param tilt_classifier: This parameter holds a valid object of class type AngleClassifier.
+        :param sensitivity: This parameter is used to configure the optical flow algorithm.
+        :param specificity: This parameter is used to configure the optical flow algorithm.
+        :param border: This parameter is used to configure the optical flow algorithm.
+        :param number_of_features: This parameter is used to configure the optical flow algorithm.
+        :param angle_diff_limit: This parameter is used to configure the optical flow algorithm.
+        :param config:
+        """
         self.debug_path = debug_path
         self.video_frames = video_frames
         self.fpath = fPath
@@ -187,7 +231,11 @@ class OpticalFlow(object):
 
     # run optical flow computation
     def run(self):
+        """
+        This method is used to run the optical flow calculation process.
 
+        :return: This method returns a separate list for each movement class and holds the predicted frame ranges of both.
+        """
         curr_frame = self.video_frames[0]
         h, w, _ = curr_frame.shape
         self.frame_size = (w, h)
@@ -244,6 +292,9 @@ class OpticalFlow(object):
 
     # run optical flow computation
     def run_eval(self):
+        """
+        This method is used to run the optical flow calculation to evaluate specified videos.
+        """
         self.cap = cv2.VideoCapture(self.fpath)
         if self.ef == 1:
             self.re_init_ef(int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT)))
@@ -303,6 +354,9 @@ class OpticalFlow(object):
         self.clear()
 
     def clear(self):
+        """
+        This method is used to reset all internal counters and destroy all cv2 windows.
+        """
         print("Clear and release everything. Reset frame index.")
 
         if self.mode > Runmodi.DEBUG_MODE:
@@ -318,6 +372,11 @@ class OpticalFlow(object):
         cv2.destroyAllWindows()
 
     def configure(self, config):
+        """
+        This method is used for reading configuration parameters (just needed during developing phase).
+
+        :param config: This parameter must hold a valid dictionary including the mandatory parameters.
+        """
         self.sensitivity = int(config["SENSITIVITY"])
         self.specificity = int(config["SPECIFICITY"])
         self.border = int(config["BORDER"])
@@ -329,6 +388,10 @@ class OpticalFlow(object):
         self.ef = int(config["END_FRAME"])
 
     def __str__(self):
+        """
+        This method is used to create a summary string including key information related to the optical flow process.
+        :return: This method returns a string summary of internal calculated key information.
+        """
         return "\n".join(
             [
                 "OFCMClassifier:",
@@ -345,6 +408,11 @@ class OpticalFlow(object):
         )
 
     def re_init_ef(self, ef):
+        """
+        This method is used to re-initialize the end frame index.
+
+        :param ef: This parameter must hold a valid frame index.
+        """
         self.ef = ef
         self.end = self.ef - self.sf
         self.most_common_angles = np.zeros([self.end - 1, 1])
@@ -354,7 +422,9 @@ class OpticalFlow(object):
         self.tilt_counter = ClassificationCounter(np.zeros([self.end, 2]).astype(int))
 
     def annotate_pan(self):
-
+        """
+        This method is used to annotate a frame as PAN.
+        """
         if self.tilt_counter.movement_created:
             self.tilt_counter.end_movement(self.i + self.sf)
         if self.pan_counter.movement_created:
@@ -363,6 +433,9 @@ class OpticalFlow(object):
             self.pan_counter.add_movement(self.i + self.sf)
 
     def annotate_tilt(self):
+        """
+        This method is used to annotate a frame as TILT.
+        """
 
         if self.pan_counter.movement_created:
             self.pan_counter.end_movement(self.i + self.sf)
@@ -372,6 +445,9 @@ class OpticalFlow(object):
             self.tilt_counter.add_movement(self.i + self.sf)
 
     def annotate_nomove(self):
+        """
+        This method is used to annotate a frame as NA.
+        """
 
         if self.pan_counter.movement_created:
             self.pan_counter.end_movement(self.i + self.sf)
@@ -379,6 +455,9 @@ class OpticalFlow(object):
             self.tilt_counter.end_movement(self.i + self.sf)
 
     def run_manual_evaluation(self):
+        """
+        This method is used to run optical flow process in DEBUG mode. A valid X-Server is needed to visualize the frame player.
+        """
         self.cap = cv2.VideoCapture(self.fpath)
 
         if self.ef == 1:
@@ -527,7 +606,15 @@ class OpticalFlow(object):
 
         return prev_frame, prev_feat, curr_frame, curr_feat
 
-    def optical_flow(self, prev_frame, prev_feat, curr_frame, mask=None):
+    def optical_flow(self, prev_frame, prev_feat, curr_frame):
+        """
+        This method is used to calculate the optical flow between two consecutive frames.
+
+        :param prev_frame: This parameter must hold a valid numpy frame (previous).
+        :param prev_feat:  This parameter must hold valid features of the previous frame.
+        :param curr_frame: This parameter must hold a valid numpy frame (current).
+        :return: This method returns two arrays including the features of the previous frame as well as of the current frame.
+        """
         print("Calculating optical flow: frame " + self.str_step_info())
         lk_params = dict(winSize=(15, 15),
                          maxLevel=2,
@@ -565,6 +652,13 @@ class OpticalFlow(object):
         return prev_feat, curr_feat
 
     def compute_magnitude_angle(self, prev_feat, curr_feat):
+        """
+        This method is used to calculate the magnitude and angle between two consecutive feature frames.
+
+        :param prev_feat: This parameter must hold a valid feature vector.
+        :param curr_feat: This parameter must hold a valid feature vector.
+        :return: This method returns the magnitude and angle between the given feature vectors.
+        """
         print("Determine magnitude and angle (degrees) of features: frame " + self.str_step_info())
 
         if prev_feat.__len__() <= 0:
@@ -580,14 +674,31 @@ class OpticalFlow(object):
         return mag, ang
 
     def str_movement_info(self):
+        """
+        This method is used to visualize camera movement information.
+
+        :return: This method returns a string including internal movement information.
+        """
         return "PAN" if self.pan_counter.oversteps(1, self.sensitivity) else \
             ("TILT" if self.tilt_counter.oversteps(1, self.sensitivity) else "NO MOVEMENT")
 
     def str_movement_info_manually(self):
+        """
+        This method is used to visualize camera movement information (for manual debugging mode only).
+
+        :return: This method returns a string including internal movement information.
+        """
         return "PAN" if self.pan_counter.movement_created else \
             ("TILT" if self.tilt_counter.movement_created else "NO MOVEMENT")
 
     def add_text(self, img, text, h):
+        """
+        This method is used to add text to a given frame.
+
+        :param img: This parameter must hold a valid numpy image.
+        :param text: This parameter must hold a valid text string.
+        :param h: This parameter must hold an integer which represents the text height.
+        """
         font = cv2.FONT_HERSHEY_SIMPLEX
         bottom_left_corner = (20, h - 20)
         font_scale = 1
@@ -601,48 +712,17 @@ class OpticalFlow(object):
                     font_color,
                     line_type)
 
-    def track(self, curr_frame, prev_feat, curr_feat):
-
-        img = np.zeros_like(curr_frame)
-        for f, f2 in zip(curr_feat, prev_feat):
-            img = cv2.line(img, (f2[0, 0], f2[0, 1]), (f[0, 0], f[0, 1]), [255, 255, 255], 5)
-        img = cv2.threshold(cv2.cvtColor(img, cv2.COLOR_BGR2GRAY), 12, 255, cv2.THRESH_BINARY)[
-            1]  # Apply OpenCV's threshold function to get binary frame
-        img = cv2.dilate(img, None, iterations=1)  # Dlation to increase white region for surrounding pixels
-
-        _, cnts, _ = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        contour_area_stack = []  # List of contour areas's values
-        contour_dictionary = {}  # Dictionary of contours key = 'contour area' & value = 'contour coordinates (x,y,w,h)'
-        biggest_contour_coordinates = None  # Biggest contour coordinate
-
-        img_cnts = curr_frame.copy()
-
-        if cnts:
-            for c in cnts:  # Contour in Contours
-                contour_area_stack.append(cv2.contourArea(c))  # Calculate contour area and append to contour stack
-                if cv2.contourArea(c) > 500:  # If contour area greater than min area
-                    (x, y, w, h) = cv2.boundingRect(c)  # Compute the bounding box for this contour
-                    cv2.rectangle(img_cnts, (x, y), (x + w, y + h), (0, 255, 0), 2)  # Draw it on the frame
-                    contour_dictionary[cv2.contourArea(c)] = (
-                    x, y, w, h)  # Add a key - value pair to contour dictionary
-            delta_value = max(contour_area_stack)  # Assign max contour area to delta value
-
-            if contour_dictionary:  # If contour dictionary is not empty
-                biggest_contour_coordinates = contour_dictionary[delta_value]  # Get coordinates of biggest contour
-
-            if biggest_contour_coordinates:  # If we have the coordinates it means there is a contour in the frame at the same time
-               # Parse the coordinates
-                x = biggest_contour_coordinates[0]
-                y = biggest_contour_coordinates[1]
-                w = biggest_contour_coordinates[2]
-                h = biggest_contour_coordinates[3]
-                cv2.rectangle(img_cnts, (x, y), (x + w, y + h), (255, 255, 255),
-                              2)  # Draw only one white rectange
-
-        cv2.imshow("Moving features.", img_cnts)
-        cv2.waitKey(50)
-
     def estimate_background(self, prev_feat, curr_feat, most_common_angle, weight, curr_frame=None):
+        """
+        This method is used to estimate and distinguish between foreground and background objects.
+
+        :param prev_feat: This parameter must hold a valid feature vector.
+        :param curr_feat: This parameter must hold a valid feature vector.
+        :param most_common_angle: This parameter must hold a valid integer representing the most common angle.
+        :param weight: This parameter must hold a weight factor [0,1].
+        :param curr_frame: This parameter must hold a valid numpy image.
+        :return: This method returns the calculated most_common_angle, background_feat and new weight factor.
+        """
         print("Convert relative pan / tilt units and estimate background pixel movement.")
 
         mag, ang = self.compute_magnitude_angle(prev_feat, curr_feat)
@@ -662,8 +742,6 @@ class OpticalFlow(object):
 
             prev_background_feat = prev_feat[background]
             prev_moving_feat = prev_feat[~background]
-
-            # self.track(curr_frame, prev_moving_feat, moving_feat)
 
             if self.mode > Runmodi.NORMAL_MODE and curr_frame is not None:
                 img = curr_frame.copy()

@@ -7,8 +7,6 @@ from cmc.Configuration import Configuration
 import os
 
 
-
-
 class ClassificationType(IntEnum):
     PAN = 0,
     TILT = 1
@@ -232,17 +230,77 @@ class OpticalFlow(object):
 
         self.pans = self.pan_counter.movements
         self.tilts = self.tilt_counter.movements
-        '''
+
         for (sf, ef) in self.pan_counter.movements:
             print(sf)
             print(ef)
         for (sf, ef) in self.tilt_counter.movements:
             print(sf)
             print(ef)
-        '''
+        ''''''
 
         self.clear()
         return self.pans, self.tilts
+
+    # run optical flow computation
+    def run_eval(self):
+        self.cap = cv2.VideoCapture(self.fpath)
+        if self.ef == 1:
+            self.re_init_ef(int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT)))
+        self.cap.set(1, self.sf)
+
+        print("\n".join(["Video path: " + self.fpath,
+                         "first frame to be captured: " + str(self.sf),
+                         "last frame to be captured: " + str(self.ef)]))
+
+        ret, curr_frame = self.cap.read()
+
+        if not ret:
+            raise Exception("Failing to open video file.")
+
+        h, w, _ = curr_frame.shape
+        self.frame_size = (w, h)
+
+        if self.mode > Runmodi.DEBUG_MODE:
+            # need to compute output path
+            print("Running program in save mode: configuring outputs.")
+            self.out = self.init_outputs(self.fpath, self.sf, self.ef, (w, h))
+
+        curr_feat = self.create_random_features(self.number_of_features, self.range_of_frame(curr_frame))
+
+        while self.i < self.end and self.cap.isOpened():
+            prev_frame, prev_feat, curr_frame, curr_feat = self.step_eval(curr_frame, curr_feat)
+
+            print("prev: ", prev_feat.__len__())
+            print("curr: ", curr_feat.__len__())
+
+            prev_feat, curr_feat = self.optical_flow(prev_frame, prev_feat, curr_frame)
+
+            most_common_angle = None
+            weight = 1
+            if self.i >= 2:
+                most_common_angle = self.most_common_angles[self.i - 2]
+                weight = self.weights[self.i - 2]
+
+                # classifiy movement
+                self.check_for_movement(most_common_angle, self.pan_counter, self.pan_classifier)
+                self.check_for_movement(most_common_angle, self.tilt_counter, self.tilt_classifier)
+
+            print("prev: ", prev_feat.__len__())
+            print("curr: ", curr_feat.__len__())
+
+            if prev_feat.__len__() == 0:
+                self.most_common_angles[self.i - 1] = self.most_common_angles[self.i - 2]
+                self.weights[self.i - 1] = self.weights[self.i - 2]
+            else:
+                self.most_common_angles[self.i - 1], curr_feat, self.weights[self.i - 1] = \
+                    self.estimate_background(prev_feat, curr_feat, most_common_angle, weight, curr_frame)
+            self.i = self.i + 1
+
+        self.pans = self.pan_counter.movements
+        self.tilts = self.tilt_counter.movements
+
+        self.clear()
 
     def clear(self):
         print("Clear and release everything. Reset frame index.")
@@ -426,6 +484,7 @@ class OpticalFlow(object):
 
     # Store previous image, I_{i-1} and get current image I_i
     def step(self, curr_frame, curr_feat):
+        print(self.i)
 
         prev_frame = curr_frame
         curr_frame = self.video_frames[self.i]
@@ -445,8 +504,30 @@ class OpticalFlow(object):
 
         return prev_frame, prev_feat, curr_frame, curr_feat
 
-    def optical_flow(self, prev_frame, prev_feat, curr_frame, mask=None):
+        # Store previous image, I_{i-1} and get current image I_i
 
+    def step_eval(self, curr_frame, curr_feat):
+        print(self.i)
+
+        prev_frame = curr_frame
+        ret, curr_frame = self.cap.read()
+
+        print("Update step: frame " + self.str_step_info())
+
+        prev_feat = curr_feat
+        if curr_feat.__len__() < self.number_of_features:
+            print("Not enough features. adding " +
+                  str(self.number_of_features - curr_feat.__len__()) +
+                  " new features.")
+            prev_feat = self.create_random_features(self.number_of_features, self.range_of_frame(curr_frame))
+            prev_feat[0:curr_feat.__len__()] = curr_feat
+
+        if self.mode > Runmodi.DEBUG_MODE:
+            self.out["original"].write(curr_frame)
+
+        return prev_frame, prev_feat, curr_frame, curr_feat
+
+    def optical_flow(self, prev_frame, prev_feat, curr_frame, mask=None):
         print("Calculating optical flow: frame " + self.str_step_info())
         lk_params = dict(winSize=(15, 15),
                          maxLevel=2,

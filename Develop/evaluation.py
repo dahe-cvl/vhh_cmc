@@ -1,5 +1,6 @@
 import sys
-from cmc import cmc_io, CMC
+from cmc import cmc_io
+from cmc.OpticalFlow import OpticalFlow
 
 def run(config_man):
    # ofc_man = cmc_ofc.OFCMClassifier(config=config_man)
@@ -7,7 +8,9 @@ def run(config_man):
    # ofc_man.to_csv("/".join([config_man["OUTPUT_PATH"], config_man["OUTPUT_CSV"]]))
    # ofc_man.to_png("/".join([config_man["OUTPUT_PATH"], config_man["OUTPUT_PLOT"]]))
 
-    ofc = CMC.OFCMClassifier(config=config)
+
+
+    ofc = OpticalFlow(config=config)
     ofc.run()
 
     ofc.to_csv("/".join([config["OUTPUT_PATH"], config["OUTPUT_CSV"]]))
@@ -28,7 +31,7 @@ if __name__ == "__main__":
     # parse the yaml file
     print("parsing config file ...")
     #config_man = cmc_io.parse_config("config_manually.yaml")
-    config = cmc_io.parse_config("config_manually.yaml")
+    config = cmc_io.parse_config("/home/dhelm/VHH_Develop/pycharm_vhh_cmc/config/config_manually.yaml")
 
     # add current working directory to input/output path.
     from os import getcwd
@@ -37,8 +40,8 @@ if __name__ == "__main__":
     config["INPUT_PATH"] = wd + config["INPUT_PATH"]
     config["OUTPUT_PATH"] = wd + config["OUTPUT_PATH"]
 
-    ofc = CMC.OFCMClassifier(config=config)
-    ofc.run()
+    ofc = OpticalFlow(config=config)
+    ofc.run_eval()
 
     name = config["INPUT_VIDEO"].split('.')[0]
     config["OUTPUT_VIDEO"] = "_".join([name, str(config["BEGIN_FRAME"]), str(config["END_FRAME"]), "ann.avi"])
@@ -50,6 +53,7 @@ if __name__ == "__main__":
 
     ofc.fpath = "/".join([config["OUTPUT_PATH"], config["OUTPUT_VIDEO"]])
 
+    '''
     input("Start manually ... press any key")
 
     ofc.run_manual_evaluation()
@@ -61,10 +65,13 @@ if __name__ == "__main__":
     ofc.to_avi("/".join([config["OUTPUT_PATH"], config["OUTPUT_VIDEO"]]))
     ofc.to_csv("/".join([config["OUTPUT_PATH"], config["OUTPUT_CSV"]]))
     ofc.to_png("/".join([config["OUTPUT_PATH"], config["OUTPUT_PLOT"]]))
+    
+    '''
 
 #   config["OUTPUT_CSV"] = "/result.csv"
     #config_man["INPUT_PATH"] = wd + config_man["INPUT_PATH"]
     #config_man["OUTPUT_PATH"] = wd + config_man["OUTPUT_PATH"]
+
 
     # update output paths if they are not set
  #   name = config["INPUT_VIDEO"].split('.')[0]

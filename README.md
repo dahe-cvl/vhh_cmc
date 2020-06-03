@@ -6,11 +6,11 @@ This package includes all methods to classify a given shot/or image sequence in 
 
 PDF format: 
     
-    [vhh_cmc_pdf](https://github.com/dahe-cvl/vhh_cmc/blob/master/ApiSphinxDocumentation/build/latex/cmc.pdf)
+   [vhh_cmc_pdf](https://github.com/dahe-cvl/vhh_cmc/blob/master/ApiSphinxDocumentation/build/latex/cmc.pdf)
     
 HTML format (only usable if repository is available in local storage):
     
-    [vhh_cmc_html](https://github.com/dahe-cvl/vhh_cmc/blob/master/ApiSphinxDocumentation/build/html/index.html)
+   [vhh_cmc_html](https://github.com/dahe-cvl/vhh_cmc/blob/master/ApiSphinxDocumentation/build/html/index.html)
     
     
 

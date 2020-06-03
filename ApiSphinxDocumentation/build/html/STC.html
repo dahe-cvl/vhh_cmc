@@ -1,0 +1,177 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>STC class &#8212; cmc 0.1.0 documentation</title>
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Video class" href="Video.html" />
+    <link rel="prev" title="Configuration class" href="Configuration.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Video.html" title="Video class"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="Configuration.html" title="Configuration class"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">cmc 0.1.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="stc-class">
+<h1>STC class<a class="headerlink" href="#stc-class" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="stc.STC.STC">
+<em class="property">class </em><code class="sig-prename descclassname">stc.STC.</code><code class="sig-name descname">STC</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config_file</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stc/STC.html#STC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stc.STC.STC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Main class of shot type classification (stc) package.</p>
+<dl class="py method">
+<dt id="stc.STC.STC.exportStcResults">
+<code class="sig-name descname">exportStcResults</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fName</span></em>, <em class="sig-param"><span class="n">stc_results_np</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stc/STC.html#STC.exportStcResults"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stc.STC.STC.exportStcResults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to export stc results as csv file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fName</strong> – [required] name of result file.</p></li>
+<li><p><strong>stc_results_np</strong> – numpy array holding the shot type classification predictions for each shot of a movie.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="stc.STC.STC.loadSbdResults">
+<code class="sig-name descname">loadSbdResults</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sbd_results_path</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stc/STC.html#STC.loadSbdResults"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stc.STC.STC.loadSbdResults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method for loading shot boundary detection results as numpy array</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Only used in debug_mode.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>sbd_results_path</strong> – [required] path to results file of shot boundary detection module (vhh_sbd)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>numpy array holding list of detected shots.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="stc.STC.STC.runModel">
+<code class="sig-name descname">runModel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">tensor_l</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stc/STC.html#STC.runModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stc.STC.STC.runModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to calculate stc predictions of specified model and given list of tensor images (pytorch).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> – [required] pytorch model instance</p></li>
+<li><p><strong>tensor_l</strong> – [required] list of tensors representing a list of frames.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>predicted class_name for each tensor frame,
+the number of hits within a shot,
+frame-based predictions for a whole shot</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="stc.STC.STC.runOnSingleVideo">
+<code class="sig-name descname">runOnSingleVideo</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">shots_per_vid_np</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">max_recall_id</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stc/STC.html#STC.runOnSingleVideo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stc.STC.STC.runOnSingleVideo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to run stc classification on specified video.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shots_per_vid_np</strong> – [required] numpy array representing all detected shots in a video
+(e.g. sid | movie_name | start | end )</p></li>
+<li><p><strong>max_recall_id</strong> – [required] integer value holding unique video id from VHH MMSI system</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="Configuration.html"
+                        title="previous chapter">Configuration class</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="Video.html"
+                        title="next chapter">Video class</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/STC.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Video.html" title="Video class"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="Configuration.html" title="Configuration class"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">cmc 0.1.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, Daniel Helm.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,287 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>cmc.CMC &#8212; cmc 0.1.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">cmc 0.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for cmc.CMC</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">cv2</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">cmc.Configuration</span> <span class="k">import</span> <span class="n">Configuration</span>
+<span class="kn">from</span> <span class="nn">cmc.PreProcessing</span> <span class="k">import</span> <span class="n">PreProcessing</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">cmc.OpticalFlow</span> <span class="k">import</span> <span class="n">OpticalFlow</span>
+
+
+<div class="viewcode-block" id="CMC"><a class="viewcode-back" href="../../CMC.html#cmc.CMC.CMC">[docs]</a><span class="k">class</span> <span class="nc">CMC</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Main class of camera movements classification (cmc) package.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor</span>
+
+<span class="sd">        :param config_file: [required] path to configuration file (e.g. PATH_TO/config.yaml)</span>
+<span class="sd">                                       must be with extension &quot;.yaml&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;create instance of cmc ... &quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">config_file</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No configuration file specified!&quot;</span><span class="p">)</span>
+            <span class="n">exit</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">config_instance</span> <span class="o">=</span> <span class="n">Configuration</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config_instance</span><span class="o">.</span><span class="n">loadConfig</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_instance</span><span class="o">.</span><span class="n">debug_flag</span> <span class="o">==</span> <span class="kc">True</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DEBUG MODE activated!&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">debug_results</span> <span class="o">=</span> <span class="s2">&quot;/data/share/maxrecall_vhh_mmsi/videos/results/cmc/develop/&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pre_processing_instance</span> <span class="o">=</span> <span class="n">PreProcessing</span><span class="p">(</span><span class="n">config_instance</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config_instance</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CMC.runOnSingleVideo"><a class="viewcode-back" href="../../CMC.html#cmc.CMC.CMC.runOnSingleVideo">[docs]</a>    <span class="k">def</span> <span class="nf">runOnSingleVideo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shots_per_vid_np</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_recall_id</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method to run cmc classification on specified video.</span>
+
+<span class="sd">        :param shots_per_vid_np: [required] numpy array representing all detected shots in a video</span>
+<span class="sd">                                 (e.g. sid | movie_name | start | end )</span>
+<span class="sd">        :param max_recall_id: [required] integer value holding unique video id from VHH MMSI system</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;run cmc classifier on single video ... &quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">shots_per_vid_np</span><span class="p">)</span> <span class="o">==</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ERROR: you have to set the parameter shots_per_vid_np!&quot;</span><span class="p">)</span>
+            <span class="n">exit</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">max_recall_id</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">or</span> <span class="n">max_recall_id</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ERROR: you have to set a valid max_recall_id [1-n]!&quot;</span><span class="p">)</span>
+            <span class="n">exit</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_instance</span><span class="o">.</span><span class="n">debug_flag</span> <span class="o">==</span> <span class="kc">True</span><span class="p">):</span>
+            <span class="c1"># load shot list from result file</span>
+            <span class="n">shots_np</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loadSbdResults</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_instance</span><span class="o">.</span><span class="n">sbd_results_path</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">shots_np</span> <span class="o">=</span> <span class="n">shots_per_vid_np</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">shots_np</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ERROR: there must be at least one shot in the list!&quot;</span><span class="p">)</span>
+            <span class="n">exit</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_instance</span><span class="o">.</span><span class="n">debug_flag</span> <span class="o">==</span> <span class="kc">True</span><span class="p">):</span>
+            <span class="n">num_shots</span> <span class="o">=</span> <span class="mi">10</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">num_shots</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">shots_np</span><span class="p">)</span>
+
+        <span class="c1"># read all frames of video</span>
+        <span class="n">vid_name</span> <span class="o">=</span> <span class="n">shots_np</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">cap</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">VideoCapture</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_instance</span><span class="o">.</span><span class="n">path_videos</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">vid_name</span><span class="p">)</span>
+        <span class="n">frame_l</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">cnt</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">while</span><span class="p">(</span><span class="kc">True</span><span class="p">):</span>
+            <span class="n">cnt</span> <span class="o">=</span> <span class="n">cnt</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">ret</span><span class="p">,</span> <span class="n">frame</span> <span class="o">=</span> <span class="n">cap</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="c1"># print(cnt)</span>
+            <span class="c1"># print(ret)</span>
+            <span class="c1"># print(cap.get(cv2.CAP_PROP_FRAME_COUNT))</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">ret</span> <span class="o">==</span> <span class="kc">True</span><span class="p">):</span>
+                <span class="n">frame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pre_processing_instance</span><span class="o">.</span><span class="n">applyTransformOnImg</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+                <span class="n">frame_l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">break</span>
+
+        <span class="n">all_frames_np</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">frame_l</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">all_frames_np</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+        <span class="n">results_cmc_l</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_shots</span><span class="p">):</span>
+            <span class="c1"># print(shots_np[idx])</span>
+            <span class="n">shot_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">shots_np</span><span class="p">[</span><span class="n">idx</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">vid_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">shots_np</span><span class="p">[</span><span class="n">idx</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">shots_np</span><span class="p">[</span><span class="n">idx</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span>
+            <span class="n">stop</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">shots_np</span><span class="p">[</span><span class="n">idx</span><span class="p">][</span><span class="mi">3</span><span class="p">])</span>
+            <span class="n">shot_frames_np</span> <span class="o">=</span> <span class="n">all_frames_np</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span>
+
+            <span class="c1"># run optical flow process</span>
+            <span class="n">optical_flow_instance</span> <span class="o">=</span> <span class="n">OpticalFlow</span><span class="p">(</span><span class="n">video_frames</span><span class="o">=</span><span class="n">shot_frames_np</span><span class="p">,</span>
+                                                <span class="n">fPath</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config_instance</span><span class="o">.</span><span class="n">path_videos</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">vid_name</span><span class="p">,</span>
+                                                <span class="n">debug_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config_instance</span><span class="o">.</span><span class="n">path_raw_results</span><span class="p">,</span>
+                                                <span class="n">sf</span><span class="o">=</span><span class="n">start</span><span class="p">,</span>
+                                                <span class="n">ef</span><span class="o">=</span><span class="n">stop</span><span class="p">,</span>
+                                                <span class="n">mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config_instance</span><span class="o">.</span><span class="n">mode</span><span class="p">,</span>
+                                                <span class="n">sensitivity</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config_instance</span><span class="o">.</span><span class="n">sensitivity</span><span class="p">,</span>
+                                                <span class="n">specificity</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config_instance</span><span class="o">.</span><span class="n">specificity</span><span class="p">,</span>
+                                                <span class="n">border</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config_instance</span><span class="o">.</span><span class="n">border</span><span class="p">,</span>
+                                                <span class="n">number_of_features</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config_instance</span><span class="o">.</span><span class="n">number_of_features</span><span class="p">,</span>
+                                                <span class="n">angle_diff_limit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config_instance</span><span class="o">.</span><span class="n">angle_diff_limit</span><span class="p">,</span>
+                                                <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+            <span class="n">pan_list</span><span class="p">,</span> <span class="n">tilt_list</span> <span class="o">=</span> <span class="n">optical_flow_instance</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="n">pan_list</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">tilt_list</span><span class="p">)</span>
+
+            <span class="n">number_of_all_frames</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">start</span> <span class="o">-</span> <span class="n">stop</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">number_of_all_frames</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">number_of_all_frames</span> <span class="o">=</span> <span class="mf">0.000000000001</span>
+
+            <span class="n">number_of_pan_frames</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">sf</span><span class="p">,</span> <span class="n">ef</span> <span class="ow">in</span> <span class="n">pan_list</span><span class="p">:</span>
+                <span class="n">diff</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">sf</span> <span class="o">-</span> <span class="n">ef</span><span class="p">)</span>
+                <span class="n">number_of_pan_frames</span> <span class="o">=</span> <span class="n">number_of_pan_frames</span> <span class="o">+</span> <span class="n">diff</span>
+            <span class="n">pans_score</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">number_of_pan_frames</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span> <span class="o">/</span> <span class="n">number_of_all_frames</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">pans_score</span><span class="p">)</span>
+
+            <span class="n">number_of_tilt_frames</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">sf</span><span class="p">,</span> <span class="n">ef</span> <span class="ow">in</span> <span class="n">tilt_list</span><span class="p">:</span>
+                <span class="n">diff</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">sf</span> <span class="o">-</span> <span class="n">ef</span><span class="p">)</span>
+                <span class="n">number_of_tilt_frames</span> <span class="o">=</span> <span class="n">number_of_tilt_frames</span> <span class="o">+</span> <span class="n">diff</span>
+            <span class="n">tilts_score</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">number_of_tilt_frames</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span> <span class="o">/</span> <span class="n">number_of_all_frames</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">tilts_score</span><span class="p">)</span>
+
+            <span class="n">threshold</span> <span class="o">=</span> <span class="mi">80</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">pans_score</span> <span class="o">&gt;=</span> <span class="n">threshold</span><span class="p">):</span>
+                <span class="n">class_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_instance</span><span class="o">.</span><span class="n">class_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">elif</span><span class="p">(</span><span class="n">tilts_score</span> <span class="o">&gt;=</span> <span class="n">threshold</span><span class="p">):</span>
+                <span class="n">class_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_instance</span><span class="o">.</span><span class="n">class_names</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">pans_score</span> <span class="o">&gt;=</span> <span class="n">threshold</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">tilts_score</span> <span class="o">&gt;=</span> <span class="n">threshold</span><span class="p">):</span>
+                <span class="n">class_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_instance</span><span class="o">.</span><span class="n">class_names</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">class_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_instance</span><span class="o">.</span><span class="n">class_names</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+            <span class="c1"># prepare results</span>
+            <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">vid_name</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">shot_id</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">start</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">stop</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">class_name</span><span class="p">))</span>
+            <span class="n">results_cmc_l</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">vid_name</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">shot_id</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">start</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">stop</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">class_name</span><span class="p">)])</span>
+
+            <span class="c1"># save raw results</span>
+            <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_instance</span><span class="o">.</span><span class="n">save_raw_results</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">optical_flow_instance</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span>
+                    <span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">config_instance</span><span class="o">.</span><span class="n">path_raw_results</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_instance</span><span class="o">.</span><span class="n">path_prefix_raw_results</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">vid_name</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.csv&quot;</span><span class="p">]))</span>
+                <span class="n">optical_flow_instance</span><span class="o">.</span><span class="n">to_png</span><span class="p">(</span>
+                    <span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">config_instance</span><span class="o">.</span><span class="n">path_raw_results</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_instance</span><span class="o">.</span><span class="n">path_prefix_raw_results</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">vid_name</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.png&quot;</span><span class="p">]))</span>
+                <span class="n">optical_flow_instance</span><span class="o">.</span><span class="n">to_avi</span><span class="p">(</span>
+                    <span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">config_instance</span><span class="o">.</span><span class="n">path_raw_results</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_instance</span><span class="o">.</span><span class="n">path_prefix_raw_results</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">vid_name</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.avi&quot;</span><span class="p">]))</span>
+
+        <span class="n">results_cmc_np</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">results_cmc_l</span><span class="p">)</span>
+
+        <span class="c1"># export results</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exportCmcResults</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">max_recall_id</span><span class="p">),</span> <span class="n">results_cmc_np</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CMC.loadSbdResults"><a class="viewcode-back" href="../../CMC.html#cmc.CMC.CMC.loadSbdResults">[docs]</a>    <span class="k">def</span> <span class="nf">loadSbdResults</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sbd_results_path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method for loading shot boundary detection results as numpy array</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">            Only used in debug_mode.</span>
+
+<span class="sd">        :param sbd_results_path: [required] path to results file of shot boundary detection module (vhh_sbd)</span>
+<span class="sd">        :return: numpy array holding list of detected shots.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># open sbd results</span>
+        <span class="n">fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">sbd_results_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+        <span class="n">lines_n</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)):</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="n">line_split</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;;&#39;</span><span class="p">)</span>
+            <span class="n">lines_n</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">line_split</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line_split</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">line_split</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">line_split</span><span class="p">[</span><span class="mi">3</span><span class="p">]])</span>
+        <span class="n">lines_np</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">lines_n</span><span class="p">)</span>
+        <span class="c1"># print(lines_np.shape)</span>
+
+        <span class="k">return</span> <span class="n">lines_np</span></div>
+
+<div class="viewcode-block" id="CMC.exportCmcResults"><a class="viewcode-back" href="../../CMC.html#cmc.CMC.CMC.exportCmcResults">[docs]</a>    <span class="k">def</span> <span class="nf">exportCmcResults</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fName</span><span class="p">,</span> <span class="n">cmc_results_np</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method to export cmc results as csv file.</span>
+
+<span class="sd">        :param fName: [required] name of result file.</span>
+<span class="sd">        :param cmc_results_np: numpy array holding the camera movements classification predictions for each shot of a movie.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;export results to csv!&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cmc_results_np</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ERROR: numpy is empty&quot;</span><span class="p">)</span>
+            <span class="n">exit</span><span class="p">()</span>
+
+        <span class="c1"># open stc resutls file</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_instance</span><span class="o">.</span><span class="n">debug_flag</span> <span class="o">==</span> <span class="kc">True</span><span class="p">):</span>
+            <span class="n">fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">debug_results</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">fName</span> <span class="o">+</span> <span class="s2">&quot;.csv&quot;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_instance</span><span class="o">.</span><span class="n">path_final_results</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">fName</span> <span class="o">+</span> <span class="s2">&quot;.csv&quot;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="s2">&quot;vid_name;shot_id;start;end;cmc&quot;</span>
+        <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">header</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">cmc_results_np</span><span class="p">)):</span>
+            <span class="n">tmp_line</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">cmc_results_np</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">cmc_results_np</span><span class="p">[</span><span class="n">i</span><span class="p">])):</span>
+                <span class="n">tmp_line</span> <span class="o">=</span> <span class="n">tmp_line</span> <span class="o">+</span> <span class="s2">&quot;;&quot;</span> <span class="o">+</span> <span class="n">cmc_results_np</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">c</span><span class="p">]</span>
+            <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">tmp_line</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span></div></div>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">cmc 0.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, Daniel Helm.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

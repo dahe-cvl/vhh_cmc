@@ -1,0 +1,185 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>stc.Video &#8212; cmc 0.1.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">cmc 0.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for stc.Video</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">cv2</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">from</span> <span class="nn">stc.utils</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">PIL</span> <span class="k">import</span> <span class="n">Image</span>
+
+
+<div class="viewcode-block" id="Video"><a class="viewcode-back" href="../../Video.html#stc.Video.Video">[docs]</a><span class="k">class</span> <span class="nc">Video</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is representing a video. Each instance of this class is holding the properties of one Video.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1">#printCustom(&quot;create instance of video class ... &quot;, STDOUT_TYPE.INFO);</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vidFile</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vidName</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frame_rate</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">channels</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">format</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_frames</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vid</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">convert_to_gray</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">convert_to_hsv</span> <span class="o">=</span> <span class="kc">False</span>
+
+<div class="viewcode-block" id="Video.load"><a class="viewcode-back" href="../../Video.html#stc.Video.Video.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vidFile</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method to load video file.</span>
+
+<span class="sd">        :param vidFile: [required] string representing path to video file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1">#print(vidFile)</span>
+        <span class="c1">#printCustom(&quot;load video information ... &quot;, STDOUT_TYPE.INFO);</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vidFile</span> <span class="o">=</span> <span class="n">vidFile</span><span class="p">;</span>
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vidFile</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
+            <span class="c1">#print(&quot;A&quot;)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ERROR: you must add a video file path!&quot;</span><span class="p">);</span>
+            <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vidName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vidFile</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vid</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">VideoCapture</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vidFile</span><span class="p">);</span>
+
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vid</span><span class="o">.</span><span class="n">isOpened</span><span class="p">()</span> <span class="o">==</span> <span class="kc">False</span><span class="p">):</span>
+            <span class="c1">#print(&quot;B&quot;)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ERROR: not able to open video file!&quot;</span><span class="p">);</span>
+            <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+
+        <span class="n">status</span><span class="p">,</span> <span class="n">frm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vid</span><span class="o">.</span><span class="n">read</span><span class="p">();</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">channels</span> <span class="o">=</span> <span class="n">frm</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vid</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cv2</span><span class="o">.</span><span class="n">CAP_PROP_FRAME_HEIGHT</span><span class="p">);</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vid</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cv2</span><span class="o">.</span><span class="n">CAP_PROP_FRAME_WIDTH</span><span class="p">);</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frame_rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vid</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cv2</span><span class="o">.</span><span class="n">CAP_PROP_FPS</span><span class="p">);</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">format</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vid</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cv2</span><span class="o">.</span><span class="n">CAP_PROP_FORMAT</span><span class="p">);</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_frames</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vid</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cv2</span><span class="o">.</span><span class="n">CAP_PROP_FRAME_COUNT</span><span class="p">);</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">vid</span><span class="o">.</span><span class="n">release</span><span class="p">();</span></div>
+
+<div class="viewcode-block" id="Video.printVIDInfo"><a class="viewcode-back" href="../../Video.html#stc.Video.Video.printVIDInfo">[docs]</a>    <span class="k">def</span> <span class="nf">printVIDInfo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method to a print summary of video properties.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;---------------------------------&quot;</span><span class="p">);</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Video information&quot;</span><span class="p">);</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;filename: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vidFile</span><span class="p">));</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;format: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">format</span><span class="p">));</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;fps: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frame_rate</span><span class="p">));</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;channels: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">));</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;width: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">));</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;height: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">));</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;nFrames: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_of_frames</span><span class="p">));</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;---------------------------------&quot;</span><span class="p">);</span></div>
+
+
+<div class="viewcode-block" id="Video.getFrame"><a class="viewcode-back" href="../../Video.html#stc.Video.Video.getFrame">[docs]</a>    <span class="k">def</span> <span class="nf">getFrame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method to get one frame of a video on a specified position.</span>
+
+<span class="sd">        :param frame_id: [required] integer value with valid frame index</span>
+<span class="sd">        :return: numpy frame (WxHx3)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">vid</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vidFile</span><span class="p">)</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">frame_id</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_frames</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ERROR: frame idx out of range!&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">[]</span>
+
+        <span class="c1">#print(&quot;Read frame with id: &quot; + str(frame_id));</span>
+        <span class="n">time_stamp_start</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">timestamp</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">vid</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">cv2</span><span class="o">.</span><span class="n">CAP_PROP_POS_FRAMES</span><span class="p">,</span> <span class="n">frame_id</span><span class="p">)</span>
+        <span class="n">status</span><span class="p">,</span> <span class="n">frame_np</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vid</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vid</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+
+        <span class="k">if</span><span class="p">(</span><span class="n">status</span> <span class="o">==</span> <span class="kc">True</span><span class="p">):</span>
+            <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">convert_to_gray</span> <span class="o">==</span> <span class="kc">True</span><span class="p">):</span>
+                <span class="n">frame_np</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">frame_np</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_BGR2GRAY</span><span class="p">)</span>
+                <span class="c1">#print(frame_gray_np.shape);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">convert_to_hsv</span> <span class="o">==</span> <span class="kc">True</span><span class="p">):</span>
+                <span class="n">frame_np</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">frame_np</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_BGR2HSV</span><span class="p">)</span>
+                <span class="n">h</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">frame_np</span><span class="p">)</span>
+
+        <span class="n">time_stamp_end</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">timestamp</span><span class="p">()</span>
+        <span class="n">time_diff</span> <span class="o">=</span> <span class="n">time_stamp_end</span> <span class="o">-</span> <span class="n">time_stamp_start</span>
+        <span class="c1">#print(&quot;time: &quot; + str(round(time_diff, 4)) + &quot; sec&quot;);</span>
+
+        <span class="k">return</span> <span class="n">frame_np</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">cmc 0.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, Daniel Helm.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

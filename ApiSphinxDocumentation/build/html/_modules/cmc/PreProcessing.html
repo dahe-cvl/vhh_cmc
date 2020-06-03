@@ -1,0 +1,175 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>cmc.PreProcessing &#8212; cmc 0.1.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">cmc 0.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for cmc.PreProcessing</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">cv2</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">cmc.Configuration</span> <span class="k">import</span> <span class="n">Configuration</span>
+
+
+<div class="viewcode-block" id="PreProcessing"><a class="viewcode-back" href="../../PreProcessing.html#cmc.PreProcessing.PreProcessing">[docs]</a><span class="k">class</span> <span class="nc">PreProcessing</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is used to pre-process frames.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_instance</span><span class="p">:</span> <span class="n">Configuration</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor</span>
+
+<span class="sd">        :param config_file: [required] path to configuration file (e.g. PATH_TO/config.yaml)</span>
+<span class="sd">                            must be with extension &quot;.yaml&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;create instance of pre-processing ... &quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config_instance</span> <span class="o">=</span> <span class="n">config_instance</span>
+
+<div class="viewcode-block" id="PreProcessing.applyTransformOnImg"><a class="viewcode-back" href="../../PreProcessing.html#cmc.PreProcessing.PreProcessing.applyTransformOnImg">[docs]</a>    <span class="k">def</span> <span class="nf">applyTransformOnImg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method is used to apply the configured pre-processing methods on a numpy frame.</span>
+
+<span class="sd">        :param image: This parameter must hold a valid numpy image (WxHxC).</span>
+<span class="sd">        :return: This methods returns the preprocessed numpy image.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">image_trans</span> <span class="o">=</span> <span class="n">image</span>
+
+        <span class="c1"># convert to grayscale image</span>
+        <span class="k">if</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_instance</span><span class="o">.</span><span class="n">flag_convert2Gray</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">image_trans</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convertRGB2Gray</span><span class="p">(</span><span class="n">image_trans</span><span class="p">)</span>
+
+        <span class="c1"># crop image</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_instance</span><span class="o">.</span><span class="n">center_crop_flag</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">image_trans</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crop</span><span class="p">(</span><span class="n">image_trans</span><span class="p">,</span> <span class="p">(</span><span class="n">image_trans</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">image_trans</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
+        <span class="c1"># resize image</span>
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_instance</span><span class="o">.</span><span class="n">flag_downscale</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_instance</span><span class="o">.</span><span class="n">resize_dim</span>
+            <span class="n">image_trans</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">image_trans</span><span class="p">,</span> <span class="n">dim</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">image_trans</span></div>
+
+<div class="viewcode-block" id="PreProcessing.convertRGB2Gray"><a class="viewcode-back" href="../../PreProcessing.html#cmc.PreProcessing.PreProcessing.convertRGB2Gray">[docs]</a>    <span class="k">def</span> <span class="nf">convertRGB2Gray</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method is used to convert a RBG numpy image to a grayscale image.</span>
+
+<span class="sd">        :param img: This parameter must hold a valid numpy image.</span>
+<span class="sd">        :return: This method returns a grayscale image (WxHx1).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">img_gray</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_BGR2GRAY</span><span class="p">)</span>
+        <span class="n">img_gray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">img_gray</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">img_gray</span></div>
+
+<div class="viewcode-block" id="PreProcessing.crop"><a class="viewcode-back" href="../../PreProcessing.html#cmc.PreProcessing.PreProcessing.crop">[docs]</a>    <span class="k">def</span> <span class="nf">crop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">dim</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method is used to crop a specified region of interest from a given image.</span>
+
+<span class="sd">        :param img: This parameter must hold a valid numpy image.</span>
+<span class="sd">        :param dim: This parameter must hold a valid tuple including the crop dimensions.</span>
+<span class="sd">        :return: This method returns the cropped image.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">crop_w</span><span class="p">,</span> <span class="n">crop_h</span> <span class="o">=</span> <span class="n">dim</span>
+
+        <span class="n">crop_h_1</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">crop_h_2</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">crop_w_1</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">crop_w_2</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">img_h</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">img_w</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">crop_w_1</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">img_w</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">crop_w</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">crop_w_1</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="n">crop_w_1</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">crop_w_2</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">img_w</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">crop_w</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">crop_w_2</span> <span class="o">&gt;=</span> <span class="n">img_w</span><span class="p">):</span>
+            <span class="n">crop_w_2</span> <span class="o">=</span> <span class="n">img_w</span>
+
+        <span class="n">crop_h_1</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">img_h</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">crop_h</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">crop_h_1</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="n">crop_h_1</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">crop_h_2</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">img_h</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">crop_h</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">crop_h_2</span> <span class="o">&gt;=</span> <span class="n">img_h</span><span class="p">):</span>
+            <span class="n">crop_h_2</span> <span class="o">=</span> <span class="n">img_h</span>
+
+        <span class="n">img_crop</span> <span class="o">=</span> <span class="n">img</span><span class="p">[</span><span class="n">crop_h_1</span><span class="p">:</span><span class="n">crop_h_2</span><span class="p">,</span> <span class="n">crop_w_1</span><span class="p">:</span><span class="n">crop_w_2</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">img_crop</span></div>
+
+<div class="viewcode-block" id="PreProcessing.resize"><a class="viewcode-back" href="../../PreProcessing.html#cmc.PreProcessing.PreProcessing.resize">[docs]</a>    <span class="k">def</span> <span class="nf">resize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">dim</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method is used to resize a image.</span>
+
+<span class="sd">        :param img: This parameter must hold a valid numpy image.</span>
+<span class="sd">        :param dim: This parameter must hold a valid tuple including the resize dimensions.</span>
+<span class="sd">        :return: This method returns the resized image.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">img_resized</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">dim</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">img_resized</span></div></div>
+
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">cmc 0.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, Daniel Helm.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

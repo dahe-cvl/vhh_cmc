@@ -1,0 +1,202 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>stc.Configuration &#8212; cmc 0.1.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">cmc 0.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for stc.Configuration</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">stc.utils</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">yaml</span>
+
+
+<div class="viewcode-block" id="Configuration"><a class="viewcode-back" href="../../Configuration.html#stc.Configuration.Configuration">[docs]</a><span class="k">class</span> <span class="nc">Configuration</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is needed to read the configuration parameters specified in the configuration.yaml file.</span>
+<span class="sd">    The instance of the class is holding all parameters during runtime.</span>
+
+<span class="sd">    .. note::</span>
+<span class="sd">       e.g. ./config/config_vhh_test.yaml</span>
+
+<span class="sd">        the yaml file is separated in multiple sections</span>
+<span class="sd">        config[&#39;Development&#39;]</span>
+<span class="sd">        config[&#39;PreProcessing&#39;]</span>
+<span class="sd">        config[&#39;StcCore&#39;]</span>
+<span class="sd">        config[&#39;Evaluation&#39;]</span>
+
+<span class="sd">        whereas each section should hold related and meaningful parameters.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor</span>
+
+<span class="sd">        :param config_file: [required] path to configuration file (e.g. PATH_TO/config.yaml)</span>
+<span class="sd">                                       must be with extension &quot;.yaml&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">printCustom</span><span class="p">(</span><span class="s2">&quot;create instance of configuration ... &quot;</span><span class="p">,</span> <span class="n">STDOUT_TYPE</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+
+        <span class="k">if</span><span class="p">(</span><span class="n">config_file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;yaml&quot;</span><span class="p">):</span>
+            <span class="n">printCustom</span><span class="p">(</span><span class="s2">&quot;Configuration file must have the extension .yaml!&quot;</span><span class="p">,</span> <span class="n">STDOUT_TYPE</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">config_file</span> <span class="o">=</span> <span class="n">config_file</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug_flag</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sbd_results_path</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_debug_pkg_flag</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">resize_dim</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mean_values</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">std_dev</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">flag_convert2Gray</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flag_crop</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flag_downscale</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">opt_histogram_equ</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">activate_candidate_selection</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">class_names</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_raw_results</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_frames_per_shot</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path_postfix_raw_results</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path_prefix_raw_results</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path_raw_results</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_final_results</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path_prefix_final_results</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path_postfix_final_results</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path_final_results</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">path_videos</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">threshold_mode</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window_size</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">backbone_cnn</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">similarity_metric</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">path_pre_trained_model</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">path_eval_results</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path_raw_results_eval</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_eval_results</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path_gt_data</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Configuration.loadConfig"><a class="viewcode-back" href="../../Configuration.html#stc.Configuration.Configuration.loadConfig">[docs]</a>    <span class="k">def</span> <span class="nf">loadConfig</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method to load configurables from the specified configuration file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="n">Loader</span><span class="o">=</span><span class="n">yaml</span><span class="o">.</span><span class="n">BaseLoader</span><span class="p">)</span>
+
+        <span class="n">developer_config</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;Development&#39;</span><span class="p">]</span>
+        <span class="n">pre_processing_config</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;PreProcessing&#39;</span><span class="p">]</span>
+        <span class="n">stc_core_config</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;StcCore&#39;</span><span class="p">]</span>
+        <span class="n">evaluation_config</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;Evaluation&#39;</span><span class="p">]</span>
+
+        <span class="c1"># developer_config section</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug_flag</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">developer_config</span><span class="p">[</span><span class="s1">&#39;DEBUG_FLAG&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sbd_results_path</span> <span class="o">=</span> <span class="n">developer_config</span><span class="p">[</span><span class="s1">&#39;SBD_RESULTS_PATH&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_debug_pkg_flag</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">developer_config</span><span class="p">[</span><span class="s1">&#39;SAVE_DEBUG_PKG&#39;</span><span class="p">])</span>
+
+        <span class="c1"># pre-processing section</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resize_dim</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">pre_processing_config</span><span class="p">[</span><span class="s1">&#39;RESIZE_DIM&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]),</span>
+                           <span class="nb">int</span><span class="p">(</span><span class="n">pre_processing_config</span><span class="p">[</span><span class="s1">&#39;RESIZE_DIM&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mean_values</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">pre_processing_config</span><span class="p">[</span><span class="s1">&#39;MEAN_VAL&#39;</span><span class="p">]]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">std_dev</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">pre_processing_config</span><span class="p">[</span><span class="s1">&#39;STD_DEV&#39;</span><span class="p">]]</span>
+
+        <span class="c1"># stc_core_config section</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">class_names</span> <span class="o">=</span> <span class="n">stc_core_config</span><span class="p">[</span><span class="s1">&#39;CLASS_NAMES&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">stc_core_config</span><span class="p">[</span><span class="s1">&#39;BATCH_SIZE&#39;</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_raw_results</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">stc_core_config</span><span class="p">[</span><span class="s1">&#39;SAVE_RAW_RESULTS&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_frames_per_shot</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">stc_core_config</span><span class="p">[</span><span class="s1">&#39;NUMBER_OF_FRAMES_PER_SHOT&#39;</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">path_postfix_raw_results</span> <span class="o">=</span> <span class="n">stc_core_config</span><span class="p">[</span><span class="s1">&#39;POSTFIX_RAW_RESULTS&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path_prefix_raw_results</span> <span class="o">=</span> <span class="n">stc_core_config</span><span class="p">[</span><span class="s1">&#39;PREFIX_RAW_RESULTS&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path_raw_results</span> <span class="o">=</span> <span class="n">stc_core_config</span><span class="p">[</span><span class="s1">&#39;PATH_RAW_RESULTS&#39;</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_final_results</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">stc_core_config</span><span class="p">[</span><span class="s1">&#39;SAVE_FINAL_RESULTS&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path_prefix_final_results</span> <span class="o">=</span> <span class="n">stc_core_config</span><span class="p">[</span><span class="s1">&#39;PREFIX_FINAL_RESULTS&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path_postfix_final_results</span> <span class="o">=</span> <span class="n">stc_core_config</span><span class="p">[</span><span class="s1">&#39;POSTFIX_FINAL_RESULTS&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path_final_results</span> <span class="o">=</span> <span class="n">stc_core_config</span><span class="p">[</span><span class="s1">&#39;PATH_FINAL_RESULTS&#39;</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">path_videos</span> <span class="o">=</span> <span class="n">stc_core_config</span><span class="p">[</span><span class="s1">&#39;PATH_VIDEOS&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">stc_core_config</span><span class="p">[</span><span class="s1">&#39;THRESHOLD&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path_pre_trained_model</span> <span class="o">=</span> <span class="n">stc_core_config</span><span class="p">[</span><span class="s1">&#39;PATH_PRETRAINED_MODEL&#39;</span><span class="p">]</span>
+
+        <span class="c1"># evaluation section</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path_raw_results_eval</span> <span class="o">=</span> <span class="n">evaluation_config</span><span class="p">[</span><span class="s1">&#39;PATH_RAW_RESULTS&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path_eval_results</span> <span class="o">=</span> <span class="n">evaluation_config</span><span class="p">[</span><span class="s1">&#39;PATH_EVAL_RESULTS&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_eval_results</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">evaluation_config</span><span class="p">[</span><span class="s1">&#39;SAVE_EVAL_RESULTS&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path_gt_data</span> <span class="o">=</span> <span class="n">evaluation_config</span><span class="p">[</span><span class="s1">&#39;PATH_GT_ANNOTATIONS&#39;</span><span class="p">]</span></div></div>
+
+
+
+
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">cmc 0.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, Daniel Helm.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

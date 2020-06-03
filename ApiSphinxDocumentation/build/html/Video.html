@@ -1,0 +1,142 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Video class &#8212; cmc 0.1.0 documentation</title>
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Models - module" href="Models.html" />
+    <link rel="prev" title="STC class" href="STC.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Models.html" title="Models - module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="STC.html" title="STC class"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">cmc 0.1.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="video-class">
+<h1>Video class<a class="headerlink" href="#video-class" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="stc.Video.Video">
+<em class="property">class </em><code class="sig-prename descclassname">stc.Video.</code><code class="sig-name descname">Video</code><a class="reference internal" href="_modules/stc/Video.html#Video"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stc.Video.Video" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This class is representing a video. Each instance of this class is holding the properties of one Video.</p>
+<dl class="py method">
+<dt id="stc.Video.Video.getFrame">
+<code class="sig-name descname">getFrame</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">frame_id</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stc/Video.html#Video.getFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stc.Video.Video.getFrame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to get one frame of a video on a specified position.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>frame_id</strong> – [required] integer value with valid frame index</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>numpy frame (WxHx3)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="stc.Video.Video.load">
+<code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">vidFile</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stc/Video.html#Video.load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stc.Video.Video.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to load video file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>vidFile</strong> – [required] string representing path to video file</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="stc.Video.Video.printVIDInfo">
+<code class="sig-name descname">printVIDInfo</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/stc/Video.html#Video.printVIDInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stc.Video.Video.printVIDInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to a print summary of video properties.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="STC.html"
+                        title="previous chapter">STC class</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="Models.html"
+                        title="next chapter">Models - module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/Video.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Models.html" title="Models - module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="STC.html" title="STC class"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">cmc 0.1.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, Daniel Helm.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

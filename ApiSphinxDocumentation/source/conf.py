@@ -17,12 +17,12 @@ sys.path.insert(0, os.path.abspath('../../cmc/'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'cmc'
+project = 'VHH Plugin Package: Camera Movements Classification (vhh_cmc)'
 copyright = '2020, Daniel Helm'
 author = 'Daniel Helm'
 
 # The full version, including alpha/beta/rc tags
-release = '0.1.0'
+release = '1.0.0'
 
 
 # -- General configuration ---------------------------------------------------
@@ -37,6 +37,10 @@ extensions = ['sphinx.ext.autodoc',
               'rst2pdf.pdfbuilder'
               ]
 pdf_documents = [('index', u'rst2pdf', u'Sample rst2pdf doc', u'Your Name')]
+
+latex_elements = {
+  'extraclassoptions': 'openany,oneside'
+}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

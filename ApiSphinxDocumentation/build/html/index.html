@@ -4,7 +4,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Introduction &#8212; cmc 0.1.0 documentation</title>
+    <title>Package Overview &#8212; VHH Plugin Package: Camera Movements Classification (vhh_cmc) 1.0.0 documentation</title>
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -25,7 +25,7 @@
         <li class="right" >
           <a href="Configuration.html" title="Configuration class"
              accesskey="N">next</a> |</li>
-        <li class="nav-item nav-item-0"><a href="#">cmc 0.1.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="#">VHH Plugin Package: Camera Movements Classification (vhh_cmc) 1.0.0 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -34,85 +34,84 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="introduction">
-<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
-<p>This python package is developed within the project <a class="reference external" href="https://www.vhh-project.eu/">Visual History of the Holocaust</a> <a class="footnote-reference brackets" href="#id1" id="id2">1</a> (VHH) started in Januray 2019.
-The major objective of this package is to provide interfaces and functions to classify image sequences
-(shots) in one out the four classes: Extreme Long Shot (ELS), Long Shot (LS), Medium Shot (MS) or Close-Up shot (CU).
-Those classes are the most significant cinematographic camera settings and represent the distance between an subject
-and the camera.</p>
-<p>This software package is installable and designed to reuse it in customized applications such as the <a class="reference external" href="https://github.com/dahe-cvl/vhh_core">vhh_core</a> <a class="footnote-reference brackets" href="#id3" id="id4">2</a> package. This
-module represents the main controller in the context of the VHH project.</p>
-<p>This documentation provides an API description of all classes, modules and member functions as well as
-the required setup descriptions.</p>
-</div>
-<div class="section" id="methodology">
-<h1>Methodology<a class="headerlink" href="#methodology" title="Permalink to this headline">¶</a></h1>
-</div>
-<div class="section" id="package-overview">
+  <div class="section" id="package-overview">
 <h1>Package Overview<a class="headerlink" href="#package-overview" title="Permalink to this headline">¶</a></h1>
-<p>The following list give an overview of the folder structure of this python repository:</p>
-<p><em>name of repository</em>: vhh_stc</p>
+<p>The following description gives an overview of the folder structure of this python repository:</p>
+<p><em>name of repository</em>: vhh_cmc</p>
 <blockquote>
 <div><ul class="simple">
 <li><p><strong>ApiSphinxDocumentation/</strong>: includes all files to generate the documentation as well as the created documentations (html, pdf)</p></li>
 <li><p><strong>config/</strong>: this folder includes the required configuration file</p></li>
-<li><p><strong>stc/</strong>: this folder represents the shot-type-classification module and builds the main part of this repository</p></li>
+<li><p><strong>cmc/</strong>: this folder represents the shot-type-classification module and builds the main part of this repository</p></li>
 <li><p><strong>Demo/</strong>: this folder includes a demo script to demonstrate how the package have to be used in customized applications</p></li>
-<li><p><strong>Develop/</strong>: includes scripts to train and evaluate the pytorch models. Furthermore, a script is included to create the package documentation (pdf, html)</p></li>
+<li><dl class="simple">
+<dt><strong>Develop/</strong>: includes scripts to generate the sphinx documentation. Furthermore, a script is included to run a</dt><dd><p>process to evaluate the implemented approach on a specified dataset.</p>
+</dd>
+</dl>
+</li>
 <li><p><strong>README.md</strong>: this file gives a brief description of this repository (e.g. link to this documentation)</p></li>
 <li><p><strong>requirements.txt</strong>: this file holds all python lib dependencies and is needed to install the package in your own virtual environment</p></li>
-<li><p><strong>setup.py</strong>: this script is needed to install the stc package in your own virtual environment</p></li>
+<li><p><strong>setup.py</strong>: this script is needed to install the cmc package in your own virtual environment</p></li>
 </ul>
 </div></blockquote>
 </div>
 <div class="section" id="setup-instructions">
 <h1>Setup  instructions<a class="headerlink" href="#setup-instructions" title="Permalink to this headline">¶</a></h1>
-<p>This package includes a setup.py script and a requirements.txt file which are needed to install this package for custom applications.
-The following instructions have to be done to used this library in your own application:</p>
-<p>Requirements:</p>
+<p>This package includes a setup.py script and a requirements.txt file which are needed to install this package for custom
+applications. The following instructions have to be done to use this library in your own application:</p>
+<p><strong>Requirements:</strong></p>
 <blockquote>
 <div><ul class="simple">
 <li><p>Ubuntu 18.04 LTS</p></li>
-<li><p>CUDA 10.1 + cuDNN</p></li>
 <li><p>python version 3.6.x</p></li>
 </ul>
 </div></blockquote>
-<p>Create a virtual environment:</p>
+<p><strong>Create a virtual environment:</strong></p>
 <blockquote>
 <div><ul class="simple">
-<li><p>create a folder to a specified path (e.g. /xxx/vhh_stc/)</p></li>
-<li><p>python3 -m venv /xxx/vhh_stc/</p></li>
+<li><p>create a folder to a specified path (e.g. /xxx/vhh_cmc/)</p></li>
+<li><p>python3 -m venv /xxx/vhh_cmc/</p></li>
 </ul>
 </div></blockquote>
-<p>Activate the environment:</p>
+<p><strong>Activate the environment:</strong></p>
 <blockquote>
 <div><ul class="simple">
-<li><p>source /xxx/vhh_stc/bin/activate</p></li>
+<li><p>source /xxx/vhh_cmc/bin/activate</p></li>
 </ul>
 </div></blockquote>
-<p>Checkout vhh_stc repository to a specified folder:</p>
+<p><strong>Checkout vhh_cmc repository to a specified folder:</strong></p>
 <blockquote>
 <div><ul class="simple">
-<li><p>git clone <a class="reference external" href="https://github.com/dahe-cvl/vhh_stc">https://github.com/dahe-cvl/vhh_stc</a></p></li>
+<li><p>git clone <a class="reference external" href="https://github.com/dahe-cvl/vhh_cmc">https://github.com/dahe-cvl/vhh_cmc</a></p></li>
 </ul>
 </div></blockquote>
-<p>Install the stc package and all dependencies:</p>
+<p><strong>Install the cmc package and all dependencies:</strong></p>
 <blockquote>
 <div><ul class="simple">
 <li><p>change to the root directory of the repository (includes setup.py)</p></li>
 <li><p>python setup.py install</p></li>
 </ul>
 </div></blockquote>
+<p><strong>Setup environment variables:</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p>source /data/dhelm/python_virtenv/vhh_sbd_env/bin/activate</p></li>
+<li><p>export CUDA_VISIBLE_DEVICES=1</p></li>
+<li><p>export PYTHONPATH=$PYTHONPATH:/XXX/vhh_cmc/:/XXX/vhh_cmc/Develop/:/XXX/vhh_cmc/Demo/</p></li>
+</ul>
+</div></blockquote>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>You can check the success of the installation by using the commend <em>pip list</em>. This command should give you a list with all installed python packages and it should include <em>vhh_stc</em></p>
+<p>You can check the success of the installation by using the commend <em>pip list</em>. This command should give you a list
+with all installed python packages and it should include <em>vhh_cmc</em>.</p>
 </div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Currently there is an issue in the <em>setup.py</em> script. Therefore the pytorch libraries have to be installed manually by running the following command:
-<em>pip install torch==1.5.0+cu101 torchvision==0.6.0+cu101 -f https://download.pytorch.org/whl/torch_stable.html</em></p>
-</div>
+<p><strong>Run demo script</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p>change to root directory of the repository</p></li>
+<li><p>python Demo/vhh_cmc_run_on_single_video.py</p></li>
+</ul>
+</div></blockquote>
 </div>
 <div class="section" id="api-description">
 <h1>API Description<a class="headerlink" href="#api-description" title="Permalink to this headline">¶</a></h1>
@@ -123,6 +122,7 @@ The following instructions have to be done to used this library in your own appl
 <li class="toctree-l1"><a class="reference internal" href="CMC.html">CMC class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="OpticalFlow.html">OpticalFlow class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PreProcessing.html">PreProcessing class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Evaluation.html">Evaluation class</a></li>
 </ul>
 </div>
 </div>
@@ -135,14 +135,6 @@ The following instructions have to be done to used this library in your own appl
 </ul>
 <div class="section" id="references">
 <h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
-<dl class="footnote brackets">
-<dt class="label" id="id1"><span class="brackets"><a class="fn-backref" href="#id2">1</a></span></dt>
-<dd><p><a class="reference external" href="https://www.vhh-project.eu/">https://www.vhh-project.eu/</a></p>
-</dd>
-<dt class="label" id="id3"><span class="brackets"><a class="fn-backref" href="#id4">2</a></span></dt>
-<dd><p><a class="reference external" href="https://github.com/dahe-cvl/vhh_core">https://github.com/dahe-cvl/vhh_core</a></p>
-</dd>
-</dl>
 </div>
 </div>
 
@@ -154,9 +146,7 @@ The following instructions have to be done to used this library in your own appl
         <div class="sphinxsidebarwrapper">
   <h3><a href="#">Table of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Introduction</a></li>
-<li><a class="reference internal" href="#methodology">Methodology</a></li>
-<li><a class="reference internal" href="#package-overview">Package Overview</a></li>
+<li><a class="reference internal" href="#">Package Overview</a></li>
 <li><a class="reference internal" href="#setup-instructions">Setup  instructions</a></li>
 <li><a class="reference internal" href="#api-description">API Description</a></li>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a><ul>
@@ -198,7 +188,7 @@ The following instructions have to be done to used this library in your own appl
         <li class="right" >
           <a href="Configuration.html" title="Configuration class"
              >next</a> |</li>
-        <li class="nav-item nav-item-0"><a href="#">cmc 0.1.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="#">VHH Plugin Package: Camera Movements Classification (vhh_cmc) 1.0.0 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

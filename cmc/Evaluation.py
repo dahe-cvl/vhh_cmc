@@ -13,7 +13,16 @@ from sklearn.metrics import confusion_matrix
 
 
 class Evaluation(object):
+    """
+    Evaluation class includes all methods to evaluate the implemented algorithms.
+    """
+
     def __init__(self, config_instance: Configuration):
+        """
+        Constructor.
+
+        :param config_instance: object instance of type Configuration
+        """
         print("create instance of class evaluation ... ")
 
         self.config_instance = config_instance
@@ -27,6 +36,14 @@ class Evaluation(object):
         self.final_dataset_np = []
 
     def load_dataset(self):
+        """
+        This method is used to load the dataset used to evaluate the algorithm.
+        The dataset must have the following structure:
+        dataset_root_dir/training_data/
+        dataset_root_dir/training_data/tilt/
+        dataset_root_dir/training_data/pan/
+        dataset_root_dir/training_data/annotation/xxx.flist
+        """
         print("load eval dataset ... ")
 
         # load samples
@@ -88,35 +105,10 @@ class Evaluation(object):
 
         self.final_dataset_np = np.concatenate((vids_np, self.final_dataset_np), axis=1)
 
-    def get_sample(self, idx=0):
-        if(idx >= len(self.final_dataset_np) or idx < 0):
-            print("ERROR: idx out of range!")
-            exit()
-
-        sample_shot_info = self.final_dataset_np[idx]
-        shot_path = sample_shot_info[0]
-        start = sample_shot_info[1]
-        stop = sample_shot_info[2]
-        class_name = sample_shot_info[3]
-
-        cap = cv2.VideoCapture(shot_path)
-
-        frames_list = []
-        while(True):
-            ret, curr_frame = cap.read()
-            if(ret == False):
-                break
-            curr_frame = self.pre_processing_instance.applyTransformOnImg(curr_frame)
-
-            frames_list.append(curr_frame)
-        frames_np = np.array(frames_list)
-        #print(frames_np.shape)
-        #print(class_name)
-        cap.release()
-
-        return frames_np, start, stop, class_name
-
     def run_evaluation(self):
+        """
+        This method is used to start and run the evaluation process.
+        """
         print("calculate evaluation metrics ... ")
 
         # load all predictions and merge
@@ -156,6 +148,13 @@ class Evaluation(object):
         self.calculate_metrics(y_score=pred_np_prep, y_test=gt_np_prep)
 
     def calculate_metrics(self, y_score, y_test):
+        """
+        This method is used to calculate the metrics: precision, recall, f1score.
+        Furthermore, the confusion matrix is generated and stored as figure on a specified location.
+
+        :param y_score: This parameter must hold a valid numpy array with the class prediction per shot .
+        :param y_test: This parameter must hold a valid numpy array with the groundtruth labels per shot.
+        """
         print(y_score)
         print(y_test)
 
@@ -226,6 +225,12 @@ class Evaluation(object):
         Citiation
         ---------
         http://scikit-learn.org/stable/auto_examples/model_selection/plot_confusion_matrix.html
+        :param cm:
+        :param target_names:
+        :param title:
+        :param cmap:
+        :param normalize:
+        :param path:
 
         """
         import matplotlib.pyplot as plt

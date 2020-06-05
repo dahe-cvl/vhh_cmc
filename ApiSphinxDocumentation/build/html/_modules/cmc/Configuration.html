@@ -4,7 +4,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>cmc.Configuration &#8212; cmc 0.1.0 documentation</title>
+    <title>cmc.Configuration &#8212; VHH Plugin Package: Camera Movements Classification (vhh_cmc) 1.0.0 documentation</title>
     <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -21,7 +21,7 @@
         <li class="right" style="margin-right: 10px">
           <a href="../../genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">cmc 0.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">VHH Plugin Package: Camera Movements Classification (vhh_cmc) 1.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
@@ -101,9 +101,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">path_videos</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="c1"># evaluation section</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">path_raw_results_eval</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">path_eval_results</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">save_eval_results</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path_eval_dataset</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path_eval_results</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_eval_results</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">path_gt_data</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="Configuration.loadConfig"><a class="viewcode-back" href="../../Configuration.html#cmc.Configuration.Configuration.loadConfig">[docs]</a>    <span class="k">def</span> <span class="nf">loadConfig</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -156,7 +156,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">path_videos</span> <span class="o">=</span> <span class="n">cmc_core_config</span><span class="p">[</span><span class="s1">&#39;PATH_VIDEOS&#39;</span><span class="p">]</span>
 
         <span class="c1"># evaluation section</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">path_raw_results_eval</span> <span class="o">=</span> <span class="n">evaluation_config</span><span class="p">[</span><span class="s1">&#39;PATH_RAW_RESULTS&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path_eval_dataset</span> <span class="o">=</span> <span class="n">evaluation_config</span><span class="p">[</span><span class="s1">&#39;PATH_EVAL_DATASET&#39;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">path_eval_results</span> <span class="o">=</span> <span class="n">evaluation_config</span><span class="p">[</span><span class="s1">&#39;PATH_EVAL_RESULTS&#39;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">save_eval_results</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">evaluation_config</span><span class="p">[</span><span class="s1">&#39;SAVE_EVAL_RESULTS&#39;</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">path_gt_data</span> <span class="o">=</span> <span class="n">evaluation_config</span><span class="p">[</span><span class="s1">&#39;PATH_GT_ANNOTATIONS&#39;</span><span class="p">]</span></div></div>
@@ -187,7 +187,7 @@
         <li class="right" style="margin-right: 10px">
           <a href="../../genindex.html" title="General Index"
              >index</a></li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">cmc 0.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">VHH Plugin Package: Camera Movements Classification (vhh_cmc) 1.0.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>

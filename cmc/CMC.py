@@ -68,7 +68,12 @@ class CMC(object):
 
         # read all frames of video
         vid_name = shots_np[0][1]
-        cap = cv2.VideoCapture(self.config_instance.path_videos + "/" + vid_name)
+
+        if(self.config_instance.save_eval_results == 1):
+            print("Evaluation mode is activated ...")
+            cap = cv2.VideoCapture(vid_name)
+        else:
+            cap = cv2.VideoCapture(self.config_instance.path_videos + "/" + vid_name)
         frame_l = []
         cnt = 0
 
@@ -89,7 +94,7 @@ class CMC(object):
 
         results_cmc_l = []
         for idx in range(0, num_shots):
-            # print(shots_np[idx])
+            print(shots_np[idx])
             shot_id = int(shots_np[idx][0])
             vid_name = str(shots_np[idx][1])
             start = int(shots_np[idx][2])
@@ -158,7 +163,10 @@ class CMC(object):
         results_cmc_np = np.array(results_cmc_l)
 
         # export results
-        self.exportCmcResults(str(max_recall_id), results_cmc_np)
+        if (self.config_instance.save_eval_results == 1):
+            self.exportCmcResults(vid_name, results_cmc_np)
+        else:
+            self.exportCmcResults(str(max_recall_id), results_cmc_np)
 
     def loadSbdResults(self, sbd_results_path):
         """
@@ -203,8 +211,15 @@ class CMC(object):
         # open stc resutls file
         if (self.config_instance.debug_flag == True):
             fp = open(self.debug_results + "/" + fName + ".csv", 'w')
+        elif (self.config_instance.save_eval_results == 1):
+
+            print(self.config_instance.path_eval_results)
+            fp = open(self.config_instance.path_eval_results + "/" + fName.split('/')[-1].split('.')[0] + ".csv", 'w')
         else:
             fp = open(self.config_instance.path_final_results + "/" + fName + ".csv", 'w')
+
+
+
         header = "vid_name;shot_id;start;end;cmc"
         fp.write(header + "\n")
 
@@ -214,3 +229,4 @@ class CMC(object):
                 tmp_line = tmp_line + ";" + cmc_results_np[i][c]
             fp.write(tmp_line + "\n")
 
+        fp.close()

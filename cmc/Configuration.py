@@ -67,9 +67,9 @@ class Configuration:
         self.path_videos = None
 
         # evaluation section
-        self.path_raw_results_eval = None
-        self.path_eval_results = None
-        self.save_eval_results = None
+        self.path_eval_dataset = None
+        self.path_eval_results = ""
+        self.save_eval_results = -1
         self.path_gt_data = None
 
     def loadConfig(self):
@@ -122,7 +122,7 @@ class Configuration:
         self.path_videos = cmc_core_config['PATH_VIDEOS']
 
         # evaluation section
-        self.path_raw_results_eval = evaluation_config['PATH_RAW_RESULTS']
+        self.path_eval_dataset = evaluation_config['PATH_EVAL_DATASET']
         self.path_eval_results = evaluation_config['PATH_EVAL_RESULTS']
         self.save_eval_results = int(evaluation_config['SAVE_EVAL_RESULTS'])
         self.path_gt_data = evaluation_config['PATH_GT_ANNOTATIONS']

@@ -1,0 +1,56 @@
+\begin{sphinxtheindex}
+\let\bigletter\sphinxstyleindexlettergroup
+\let\spxpagem \sphinxstyleindexpagemain
+\let\spxentry \sphinxstyleindexentry
+\let\spxextra \sphinxstyleindexextra
+
+  \bigletter {\sphinxsymbolsname}
+  \item \spxentry{\_\_init\_\_()}\spxextra{cmc.OpticalFlow.OpticalFlow method}, \hyperpage{4}
+
+  \indexspace
+  \bigletter A
+  \item \spxentry{applyTransformOnImg()}\spxextra{cmc.PreProcessing.PreProcessing method}, 
+		\hyperpage{5}
+
+  \indexspace
+  \bigletter C
+  \item \spxentry{calculate\_metrics()}\spxextra{cmc.Evaluation.Evaluation method}, \hyperpage{6}
+  \item \spxentry{CMC}\spxextra{class in cmc.CMC}, \hyperpage{3}
+  \item \spxentry{Configuration}\spxextra{class in cmc.Configuration}, \hyperpage{3}
+  \item \spxentry{convertRGB2Gray()}\spxextra{cmc.PreProcessing.PreProcessing method}, 
+		\hyperpage{5}
+  \item \spxentry{crop()}\spxextra{cmc.PreProcessing.PreProcessing method}, \hyperpage{5}
+
+  \indexspace
+  \bigletter E
+  \item \spxentry{Evaluation}\spxextra{class in cmc.Evaluation}, \hyperpage{6}
+  \item \spxentry{exportCmcResults()}\spxextra{cmc.CMC.CMC method}, \hyperpage{3}
+
+  \indexspace
+  \bigletter L
+  \item \spxentry{load\_dataset()}\spxextra{cmc.Evaluation.Evaluation method}, \hyperpage{6}
+  \item \spxentry{loadConfig()}\spxextra{cmc.Configuration.Configuration method}, \hyperpage{3}
+  \item \spxentry{loadSbdResults()}\spxextra{cmc.CMC.CMC method}, \hyperpage{3}
+
+  \indexspace
+  \bigletter O
+  \item \spxentry{optical\_flow()}\spxextra{cmc.OpticalFlow.OpticalFlow method}, \hyperpage{5}
+  \item \spxentry{OpticalFlow}\spxextra{class in cmc.OpticalFlow}, \hyperpage{4}
+
+  \indexspace
+  \bigletter P
+  \item \spxentry{plot\_confusion\_matrix()}\spxextra{cmc.Evaluation.Evaluation method}, 
+		\hyperpage{6}
+  \item \spxentry{PreProcessing}\spxextra{class in cmc.PreProcessing}, \hyperpage{5}
+
+  \indexspace
+  \bigletter R
+  \item \spxentry{resize()}\spxextra{cmc.PreProcessing.PreProcessing method}, \hyperpage{6}
+  \item \spxentry{run()}\spxextra{cmc.OpticalFlow.OpticalFlow method}, \hyperpage{5}
+  \item \spxentry{run\_eval()}\spxextra{cmc.OpticalFlow.OpticalFlow method}, \hyperpage{5}
+  \item \spxentry{run\_evaluation()}\spxextra{cmc.Evaluation.Evaluation method}, \hyperpage{7}
+  \item \spxentry{run\_manual\_evaluation()}\spxextra{cmc.OpticalFlow.OpticalFlow method}, 
+		\hyperpage{5}
+  \item \spxentry{runOnSingleVideo()}\spxextra{cmc.CMC.CMC method}, \hyperpage{4}
+
+\end{sphinxtheindex}

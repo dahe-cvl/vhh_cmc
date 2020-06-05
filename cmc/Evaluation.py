@@ -120,13 +120,13 @@ class Evaluation(object):
         print("calculate evaluation metrics ... ")
 
         # load all predictions and merge
-        results_file_list = os.listdir(self.path_eval_results)
+        results_file_list = [f for f in os.listdir(self.path_eval_results) if f.endswith('.csv')]
 
         pred_list = []
         pred_np = []
         for i, file in enumerate(results_file_list):
             results_file = os.path.join(self.path_eval_results, file)
-
+            print(results_file)
             fp = open(results_file, 'r')
             lines = fp.readlines()
             lines = lines[1:]
@@ -173,18 +173,18 @@ class Evaluation(object):
         print('F1 score: %f' % f1)
 
         # confusion matrix
-        matrix = confusion_matrix(y_test, y_score, labels=self.config_instance.class_names[:-1])
+        matrix = confusion_matrix(y_test, y_score, labels=self.config_instance.class_names)
         print(matrix)
 
         print("save confusion matrix ...")
         self.plot_confusion_matrix(cm=matrix,
-                                   target_names=self.config_instance.class_names[:-1],
+                                   target_names=self.config_instance.class_names,
                                    title='Confusion matrix',
                                    cmap=None,
                                    normalize=True,
                                    path=self.config_instance.path_eval_results + "/confusion_matrix_normalize.png")
         self.plot_confusion_matrix(cm=matrix,
-                                   target_names=self.config_instance.class_names[:-1],
+                                   target_names=self.config_instance.class_names,
                                    title='Confusion matrix',
                                    cmap=None,
                                    normalize=False,
@@ -231,6 +231,8 @@ class Evaluation(object):
         import matplotlib.pyplot as plt
         import numpy as np
         import itertools
+        from matplotlib import pyplot as plt
+        plt.rc('pdf', fonttype=42)
 
         accuracy = np.trace(cm) / float(np.sum(cm))
         misclass = 1 - accuracy
@@ -241,7 +243,7 @@ class Evaluation(object):
         plt.figure(figsize=(8, 6))
         plt.imshow(cm, interpolation='nearest', cmap=cmap)
         plt.title(title)
-        plt.colorbar()
+        #plt.colorbar()
 
         if target_names is not None:
             tick_marks = np.arange(len(target_names))
@@ -265,4 +267,5 @@ class Evaluation(object):
         plt.tight_layout()
         plt.ylabel('True label')
         plt.xlabel('Predicted label\naccuracy={:0.4f}; misclass={:0.4f}'.format(accuracy, misclass))
-        plt.savefig(path)
+        #plt.savefig(path)
+        plt.savefig(path, dpi=500)

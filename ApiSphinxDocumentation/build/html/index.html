@@ -113,6 +113,96 @@ with all installed python packages and it should include <em>vhh_cmc</em>.</p>
 </ul>
 </div></blockquote>
 </div>
+<div class="section" id="parameter-description">
+<h1>Parameter Description<a class="headerlink" href="#parameter-description" title="Permalink to this headline">¶</a></h1>
+<p>DEBUG_FLAG<dd><p>This parameter is used to activate or deactivate the debug mode.</p>
+</dd>
+</p>
+<p>SBD_RESULTS_PATH<dd><p>This parameter is used to specify a SBD results file for debugging mode.</p>
+</dd>
+</p>
+<p>SAVE_DEBUG_PKG<dd><p>This parameter is used to save a debug package (e.g. including some visualizations, … - not available yet).</p>
+</dd>
+</p>
+<p>CONVERT2GRAY_FLAG<dd><p>This flag is used to convert a input frame into a grayscale frame (0… deactivate, 1 … activate).</p>
+</dd>
+</p>
+<p>CENTER_CROP_FLAG<dd><p>This flag is used to center crop a input frame (0… deactivate, 1 … activate).</p>
+</dd>
+</p>
+<p>DOWNSCALE_FLAG<dd><p>This flag is used to scale a input frame into the specified dimension (0… deactivate, 1 … activate).</p>
+</dd>
+</p>
+<p>RESIZE_DIM<dd><p>This flag is used to to specify the resize dimension. (only usable if DOWNSCALE_FLAG is active).</p>
+</dd>
+</p>
+<p>SENSITIVITY<dd><p>This parameter is used to specify the number of consecutive frames which are needed to register a camera movement.</p>
+</dd>
+</p>
+<p>SPECIFICITY<dd><p>This parameter is used to specify the number of outliers (miss detections).</p>
+</dd>
+</p>
+<p>BORDER<dd><p>This parameter is used to specify the frame border inside which random features are created</p>
+</dd>
+</p>
+<p>NUMBER_OF_FEATURES<dd><p>This parameter is used to specify the number of features number of features to be tracked for optical flow</p>
+</dd>
+</p>
+<p>ANGLE_DIFF_LIMIT<dd><p>This parameter is used to specify the difference limit to most common angle such that still considered as background movement</p>
+</dd>
+</p>
+<p>MODE<dd><p>NORMAL_MODE = 0
+DEBUG_MODE = 1
+SAVE_MODE = 2
+DEBUG_AND_SAVE_MODE = 3</p>
+</dd>
+</p>
+<p>CLASS_NAMES<dd><p>This parameter is used to specify the class names.</p>
+</dd>
+</p>
+<p>SAVE_RAW_RESULTS<dd><p>This parameter is used to save raw results (e.g. debug visualizations).</p>
+</dd>
+</p>
+<p>PATH_RAW_RESULTS<dd><p>This parameter is used to specify the path for saving the raw results.</p>
+</dd>
+</p>
+<p>PREFIX_RAW_RESULTS<dd><p>This parameter is used to specify the prefix for the results file.</p>
+</dd>
+</p>
+<p>POSTFIX_RAW_RESULTS<dd><p>This parameter is used to specify the postfix for the results file.</p>
+</dd>
+</p>
+<p>SAVE_FINAL_RESULTS<dd><p>This parameter is used to save final results (e.g. csv list).</p>
+</dd>
+</p>
+<p>PATH_FINAL_RESULTS<dd><p>This parameter is used to specify the path for saving the final results.</p>
+</dd>
+</p>
+<p>PREFIX_FINAL_RESULTS<dd><p>This parameter is used to specify the prefix for the results file.</p>
+</dd>
+</p>
+<p>POSTFIX_FINAL_RESULTS<dd><p>This parameter is used to specify the postfix for the results file.</p>
+</dd>
+</p>
+<p>PATH_VIDEOS<dd><p>This parameter is used to specify the path to the videos.</p>
+</dd>
+</p>
+<p>SAVE_EVAL_RESULTS<dd><p>This parameter is used to save evaluation results (e.g. visualizations, … ).</p>
+</dd>
+</p>
+<p>PATH_RAW_RESULTS<dd><p>This parameter is used the raw results path.</p>
+</dd>
+</p>
+<p>PATH_EVAL_RESULTS<dd><p>This parameter is used to specify the path to store the evaluation results path.</p>
+</dd>
+</p>
+<p>PATH_GT_ANNOTATIONS<dd><p>This parameter is used to groundtruth annotations used for evaluation.</p>
+</dd>
+</p>
+<p>PATH_EVAL_DATASET<dd><p>This parameter is used to specify the path to the dataset used for the evaluation.</p>
+</dd>
+</p>
+</div>
 <div class="section" id="api-description">
 <h1>API Description<a class="headerlink" href="#api-description" title="Permalink to this headline">¶</a></h1>
 <p>This section gives an overview of all classes and modules in <em>cmc</em> as well as an code description.</p>
@@ -148,6 +238,7 @@ with all installed python packages and it should include <em>vhh_cmc</em>.</p>
   <ul>
 <li><a class="reference internal" href="#">Package Overview</a></li>
 <li><a class="reference internal" href="#setup-instructions">Setup  instructions</a></li>
+<li><a class="reference internal" href="#parameter-description">Parameter Description</a></li>
 <li><a class="reference internal" href="#api-description">API Description</a></li>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a><ul>
 <li><a class="reference internal" href="#references">References</a></li>

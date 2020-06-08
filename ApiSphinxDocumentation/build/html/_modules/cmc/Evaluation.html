@@ -92,7 +92,7 @@
         <span class="c1">#print(len(self.all_shot_file_list))</span>
 
         <span class="c1"># load groundtruth labels</span>
-        <span class="n">test_gt_labels_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path_eval_dataset</span> <span class="o">+</span> <span class="s2">&quot;/annotation/all_shots.flist&quot;</span>
+        <span class="n">test_gt_labels_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path_eval_dataset</span> <span class="o">+</span> <span class="s2">&quot;/annotation/test_shots.flist&quot;</span>
         <span class="c1">#print(test_gt_labels_file)</span>
 
         <span class="n">fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">test_gt_labels_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
@@ -189,8 +189,8 @@
 <span class="sd">        :param y_score: This parameter must hold a valid numpy array with the class prediction per shot .</span>
 <span class="sd">        :param y_test: This parameter must hold a valid numpy array with the groundtruth labels per shot.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">y_score</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">y_test</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y_score</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y_test</span><span class="p">))</span>
 
         <span class="c1"># accuracy: (tp + tn) / (p + n)</span>
         <span class="n">accuracy</span> <span class="o">=</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_score</span><span class="p">)</span>

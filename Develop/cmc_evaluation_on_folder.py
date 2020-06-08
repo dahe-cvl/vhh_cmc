@@ -16,7 +16,7 @@ eval_instance.load_dataset()
 # max_recall_id can be ignored in eval mode
 # shots_per_vid_np must be a numpy with the follwoing shape (Nx4 --> N >= 1)
 #
-ACTIVE_FLAG = False
+ACTIVE_FLAG = True
 if(ACTIVE_FLAG == True):
     shots_np = eval_instance.final_dataset_np[:, :4]
     for i in range(0, len(shots_np)):

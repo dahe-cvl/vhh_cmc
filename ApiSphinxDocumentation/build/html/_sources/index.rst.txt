@@ -65,6 +65,10 @@ applications. The following instructions have to be done to use this library in 
    * change to root directory of the repository
    * python Demo/vhh_cmc_run_on_single_video.py
 
+Parameter Description
+=====================
+
+.. autoyaml:: ../config/config_cmc.yaml
 
 API Description
 ===============

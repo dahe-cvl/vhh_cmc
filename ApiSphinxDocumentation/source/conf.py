@@ -34,7 +34,8 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.todo',
               'sphinx.ext.coverage',
               'sphinx.ext.viewcode',
-              'rst2pdf.pdfbuilder'
+              'rst2pdf.pdfbuilder',
+              'sphinxcontrib.autoyaml',
               ]
 pdf_documents = [('index', u'rst2pdf', u'Sample rst2pdf doc', u'Your Name')]
 

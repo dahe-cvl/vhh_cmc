@@ -72,7 +72,7 @@
 
 
 \title{VHH Plugin Package: Camera Movements Classification (vhh\_cmc)}
-\date{Jun 05, 2020}
+\date{Jun 08, 2020}
 \release{1.0.0}
 \author{Daniel Helm}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -198,6 +198,152 @@ change to root directory of the repository
 python Demo/vhh\_cmc\_run\_on\_single\_video.py
 
 \end{itemize}
+
+
+\chapter{Parameter Description}
+\label{\detokenize{index:parameter-description}}
+DEBUG\_FLAG
+This parameter is used to activate or deactivate the debug mode.
+
+
+
+SBD\_RESULTS\_PATH
+This parameter is used to specify a SBD results file for debugging mode.
+
+
+
+SAVE\_DEBUG\_PKG
+This parameter is used to save a debug package (e.g. including some visualizations, … \sphinxhyphen{} not available yet).
+
+
+
+CONVERT2GRAY\_FLAG
+This flag is used to convert a input frame into a grayscale frame (0… deactivate, 1 … activate).
+
+
+
+CENTER\_CROP\_FLAG
+This flag is used to center crop a input frame (0… deactivate, 1 … activate).
+
+
+
+DOWNSCALE\_FLAG
+This flag is used to scale a input frame into the specified dimension (0… deactivate, 1 … activate).
+
+
+
+RESIZE\_DIM
+This flag is used to to specify the resize dimension. (only usable if DOWNSCALE\_FLAG is active).
+
+
+
+SENSITIVITY
+This parameter is used to specify the number of consecutive frames which are needed to register a camera movement.
+
+
+
+SPECIFICITY
+This parameter is used to specify the number of outliers (miss detections).
+
+
+
+BORDER
+This parameter is used to specify the frame border inside which random features are created
+
+
+
+NUMBER\_OF\_FEATURES
+This parameter is used to specify the number of features number of features to be tracked for optical flow
+
+
+
+ANGLE\_DIFF\_LIMIT
+This parameter is used to specify the difference limit to most common angle such that still considered as background movement
+
+
+
+MODE
+NORMAL\_MODE = 0
+DEBUG\_MODE = 1
+SAVE\_MODE = 2
+DEBUG\_AND\_SAVE\_MODE = 3
+
+
+
+CLASS\_NAMES
+This parameter is used to specify the class names.
+
+
+
+SAVE\_RAW\_RESULTS
+This parameter is used to save raw results (e.g. debug visualizations).
+
+
+
+PATH\_RAW\_RESULTS
+This parameter is used to specify the path for saving the raw results.
+
+
+
+PREFIX\_RAW\_RESULTS
+This parameter is used to specify the prefix for the results file.
+
+
+
+POSTFIX\_RAW\_RESULTS
+This parameter is used to specify the postfix for the results file.
+
+
+
+SAVE\_FINAL\_RESULTS
+This parameter is used to save final results (e.g. csv list).
+
+
+
+PATH\_FINAL\_RESULTS
+This parameter is used to specify the path for saving the final results.
+
+
+
+PREFIX\_FINAL\_RESULTS
+This parameter is used to specify the prefix for the results file.
+
+
+
+POSTFIX\_FINAL\_RESULTS
+This parameter is used to specify the postfix for the results file.
+
+
+
+PATH\_VIDEOS
+This parameter is used to specify the path to the videos.
+
+
+
+SAVE\_EVAL\_RESULTS
+This parameter is used to save evaluation results (e.g. visualizations, … ).
+
+
+
+PATH\_RAW\_RESULTS
+This parameter is used the raw results path.
+
+
+
+PATH\_EVAL\_RESULTS
+This parameter is used to specify the path to store the evaluation results path.
+
+
+
+PATH\_GT\_ANNOTATIONS
+This parameter is used to groundtruth annotations used for evaluation.
+
+
+
+PATH\_EVAL\_DATASET
+This parameter is used to specify the path to the dataset used for the evaluation.
+
+
 
 
 \chapter{API Description}

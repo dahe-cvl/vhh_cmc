@@ -58,7 +58,7 @@ class Evaluation(object):
         #print(len(self.all_shot_file_list))
 
         # load groundtruth labels
-        test_gt_labels_file = self.path_eval_dataset + "/annotation/all_shots.flist"
+        test_gt_labels_file = self.path_eval_dataset + "/annotation/test_shots.flist"
         #print(test_gt_labels_file)
 
         fp = open(test_gt_labels_file, 'r')
@@ -155,8 +155,8 @@ class Evaluation(object):
         :param y_score: This parameter must hold a valid numpy array with the class prediction per shot .
         :param y_test: This parameter must hold a valid numpy array with the groundtruth labels per shot.
         """
-        print(y_score)
-        print(y_test)
+        print(len(y_score))
+        print(len(y_test))
 
         # accuracy: (tp + tn) / (p + n)
         accuracy = accuracy_score(y_test, y_score)

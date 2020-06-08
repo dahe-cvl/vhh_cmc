@@ -5,3 +5,6 @@ NumPy
 matplotlib
 scipy
 scikit-learn
+Sphinx
+sphinxcontrib-bibtex
+sphinxcontrib-autoyaml

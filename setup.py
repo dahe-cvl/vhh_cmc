@@ -35,7 +35,7 @@ print("all dependencies installed!")
 # install sbd package
 setup(
      name='vhh_cmc',
-     version='0.1.0',
+     version='1.0.0',
      author="Daniel Helm",
      author_email="daniel.helm@tuwien.ac.at",
      description="Camera Movements Classification Package",

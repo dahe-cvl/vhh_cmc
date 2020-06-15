@@ -138,14 +138,20 @@ class CMC(object):
             print(tilts_score)
 
             threshold = 80
-            if (pans_score >= threshold):
-                class_name = self.config_instance.class_names[0]
-            elif(tilts_score >= threshold):
-                class_name = self.config_instance.class_names[1]
-            elif (pans_score >= threshold) and (tilts_score >= threshold):
-                class_name = self.config_instance.class_names[2]
+            if(self.config_instance.save_eval_results == 1):
+                if (pans_score >= threshold):
+                    class_name = self.config_instance.class_names[0]
+                else:
+                    class_name = self.config_instance.class_names[1]
             else:
-                class_name = self.config_instance.class_names[2]
+                if (pans_score >= threshold):
+                    class_name = self.config_instance.class_names[0]
+                elif(tilts_score >= threshold):
+                    class_name = self.config_instance.class_names[1]
+                elif (pans_score >= threshold) and (tilts_score >= threshold):
+                    class_name = self.config_instance.class_names[2]
+                else:
+                    class_name = self.config_instance.class_names[2]
 
             # prepare results
             print(str(vid_name) + ";" + str(shot_id) + ";" + str(start) + ";" + str(stop) + ";" + str(class_name))
@@ -154,7 +160,7 @@ class CMC(object):
             # save raw results
             if(self.config_instance.save_raw_results == 1):
                 optical_flow_instance.to_csv(
-                    "/".join([self.config_instance.path_raw_results, self.config_instance.path_prefix_raw_results + str(vid_name) + ".csv"]))
+                    "/".join([self.config_instance.path_raw_results, self.config_instance.path_prefix_raw_results + str(vid_name.split('/')[-1]) + ".csv"]))
                 optical_flow_instance.to_png(
                     "/".join([self.config_instance.path_raw_results, self.config_instance.path_prefix_raw_results + str(vid_name) + ".png"]))
                 optical_flow_instance.to_avi(

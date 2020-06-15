@@ -4,6 +4,7 @@ import os
 import numpy as np
 import cv2
 
+from sklearn.metrics import classification_report
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import precision_score
 from sklearn.metrics import recall_score
@@ -174,6 +175,7 @@ class Evaluation(object):
         # confusion matrix
         matrix = confusion_matrix(y_test, y_score, labels=self.config_instance.class_names)
         print(matrix)
+        print(classification_report(y_test, y_score))
 
         print("save confusion matrix ...")
         self.plot_confusion_matrix(cm=matrix,

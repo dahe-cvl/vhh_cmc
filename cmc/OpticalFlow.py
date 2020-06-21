@@ -34,7 +34,7 @@ class AngleClassifier(object):
         if self.classification_type == ClassificationType.PAN:
             self.main_angles = np.array([180, 0])
         elif self.classification_type == ClassificationType.TILT:
-            self.main_angles = np.array([90, 270])
+            self.main_angles = np.array([90, -90])
 
     def classify(self, angle):
         """
@@ -47,7 +47,7 @@ class AngleClassifier(object):
         print("Checking for " + self.classification_type.name + ": " + str(angle) + " degrees.")
         for i, a in enumerate(self.main_angles):
             print("Classifying: distance " + str(self.r) + " to angle " + str(a))
-            if angle in range(self.r[0]+a, self.r[1]+a):
+            if int(angle) in range(self.r[0]+a, self.r[1]+a):
                 print("Angle contributes to " + self.classification_type.name + " movement.")
                 return True
         print("Angle does not contribute to " + self.classification_type.name + "movement.")
@@ -245,8 +245,26 @@ class OpticalFlow(object):
             print("Running program in save mode: configuring outputs.")
             self.out = self.init_outputs(self.fpath, self.sf, self.ef, (w, h))
 
-        curr_feat = self.create_random_features(self.number_of_features, self.range_of_frame(curr_frame))
+        # TODO: replace with meaningful feature extractor
+        #curr_feat = self.create_random_features(self.number_of_features, self.range_of_frame(curr_frame))
+        #print(len(curr_feat))
 
+        # params for ShiTomasi corner detection
+        feature_params = dict(maxCorners=500,
+                              qualityLevel=0.000003,
+                              minDistance=5,
+                              blockSize=128)
+
+        print(curr_frame.shape)
+        curr_frame_gray = cv2.cvtColor(curr_frame, cv2.COLOR_BGR2GRAY)
+        curr_feat = cv2.goodFeaturesToTrack(curr_frame_gray, mask=None, **feature_params)
+
+        prev_feat, curr_feat = self.getORBMatches(curr_frame_gray, curr_frame_gray)
+
+        print(len(curr_feat))
+        #exit()
+        raw_angles_l = []
+        raw_mag_l = []
         while self.i < self.end:
             prev_frame, prev_feat, curr_frame, curr_feat = self.step(curr_frame, curr_feat)
 
@@ -254,6 +272,13 @@ class OpticalFlow(object):
             print("curr: ", curr_feat.__len__())
 
             prev_feat, curr_feat = self.optical_flow(prev_frame, prev_feat, curr_frame)
+            mag, angle = self.compute_magnitude_angle(prev_feat, curr_feat)
+
+            mag_mean = np.mean(mag)
+            angle_mean = np.mean(angle)
+            raw_angles_l.append(angle_mean)
+            raw_mag_l.append(mag_mean)
+
 
             most_common_angle = None
             weight = 1
@@ -262,8 +287,13 @@ class OpticalFlow(object):
                 weight = self.weights[self.i - 2]
 
                 # classifiy movement
-                self.check_for_movement(most_common_angle, self.pan_counter, self.pan_classifier)
-                self.check_for_movement(most_common_angle, self.tilt_counter, self.tilt_classifier)
+                #self.check_for_movement(most_common_angle, self.pan_counter, self.pan_classifier)
+                #self.check_for_movement(most_common_angle, self.tilt_counter, self.tilt_classifier)
+                print("----")
+                print(most_common_angle)
+                print(angle_mean)
+                self.check_for_movement(angle_mean, self.pan_counter, self.pan_classifier)
+                self.check_for_movement(angle_mean, self.tilt_counter, self.tilt_classifier)
 
             print("prev: ", prev_feat.__len__())
             print("curr: ", curr_feat.__len__())
@@ -286,7 +316,21 @@ class OpticalFlow(object):
             print(sf)
             print(ef)
         ''''''
+        print(self.fpath)
+        print("#############")
+        print(raw_angles_l)
+        print(raw_mag_l)
 
+        '''
+        # plot angles over time
+        plt.figure()
+        plt.plot(np.arange(len(raw_angles_l)), raw_angles_l)
+        # plt.plot(np.arange(len(mag_l)), mag_l)
+        plt.ylim(ymax=190, ymin=-190)
+        plt.grid(True)
+        # plt.show()
+        plt.savefig("./raw_angles_" + str(self.fpath.split('/')[-1].split('.')[0]) + ".png")
+        '''
         self.clear()
         return self.pans, self.tilts
 
@@ -561,6 +605,53 @@ class OpticalFlow(object):
     def str_step_info(self):
         return str(self.i + self.sf) + "/" + str(self.ef)
 
+    def getORBMatches(self, frame1, frame2):
+        kp_curr_list = []
+        kp_prev_list = []
+
+        orb = cv2.ORB_create()
+
+        kp_prev, descriptor_prev = orb.detectAndCompute(frame1, None)
+        kp_curr, descriptor_curr = orb.detectAndCompute(frame2, None)
+
+        out_frame1 = frame1.copy()
+        # img = cv2.drawKeypoints(old_frame, kp, out_img)
+        # out_img_prev = cv2.drawKeypoints(frames_np[i-1],
+        #                                 kp_prev,
+        #                                 out_img_prev,
+        #                                 flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+        out_frame2 = frame2.copy()
+        # img = cv2.drawKeypoints(old_frame, kp, out_img)
+        # out_img_curr = cv2.drawKeypoints(frames_np[i - 1],
+        #                                 kp_curr,
+        #                                 out_img_curr,
+        #                                 flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+        # print(out_img_prev.shape)
+        # print(out_img_curr.shape)
+
+        # Create a Brute Force Matcher object.
+        bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+
+        # Perform the matching between the ORB descriptors of the training image and the test image
+        matches = bf.match(descriptor_prev, descriptor_curr)
+
+        # The matches with shorter distance are the ones we want.
+        matches = sorted(matches, key=lambda x: x.distance)
+
+        for match in matches:
+            kp_curr_list.append(kp_curr[match.trainIdx].pt)
+            kp_prev_list.append(kp_prev[match.queryIdx].pt)
+
+        '''
+        result = cv2.drawMatches(out_img_curr, kp_curr, out_img_prev, kp_prev, matches[:1], out_img_prev, flags=2)
+        # Display the best matching points
+        plt.title('Best Matching Points')
+        plt.imshow(result)
+        plt.draw()
+        plt.pause(0.05)
+        '''
+        return np.array(kp_prev_list).astype(np.float32).reshape(-1, 1, 2), np.array(kp_curr_list).astype(np.float32).reshape(-1, 1, 2)
+
     # Store previous image, I_{i-1} and get current image I_i
     def step(self, curr_frame, curr_feat):
         print(self.i)
@@ -571,12 +662,35 @@ class OpticalFlow(object):
         print("Update step: frame " + self.str_step_info())
 
         prev_feat = curr_feat
+
         if curr_feat.__len__() < self.number_of_features:
             print("Not enough features. adding " +
                   str(self.number_of_features - curr_feat.__len__()) +
                   " new features.")
+
+            # TODO: replace with meaningful feature extractor
             prev_feat = self.create_random_features(self.number_of_features, self.range_of_frame(curr_frame))
-            prev_feat[0:curr_feat.__len__()] = curr_feat
+            '''
+            # params for ShiTomasi corner detection
+            feature_params = dict(maxCorners=100,
+                                  qualityLevel=0.0003,
+                                  minDistance=7,
+                                  blockSize=7
+                                  )
+
+            print(curr_frame.shape)
+            curr_frame_gray = cv2.cvtColor(curr_frame, cv2.COLOR_BGR2GRAY)
+            prev_feat = cv2.goodFeaturesToTrack(curr_frame_gray, mask=None, **feature_params)
+            print(type(prev_feat))
+            '''
+
+            #if(prev_feat == None):
+            #    prev_feat = self.create_random_features(self.number_of_features, self.range_of_frame(curr_frame))
+            print(len(curr_feat))
+            print(len(prev_feat))
+
+
+            prev_feat[0:curr_feat.__len__()] = curr_feat[0:prev_feat.__len__()]
 
         if self.mode > Runmodi.DEBUG_MODE:
             self.out["original"].write(curr_frame)
@@ -619,6 +733,8 @@ class OpticalFlow(object):
         lk_params = dict(winSize=(15, 15),
                          maxLevel=2,
                          criteria=(cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03))
+
+        #print(prev_feat)
 
         curr_feat, st, err = cv2.calcOpticalFlowPyrLK(cv2.cvtColor(prev_frame, cv2.COLOR_BGR2GRAY),
                                                       cv2.cvtColor(curr_frame, cv2.COLOR_BGR2GRAY), prev_feat, None,

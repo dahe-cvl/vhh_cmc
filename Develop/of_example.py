@@ -9,7 +9,7 @@ class SimpleOF(object):
         print("create instance of simple OF")
 
         #self.video_name = "C:\\Users\\dhelm\\Documents\\999.mp4"
-        self.video_name = "C:\\Users\\dhelm\\Documents\\training_data_patrick_link\\training_data\\tilt\\tilt_130_74088.mp4"
+        self.video_name = "C:\\Users\\dhelm\\Documents\\training_data_patrick_link_reworked\\training_data\\tilt\\tilt_130_74088.mp4"
         #self.video_name = "C:\\Users\\dhelm\\Documents\\training_data_patrick_link\\training_data\\pan\\tilt_130_74088.mp4"
 
 
@@ -39,6 +39,8 @@ class SimpleOF(object):
         #feature_detector = cv.ORB_create(nfeatures=500,
         #                                 nlevels=2)
 
+
+
         # Parameters for lucas kanade optical flow
         lk_params = dict( winSize=(15, 15),
                           maxLevel=2,
@@ -67,6 +69,8 @@ class SimpleOF(object):
         frames_np = np.array(frame_list)
         cap.release()
 
+        print(frames_np.shape)
+
         REQUIRED_FEATURES = 100
         n_features = 0
 
@@ -77,8 +81,9 @@ class SimpleOF(object):
         frm_gray = cv.cvtColor(frm, cv.COLOR_BGR2GRAY)
 
         features = feature_detector.detect(frm_gray, None)
-        keypoints = np.array([kp.pt for kp in features]).astype('float32')
-        n_features = len(keypoints)
+
+        #keypoints = np.array([kp.pt for kp in features]).astype('float32')
+        #n_features = len(keypoints)
 
         # match features to next frame
 
@@ -127,10 +132,10 @@ class SimpleOF(object):
             for i, (new, old) in enumerate(zip(curr_points, prev_points)):
                 a,b = new.ravel()
                 c,d = old.ravel()
-                mask = cv.line(mask, (a, b), (c, d), 1)
+                #mask = cv.line(mask, (a, b), (c, d), 1)
                 frame_curr = cv.circle(frame_curr, (a, b), 5, -1)
-            img = cv.add(frame_curr, mask)
-            cv.imshow('frame', img)
+            #img = cv.add(frame_curr, mask)
+            cv.imshow('frame', frame_curr)
 
             # plot angles over time
             plt.plot(np.arange(len(angles_l)), angles_l)

@@ -5,6 +5,8 @@ from cmc.PreProcessing import PreProcessing
 import os
 from cmc.OpticalFlow import OpticalFlow
 from cmc.OpticalFlow_ORB import OpticalFlow_ORB
+from cmc.OpticalFlow_SIFT import OpticalFlow_SIFT
+from cmc.OpticalFlow_SURF import OpticalFlow_SURF
 
 
 class CMC(object):
@@ -102,20 +104,27 @@ class CMC(object):
             stop = int(shots_np[idx][3])
             shot_frames_np = all_frames_np[start:stop + 1, :, :, :]
 
+
             # add new optical flow version
+            '''
             optical_flow_orb_instance = OpticalFlow_ORB(video_frames=shot_frames_np)
-            angles_l = optical_flow_orb_instance.run()
-            angle = optical_flow_orb_instance.predict_final_result(angles_l)
+            mag_l, angles_l = optical_flow_orb_instance.run()
+            class_name = optical_flow_orb_instance.predict_final_result(mag_l,
+                                                                        angles_l,
+                                                                        self.config_instance.class_names)
+            
+            optical_flow_sift_instance = OpticalFlow_SIFT(video_frames=shot_frames_np)
+            mag_l, angles_l = optical_flow_sift_instance.run()
+            class_name = optical_flow_sift_instance.predict_final_result(mag_l,
+                                                                        angles_l,
+                                                                        self.config_instance.class_names)
+            '''
 
-            print("predicted angle: " + str(angle))
-
-            if ( (angle >= 140 and angle < 220) or (angle >= -40 and angle < 40) ):
-                class_name = self.config_instance.class_names[0]
-            elif ( (angle >= 50 and angle < 130) or (angle >= 230 and angle < 310) ):
-                class_name = self.config_instance.class_names[1]
-            else:
-                class_name = self.config_instance.class_names[2]
-            print(class_name)
+            optical_flow_sift_instance = OpticalFlow_SURF(video_frames=shot_frames_np)
+            mag_l, angles_l = optical_flow_sift_instance.run()
+            class_name = optical_flow_sift_instance.predict_final_result(mag_l,
+                                                                         angles_l,
+                                                                         self.config_instance.class_names)
 
             '''
             # run optical flow process
@@ -193,7 +202,7 @@ class CMC(object):
             self.exportCmcResults(vid_name, results_cmc_np)
         else:
             self.exportCmcResults(str(max_recall_id), results_cmc_np)
-
+        ''''''
     def loadSbdResults(self, sbd_results_path):
         """
         Method for loading shot boundary detection results as numpy array

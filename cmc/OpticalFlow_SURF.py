@@ -4,7 +4,7 @@ import argparse
 from matplotlib import pyplot as plt
 
 
-class OpticalFlow_ORB(object):
+class OpticalFlow_SURF(object):
     def __init__(self, video_frames=None):
         #self.video_name = "C:\\Users\\dhelm\\Documents\\slow_traffic_small.mp4"
         #self.video_name = "C:\\Users\\dhelm\\Documents\\training_data_patrick_link\\training_data\\tilt\\b88f0e71-a0f2-4efe-ae0d-5b83a0770b73_32.mp4"  # tilt unten nach oben
@@ -111,12 +111,11 @@ class OpticalFlow_ORB(object):
                 #print(end_x)
                 #print(end_y)
 
-                kp_prev_list, kp_curr_list = self.getORBMatches(prev_frame[start_y:end_y, start_x:end_x],
+                kp_prev_list, kp_curr_list = self.getSURFMatches(prev_frame[start_y:end_y, start_x:end_x],
                                                                 curr_frame[start_y:end_y, start_x:end_x])
                 #kp_prev_list, kp_curr_list = self.getORBMatches(frames_np[i - 1], frames_np[i])
                 print(len(kp_curr_list))
                 print(len(kp_prev_list))
-
 
                 if(len(kp_prev_list) == 0 or len(kp_curr_list) == 0):
                     block_mag_l_n.append([block_idx, 0])
@@ -256,17 +255,24 @@ class OpticalFlow_ORB(object):
 
         return class_name
 
-    def getORBMatches(self, frame1, frame2):
+    def getSURFMatches(self, frame1, frame2):
         kp_curr_list = []
         kp_prev_list = []
 
-        orb = cv2.ORB_create()
+        surf = cv2.xfeatures2d.SURF_create()
+        kp_prev, descriptor_prev = surf.detectAndCompute(frame1, None)
+        kp_curr, descriptor_curr = surf.detectAndCompute(frame2, None)
 
-        kp_prev, descriptor_prev = orb.detectAndCompute(frame1, None)
-        kp_curr, descriptor_curr = orb.detectAndCompute(frame2, None)
+        #print(len(kp_prev))
+        #print(len(kp_curr))
+        #print(len(descriptor_prev))
+        #print(len(descriptor_curr))
+        #print(descriptor_prev)
+        #print(descriptor_curr)
 
         print(type(descriptor_prev))
         print(type(descriptor_curr))
+
 
         out_frame1 = frame1.copy()
         #img = cv2.drawKeypoints(old_frame, kp, out_img)
@@ -284,28 +290,44 @@ class OpticalFlow_ORB(object):
         #print(out_img_curr.shape)
 
         # Create a Brute Force Matcher object.
-        bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+        bf = cv2.BFMatcher()
 
         # Perform the matching between the ORB descriptors of the training image and the test image
         try:
-            matches = bf.match(descriptor_prev, descriptor_curr)
+            matches = bf.knnMatch(descriptor_prev, descriptor_curr, k=2)
+            print(matches)
         except:
             return kp_prev_list, kp_curr_list
 
-        #print(matches)
-        print(type(matches))
-        if (len(matches) == 0):
+        # Apply ratio test
+        good_matches = []
+        if(len(matches) > 0):
+            if(len(matches[0]) == 2 ):
+                for m, n in matches:
+                    if m.distance < 0.75 * n.distance:
+                        good_matches.append([m])
+            elif(len(matches[0]) == 1):
+                for m in matches:
+                    if m[0].distance < 0.75:
+                        good_matches.append([np.squeeze(np.array(m)).tolist()])
+
+        #good_matches = np.squeeze(np.array(good_matches)).tolist()
+        print((good_matches))
+
+        # print(matches)
+        print(type(good_matches))
+        if (len(good_matches) == 0):
             return kp_prev_list, kp_curr_list
 
         print(descriptor_prev.shape)
-        #matches = bf.knnMatch(descriptor_prev, descriptor_curr, k=3)
+        # matches = bf.knnMatch(descriptor_prev, descriptor_curr, k=3)
 
-        # The matches with shorter distance are the ones we want.
-        matches = sorted(matches, key=lambda x: x.distance)
+        ## The matches with shorter distance are the ones we want.
+        # good_matches = sorted(good_matches, key=lambda x: x.distance)
 
-        for match in matches:
-            kp_curr_list.append(kp_curr[match.trainIdx].pt)
-            kp_prev_list.append(kp_prev[match.queryIdx].pt)
+        for match in good_matches:
+            kp_curr_list.append(kp_curr[match[0].trainIdx].pt)
+            kp_prev_list.append(kp_prev[match[0].queryIdx].pt)
 
         '''
         result = cv2.drawMatches(out_img_curr, kp_curr, out_img_prev, kp_prev, matches[:1], out_img_prev, flags=2)

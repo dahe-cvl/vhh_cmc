@@ -148,5 +148,3 @@ BRIEF features + knn matcher
 |    macro avg   | 0.57 | 0.55 | 0.55   |    260 |
 | weighted avg   | 0.91 | 0.79 | 0.83   |    260 |
 
-Experiment 6:
-FAST features + knn matcher

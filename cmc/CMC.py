@@ -4,6 +4,11 @@ from cmc.Configuration import Configuration
 from cmc.PreProcessing import PreProcessing
 import os
 from cmc.OpticalFlow import OpticalFlow
+from cmc.OpticalFlow_ORB import OpticalFlow_ORB
+from cmc.OpticalFlow_SIFT import OpticalFlow_SIFT
+from cmc.OpticalFlow_SURF import OpticalFlow_SURF
+from cmc.OpticalFlow_BRIEF import OpticalFlow_BRIEF
+from cmc.OpticalFlow_FAST import OpticalFlow_FAST
 
 
 class CMC(object):
@@ -101,6 +106,43 @@ class CMC(object):
             stop = int(shots_np[idx][3])
             shot_frames_np = all_frames_np[start:stop + 1, :, :, :]
 
+
+            # add new optical flow version
+            '''
+            optical_flow_orb_instance = OpticalFlow_ORB(video_frames=shot_frames_np)
+            mag_l, angles_l = optical_flow_orb_instance.run()
+            class_name = optical_flow_orb_instance.predict_final_result(mag_l,
+                                                                        angles_l,
+                                                                        self.config_instance.class_names)
+            '''
+
+            optical_flow_sift_instance = OpticalFlow_SIFT(video_frames=shot_frames_np)
+            mag_l, angles_l = optical_flow_sift_instance.run()
+            class_name = optical_flow_sift_instance.predict_final_result(mag_l,
+                                                                        angles_l,
+                                                                        self.config_instance.class_names)
+            
+            '''
+            optical_flow_surf_instance = OpticalFlow_SURF(video_frames=shot_frames_np)
+            mag_l, angles_l = optical_flow_surf_instance.run()
+            class_name = optical_flow_surf_instance.predict_final_result(mag_l,
+                                                                         angles_l,
+                                                                         self.config_instance.class_names)
+            
+            optical_flow_brief_instance = OpticalFlow_BRIEF(video_frames=shot_frames_np)
+            mag_l, angles_l = optical_flow_brief_instance.run()
+            class_name = optical_flow_brief_instance.predict_final_result(mag_l,
+                                                                          angles_l,
+                                                                          self.config_instance.class_names)
+            
+            optical_flow_fast_instance = OpticalFlow_FAST(video_frames=shot_frames_np)
+            mag_l, angles_l = optical_flow_fast_instance.run()
+            class_name = optical_flow_fast_instance.predict_final_result(mag_l,
+                                                                         angles_l,
+                                                                         self.config_instance.class_names)
+            '''
+
+            '''
             # run optical flow process
             optical_flow_instance = OpticalFlow(video_frames=shot_frames_np,
                                                 fPath=self.config_instance.path_videos + "/" + vid_name,
@@ -137,26 +179,29 @@ class CMC(object):
             tilts_score = int((number_of_tilt_frames * 100) / number_of_all_frames)
             print(tilts_score)
 
-            threshold = 80
-            if(self.config_instance.save_eval_results == 1):
-                if (pans_score >= threshold):
-                    class_name = self.config_instance.class_names[0]
-                else:
-                    class_name = self.config_instance.class_names[1]
+            #if(self.config_instance.save_eval_results == 1):
+            #    if (pans_score >= threshold):
+            #        class_name = self.config_instance.class_names[0]
+            #    else:
+            #        class_name = self.config_instance.class_names[1]
+            #else:
+            threshold = 60
+            if (pans_score >= threshold):
+                class_name = self.config_instance.class_names[0]
+            elif(tilts_score >= threshold):
+                class_name = self.config_instance.class_names[1]
+            elif (pans_score >= threshold) and (tilts_score >= threshold):
+                class_name = self.config_instance.class_names[2]
             else:
-                if (pans_score >= threshold):
-                    class_name = self.config_instance.class_names[0]
-                elif(tilts_score >= threshold):
-                    class_name = self.config_instance.class_names[1]
-                elif (pans_score >= threshold) and (tilts_score >= threshold):
-                    class_name = self.config_instance.class_names[2]
-                else:
-                    class_name = self.config_instance.class_names[2]
+                class_name = self.config_instance.class_names[2]
+            '''
 
             # prepare results
             print(str(vid_name) + ";" + str(shot_id) + ";" + str(start) + ";" + str(stop) + ";" + str(class_name))
             results_cmc_l.append([str(vid_name) + ";" + str(shot_id) + ";" + str(start) + ";" + str(stop) + ";" + str(class_name)])
+            #exit()
 
+            '''
             # save raw results
             if(self.config_instance.save_raw_results == 1):
                 optical_flow_instance.to_csv(
@@ -165,7 +210,7 @@ class CMC(object):
                     "/".join([self.config_instance.path_raw_results, self.config_instance.path_prefix_raw_results + str(vid_name) + ".png"]))
                 optical_flow_instance.to_avi(
                     "/".join([self.config_instance.path_raw_results, self.config_instance.path_prefix_raw_results + str(vid_name) + ".avi"]))
-
+            '''
         results_cmc_np = np.array(results_cmc_l)
 
         # export results

@@ -34,6 +34,7 @@ class PreProcessing(object):
         # crop image
         if (int(self.config_instance.center_crop_flag) == 1):
             image_trans = self.crop(image_trans, (image_trans.shape[0], image_trans.shape[0]))
+            #image_trans = self.crop(image_trans, (700, 512))
 
         # resize image
         if(self.config_instance.flag_downscale == 1):

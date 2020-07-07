@@ -37,7 +37,7 @@ HTML format (only usable if repository is available in local storage): [vhh_cmc_
 **Setup environment variables:**
 
    * source /data/dhelm/python_virtenv/vhh_sbd_env/bin/activate
-   * export CUDA_VISIBLE_DEVICES=1
+   * export CUDA_VISIBLE_DEVICES=0
    * export PYTHONPATH=$PYTHONPATH:/XXX/vhh_cmc/:/XXX/vhh_cmc/Develop/:/XXX/vhh_cmc/Demo/
 
 
@@ -49,3 +49,104 @@ HTML format (only usable if repository is available in local storage): [vhh_cmc_
 
    * change to root directory of the repository
    * python Demo/vhh_cmc_run_on_single_video.py
+
+
+**Evaluation & Results**
+
+Experiment 1:
+Most Common Angle + Random Features + LK Optical Flow (pescoller)
+
+|      | precision  | recall  | f1-score  | support  |
+|------|------------|---------|-----------|----------|
+| na   |    0.00    |   0.00  |    0.00   |     0    |
+| pan  |    0.91    |   0.51  |    0.65   |   182    |
+| tilt |    0.50    |   0.79  |    0.61   |    78    |
+
+
+|     accuracy   |      |      | 0.60   |    260 |
+|----------------|------|------|--------|--------|
+|    macro avg   | 0.47 | 0.44 | 0.42   |    260 |
+| weighted avg   | 0.79 | 0.60 | 0.64   |    260 |
+
+
+Experiment 2:
+Most Common Angle + GoodFeatures(Shi Tomasi Corner) + LK Optical Flow (pescoller)
+
+|      | precision  | recall  | f1-score  | support  |
+|------|------------|---------|-----------|----------|
+| na   |    0.00    |   0.00  |    0.00   |     0    |
+| pan  |    0.93    |   0.64  |    0.76   |   182    |
+| tilt |    0.69    |   0.77  |    0.73   |    78    |
+
+
+|     accuracy   |      |      | 0.68   |    260 |
+|----------------|------|------|--------|--------|
+|    macro avg   | 0.54 | 0.47 | 0.50   |    260 |
+| weighted avg   | 0.86 | 0.68 | 0.75   |    260 |
+
+
+
+Experiment 3: 
+ORB Features + BFmatcher 
+
+|      | precision  | recall  | f1-score  | support  |
+|------|------------|---------|-----------|----------|
+| na   |    0.00    |   0.00  |    0.00   |     0    |
+| pan  |    1.00    |   0.75  |    0.86   |   182    |
+| tilt |    0.73    |   0.99  |    0.84   |    78    |
+
+
+|     accuracy   |      |      | 0.82   |    260 |
+|----------------|------|------|--------|--------|
+|    macro avg   | 0.58 | 0.58 | 0.56   |    260 |
+| weighted avg   | 0.92 | 0.82 | 0.85   |    260 |
+
+
+Experiment 4:
+SIFT Features + knnMatcher
+
+|      | precision  | recall  | f1-score  | support  |
+|------|------------|---------|-----------|----------|
+| na   |    0.00    |   0.00  |    0.00   |     0    |
+| pan  |    1.00    |   0.75  |    0.86   |   182    |
+| tilt |    0.79    |   1.00  |    0.88   |    78    |
+
+
+|     accuracy   |      |      | 0.82   |    260 |
+|----------------|------|------|--------|--------|
+|    macro avg   | 0.60 | 0.59 | 0.58   |    260 |
+| weighted avg   | 0.94 | 0.83 | 0.87   |    260 |
+
+
+Experiment 5:
+SURF features + knn matcher
+
+|      | precision  | recall  | f1-score  | support  |
+|------|------------|---------|-----------|----------|
+| na   |    0.00    |   0.00  |    0.00   |     0    |
+| pan  |    1.00    |   0.74  |    0.85   |   182    |
+| tilt |    0.80    |   1.00  |    0.89   |    78    |
+
+
+|     accuracy   |      |      | 0.82   |    260 |
+|----------------|------|------|--------|--------|
+|    macro avg   | 0.60 | 0.58 | 0.58   |    260 |
+| weighted avg   | 0.94 | 0.82 | 0.86   |    260 |
+
+Experiment 5:
+BRIEF features + knn matcher
+
+|      | precision  | recall  | f1-score  | support  |
+|------|------------|---------|-----------|----------|
+| na   |    0.00    |   0.00  |    0.00   |     0    |
+| pan  |    0.97    |   0.73  |    0.83   |   182    |
+| tilt |    0.75    |   0.94  |    0.83   |    78    |
+
+
+|     accuracy   |      |      | 0.82   |    260 |
+|----------------|------|------|--------|--------|
+|    macro avg   | 0.57 | 0.55 | 0.55   |    260 |
+| weighted avg   | 0.91 | 0.79 | 0.83   |    260 |
+
+Experiment 6:
+FAST features + knn matcher

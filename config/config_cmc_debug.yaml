@@ -2,10 +2,10 @@
 Development:
   ###
   # This parameter is used to activate or deactivate the debug mode.
-  DEBUG_FLAG: 0             # 1 ... activate 0 ... deactivate
+  DEBUG_FLAG: 1             # 1 ... activate 0 ... deactivate
   ###
   # This parameter is used to specify a SBD results file for debugging mode.
-  SBD_RESULTS_PATH: "/data/share/maxrecall_vhh_mmsi/videos/results/sbd/final_results/8.csv"
+  SBD_RESULTS_PATH: "/data/share/maxrecall_vhh_mmsi/videos/results/sbd/final_results/999.csv"
   ###
   # This parameter is used to save a debug package (e.g. including some visualizations, ... - not available yet).
   SAVE_DEBUG_PKG: 0
@@ -30,28 +30,28 @@ OpticalFlow:
   SENSITIVITY: 10
   ###
   # This parameter is used to specify the number of outliers (miss detections).
-  SPECIFICITY: 20
+  SPECIFICITY: 3
   ###
   # This parameter is used to specify the frame border inside which random features are created
   BORDER: 10
   ###
   # This parameter is used to specify the number of features number of features to be tracked for optical flow
-  NUMBER_OF_FEATURES: 500
+  NUMBER_OF_FEATURES: 100
   ###
   # This parameter is used to specify the difference limit to most common angle such that still considered as background movement
-  ANGLE_DIFF_LIMIT: 30
+  ANGLE_DIFF_LIMIT: 10
 
   ### This parameter is used to select a special mode for optical flow debugging.
   # NORMAL_MODE = 0
   # DEBUG_MODE = 1
   # SAVE_MODE = 2
   # DEBUG_AND_SAVE_MODE = 3
-  MODE: 0
+  MODE: 2
 
 CmcCore:
   ###
   # This parameter is used to specify the class names.
-  CLASS_NAMES: ["pan","tilt", "na"]
+  CLASS_NAMES: ["PAN","TILT","NA"]
 
   ###
   # This parameter is used to save raw results (e.g. debug visualizations).
@@ -69,7 +69,7 @@ CmcCore:
 
   ###
   # This parameter is used to save final results (e.g. csv list).
-  SAVE_FINAL_RESULTS: 1     # 1 ... yes 0 ... no
+  SAVE_FINAL_RESULTS: 0     # 1 ... yes 0 ... no
   ###
   # This parameter is used to specify the path for saving the final results.
   PATH_FINAL_RESULTS: "/data/share/maxrecall_vhh_mmsi/videos/results/cmc/final_results/"
@@ -87,13 +87,13 @@ CmcCore:
 Evaluation:
   ###
   # This parameter is used to save evaluation results (e.g. visualizations, ... ).
-  SAVE_EVAL_RESULTS: 1
+  SAVE_EVAL_RESULTS: 0
   ###
   # This parameter is used the raw results path.
   PATH_RAW_RESULTS: "/data/share/maxrecall_vhh_mmsi/videos/results/cmc/raw_results/"
   ###
   # This parameter is used to specify the path to store the evaluation results path.
-  PATH_EVAL_RESULTS: "/data/share/maxrecall_vhh_mmsi/videos/results/cmc/develop/optical_flow_eval/"
+  PATH_EVAL_RESULTS: "/data/share/maxrecall_vhh_mmsi/videos/results/cmc/develop/"
   ###
   # This parameter is used to groundtruth annotations used for evaluation.
   PATH_GT_ANNOTATIONS: "/caa/Projects02/vhh/private/database_nobackup/VHH_datasets/annotations/ShotBoundaryDetection/imediacities/sbd_imc_annotations_20191231.csv"

@@ -7,6 +7,8 @@ from cmc.OpticalFlow import OpticalFlow
 from cmc.OpticalFlow_ORB import OpticalFlow_ORB
 from cmc.OpticalFlow_SIFT import OpticalFlow_SIFT
 from cmc.OpticalFlow_SURF import OpticalFlow_SURF
+from cmc.OpticalFlow_BRIEF import OpticalFlow_BRIEF
+from cmc.OpticalFlow_FAST import OpticalFlow_FAST
 
 
 class CMC(object):
@@ -118,13 +120,26 @@ class CMC(object):
             class_name = optical_flow_sift_instance.predict_final_result(mag_l,
                                                                         angles_l,
                                                                         self.config_instance.class_names)
-            '''
+            
 
-            optical_flow_sift_instance = OpticalFlow_SURF(video_frames=shot_frames_np)
-            mag_l, angles_l = optical_flow_sift_instance.run()
-            class_name = optical_flow_sift_instance.predict_final_result(mag_l,
+            optical_flow_surf_instance = OpticalFlow_SURF(video_frames=shot_frames_np)
+            mag_l, angles_l = optical_flow_surf_instance.run()
+            class_name = optical_flow_surf_instance.predict_final_result(mag_l,
                                                                          angles_l,
                                                                          self.config_instance.class_names)
+            
+            optical_flow_brief_instance = OpticalFlow_BRIEF(video_frames=shot_frames_np)
+            mag_l, angles_l = optical_flow_brief_instance.run()
+            class_name = optical_flow_brief_instance.predict_final_result(mag_l,
+                                                                          angles_l,
+                                                                          self.config_instance.class_names)
+            '''
+            optical_flow_fast_instance = OpticalFlow_FAST(video_frames=shot_frames_np)
+            mag_l, angles_l = optical_flow_fast_instance.run()
+            class_name = optical_flow_fast_instance.predict_final_result(mag_l,
+                                                                         angles_l,
+                                                                         self.config_instance.class_names)
+
 
             '''
             # run optical flow process

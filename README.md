@@ -133,3 +133,20 @@ SURF features + knn matcher
 |    macro avg   | 0.60 | 0.58 | 0.58   |    260 |
 | weighted avg   | 0.94 | 0.82 | 0.86   |    260 |
 
+Experiment 5:
+BRIEF features + knn matcher
+
+|      | precision  | recall  | f1-score  | support  |
+|------|------------|---------|-----------|----------|
+| na   |    0.00    |   0.00  |    0.00   |     0    |
+| pan  |    0.97    |   0.73  |    0.83   |   182    |
+| tilt |    0.75    |   0.94  |    0.83   |    78    |
+
+
+|     accuracy   |      |      | 0.82   |    260 |
+|----------------|------|------|--------|--------|
+|    macro avg   | 0.57 | 0.55 | 0.55   |    260 |
+| weighted avg   | 0.91 | 0.79 | 0.83   |    260 |
+
+Experiment 6:
+FAST features + knn matcher

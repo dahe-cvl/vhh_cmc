@@ -1,8 +1,5 @@
 PyYAML
 pandas
-opencv-python
-opencv-contrib-python
-opencv-contrib-python-nonfree
 NumPy
 matplotlib
 scipy

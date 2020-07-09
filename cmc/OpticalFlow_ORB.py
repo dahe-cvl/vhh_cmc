@@ -41,10 +41,9 @@ class OpticalFlow_ORB(object):
 
         frames_np = self.video_frames
 
-
         # split frame in nxm tiles
-        grid_x = 1
-        grid_y = 1
+        grid_x = 4
+        grid_y = 4
         h = frames_np[0].shape[0]
         w = frames_np[0].shape[1]
 
@@ -64,27 +63,22 @@ class OpticalFlow_ORB(object):
         block_center_coordinates_l = []
         for b_x in range(0, grid_x):
             for b_y in range(0, grid_y):
-                print("----")
-                print(str(b_x) + str(b_y))
-                print(str(b_x * block_size_x) + "|" + str(b_x * block_size_x + block_size_x))
-                print(str(b_y * block_size_y) + "|" + str(b_y * block_size_y + block_size_y))
+                #print("----")
+                #print(str(b_x) + str(b_y))
+                #print(str(b_x * block_size_x) + "|" + str(b_x * block_size_x + block_size_x))
+                #print(str(b_y * block_size_y) + "|" + str(b_y * block_size_y + block_size_y))
 
                 block_coordinates_l.append([b_x * block_size_x, b_y * block_size_y])
 
-                print(str(b_x * block_size_x / 2) + "|" + str((b_x * block_size_x + block_size_x) / 2))
-                print(str(b_y * block_size_y / 2) + "|" + str((b_y * block_size_y + block_size_y) / 2))
+                #print(str(b_x * block_size_x / 2) + "|" + str((b_x * block_size_x + block_size_x) / 2))
+                #print(str(b_y * block_size_y / 2) + "|" + str((b_y * block_size_y + block_size_y) / 2))
                 block_center_coordinates_l.append([b_x * block_size_x + block_size_x / 2,
                                                   b_y * block_size_y + block_size_x / 2])
 
         block_coordinates_np = np.array(block_coordinates_l).astype('int')
         block_center_coordinates_np = np.array(block_center_coordinates_l).astype('int')
-        print(block_coordinates_np)
-        print(block_center_coordinates_np)
-
-
-
-
-
+        #print(block_coordinates_np)
+        #print(block_center_coordinates_np)
 
         REQUIRED_FEATURES = 500
         angle_raw = []
@@ -92,12 +86,47 @@ class OpticalFlow_ORB(object):
 
         angles_l_n = []
         mag_l_n = []
+        all_kp_prev_l = []
+        all_kp_curr_l = []
+
         for i in range(1, len(frames_np)):
-            print("##########")
+            # print("##########")
 
             prev_frame = frames_np[i - 1]
             curr_frame = frames_np[i]
 
+            kp_prev_list, kp_curr_list = self.getORBMatches(prev_frame,
+                                                            curr_frame)
+            # kp_prev_list, kp_curr_list = self.getORBMatches(frames_np[i - 1], frames_np[i])
+            print("---")
+            print("number of features")
+            print(len(kp_curr_list))
+            print(len(kp_prev_list))
+
+            if (len(kp_prev_list) == 0 or len(kp_curr_list) == 0):
+                mag_l_n.append([0, 0])
+                angles_l_n.append([0, 0])
+                continue
+
+            # kp_prev_list, kp_curr_list = self.getORBMatches(frames_np[i-1], frames_np[i])
+            # kp_prev_list, kp_curr_list = [[100,100]], [[50,50]]
+
+            curr_points = np.array(kp_curr_list).astype('float').reshape(-1, 1, 2)
+            prev_points = np.array(kp_prev_list).astype('float').reshape(-1, 1, 2)
+            mag_n, angle_n = self.compute_magnitude_angle(prev_points,
+                                                          curr_points)
+            #angle_raw.append(angle_n.tolist())
+            #mag_raw.append(mag_n.tolist())
+
+            mag_n = np.abs(mag_n)  # [:50])
+            mag_mean_n = np.mean(mag_n)
+            mag_l_n.append([0, mag_mean_n])
+
+            angle_n = np.abs(angle_n)  # [:50])
+            angle_mean_n = np.mean(angle_n)
+            angles_l_n.append([0, angle_mean_n])
+
+            '''
             block_angles_l_n = []
             block_mag_l_n = []
             for block_idx in range(0, len(block_coordinates_np)):
@@ -117,7 +146,6 @@ class OpticalFlow_ORB(object):
                 print(len(kp_curr_list))
                 print(len(kp_prev_list))
 
-
                 if(len(kp_prev_list) == 0 or len(kp_curr_list) == 0):
                     block_mag_l_n.append([block_idx, 0])
                     block_angles_l_n.append([block_idx, 0])
@@ -130,8 +158,9 @@ class OpticalFlow_ORB(object):
                 prev_points = np.array(kp_prev_list).astype('float').reshape(-1, 1, 2)
                 mag_n, angle_n = self.compute_magnitude_angle(prev_points,
                                                               curr_points)
-                #print(mag_n.shape)
-                #print(angle_n.shape)
+
+                all_kp_curr_l.extend(curr_points)
+                all_kp_prev_l.extend(prev_points)
 
                 mag_n = np.abs(mag_n)  # [:50])
                 mag_mean_n = np.mean(mag_n)
@@ -140,7 +169,7 @@ class OpticalFlow_ORB(object):
                 angle_n = np.abs(angle_n) #[:50])
                 angle_mean_n = np.mean(angle_n)
                 block_angles_l_n.append([block_idx, angle_mean_n])
-
+            
             #print(np.array(block_mag_l_n))
             #print(np.array(block_angles_l_n))
             #print(len(block_mag_l_n))
@@ -148,8 +177,31 @@ class OpticalFlow_ORB(object):
             #print(np.mean(np.array(block_mag_l_n)[:, 1:]))
             #print(np.mean(np.array(block_angles_l_n)[:, 1:]))
 
-            mag_l_n.append(np.mean(np.array(block_mag_l_n)[:, 1:]))
-            angles_l_n.append(np.mean(np.array(block_angles_l_n)[:, 1:]))
+            mag_l_n.append(np.array(block_mag_l_n)[:, 1:])
+            angles_l_n.append(np.array(block_angles_l_n)[:, 1:])
+            '''
+            #print(mag_n)
+            #print(np.array(angle_raw).shape)
+            #print(mag_raw)
+
+            #print(type(mag_n))
+
+            # calculate x - y components
+            vector_y = np.multiply(mag_n, np.sin(np.deg2rad(angle_n)))
+            vector_x = np.multiply(mag_n, np.cos(np.deg2rad(angle_n)))
+
+            #print(np.squeeze(np.array(angle_n))[:5])
+            #print(np.squeeze(np.array(mag_n))[:5])
+            #print(vector_y)
+            #print(vector_x[:5])
+            #print(vector_y.shape)
+            #print(vector_x.shape)
+
+            #print(np.array(mag_raw).shape)
+            #exit()
+
+            #mag_l_n.append(np.mean(np.array(block_mag_l_n)[:, 1:]))
+            #angles_l_n.append(np.mean(np.array(block_angles_l_n)[:, 1:]))
 
             #print(kp_prev_list[:50])
             #print(kp_curr_list[:50])
@@ -172,20 +224,45 @@ class OpticalFlow_ORB(object):
             img = cv2.add(frame_curr, mask)
             cv2.imshow('frame', img)
             '''
-
             '''
             # draw orig with n feature points
-            n_feature_points = 15
+            n_feature_points = len(curr_points)
+            for j, (new, old) in enumerate(zip(curr_points, prev_points)):
+                if (j > n_feature_points):
+                    break
+                a, b = new.astype('int').ravel()
+                c, d = old.astype('int').ravel()
+                frame_curr = cv2.circle(frames_np[i], (a, b), 2, (255, 0, 0), -1)
+                frame_curr = cv2.line(frame_curr, (a, b), (a + 5, b + 5), (255, 0, 0), 1)
+            # img = cv2.add(frame_curr, mask)
+            cv2.imshow('frame', frame_curr)
+
+            k = cv2.waitKey(30) & 0xff
+            if k == 27:
+                break
+            '''
+
+            # draw orig with n feature points
+            n_feature_points = len(curr_points)
             for j, (new, old) in enumerate(zip(curr_points, prev_points)):
                 if(j > n_feature_points):
                     break
                 a, b = new.astype('int').ravel()
                 c, d = old.astype('int').ravel()
-                frame_curr = cv2.circle(frames_np[i], (a, b), 5, (255, 0, 0), -1)
+                frame_curr = cv2.circle(frames_np[i], (a, b), 3, (255, 0, 0), -1)
+                frame_curr = cv2.line(frame_curr, (a, b), (a + int(vector_x[j]) * 1, b),
+                                      (0, 0, 255), 2)
+                frame_curr = cv2.line(frame_curr, (a, b), (a, b + int(vector_y[j]) * 1),
+                                      (0, 255, 0), 2)
             #img = cv2.add(frame_curr, mask)
             cv2.imshow('frame', frame_curr)
-            '''
+            
+            k = cv2.waitKey(30) & 0xff
+            if k == 27:
+                break
+                
 
+            #exit()
             '''
             # draw original
             #img = cv2.add(frames_np[i], mask)
@@ -202,12 +279,9 @@ class OpticalFlow_ORB(object):
             # plt.show()
             plt.draw()
             plt.pause(0.002)
-            ''''''
-            k = cv2.waitKey(30) & 0xff
-            if k == 27:
-                break
             '''
-
+            
+            ''''''
 
             '''
             result1 = frames_np[i-1].copy()
@@ -234,6 +308,7 @@ class OpticalFlow_ORB(object):
             plt.draw()
             plt.pause(0.005)
             '''
+
         return mag_l_n, angles_l_n
 
     def predict_final_result(self, mag_l_n, angles_l_n, class_names):
@@ -242,31 +317,92 @@ class OpticalFlow_ORB(object):
         mag_np = np.array(mag_l_n)
 
 
+
+        #print(angles_np)
+        #print(mag_np)
+
+        #print(angles_np.shape)
+        #print(mag_np.shape)
+
+        blockwise_mean_angles_np = np.squeeze(np.mean(angles_np, axis=0))
+        blockwise_mean_mag_np = np.squeeze(np.mean(mag_np, axis=0))
+
+        print("####")
+        print(blockwise_mean_mag_np)
+        print(np.min(blockwise_mean_mag_np))
+        print(np.max(blockwise_mean_mag_np))
+
+        th = np.mean(blockwise_mean_mag_np) * 1.2
+
+        print("blockwise calculation: ")
+        print(blockwise_mean_angles_np)
+        print(blockwise_mean_angles_np.shape)
+        #print(blockwise_mean_mag_np)
+        #print(blockwise_mean_mag_np.shape)
+
+        blockwise_class_l = []
+        for i in range(0, len(blockwise_mean_angles_np)):
+            block_angle = blockwise_mean_angles_np[i]
+            block_mag = blockwise_mean_mag_np[i]
+
+            print("----")
+            print(block_angle)
+            print(block_mag)
+            print(th)
+
+            # check angle conditions
+            # check mag conditions
+            if (((block_angle >= 135 and block_angle < 225) or (block_angle >= -45 and block_angle < 45)) and (block_mag > 2)):
+                class_name = class_names[0]
+            elif (((block_angle >= 45 and block_angle < 135) or (block_angle >= 225 and block_angle < 315)) and (block_mag > 2)):
+                class_name = class_names[1]
+            else:
+                class_name = class_names[2]
+            print(class_name)
+
+            # add class name
+            blockwise_class_l.append(class_name)
+
+        blockwise_class_np = np.array(blockwise_class_l)
+        print(np.unique(blockwise_class_np, return_counts=True))
+
+        class_dist_names, class_dist_cnt = np.unique(blockwise_class_np, return_counts=True)
+        class_idx = np.argmax(class_dist_cnt)
+        print(class_dist_names[class_idx])
+
+
+        class_name = class_dist_names[class_idx]
+        #exit()
+        '''
         print(np.mean(angles_np))
         angle = np.mean(angles_np)
         print("predicted angle: " + str(angle))
 
-        if ((angle >= 140 and angle < 220) or (angle >= -40 and angle < 40)):
+        print(np.mean(mag_np))
+        mag = np.mean(mag_np)
+        print("predicted mag: " + str(mag))
+
+        if ((angle >= 140 and angle < 220) or (angle >= -40 and angle < 40) and (mag > 20)):
             class_name = class_names[0]
-        elif ((angle >= 50 and angle < 130) or (angle >= 230 and angle < 310)):
+        elif ((angle >= 50 and angle < 130) or (angle >= 230 and angle < 310) and (mag > 20)):
             class_name = class_names[1]
         else:
             class_name = class_names[2]
         print(class_name)
-
+        '''
         return class_name
 
     def getORBMatches(self, frame1, frame2):
         kp_curr_list = []
         kp_prev_list = []
 
-        orb = cv2.ORB_create()
+        orb = cv2.ORB_create(nfeatures=1000)
 
         kp_prev, descriptor_prev = orb.detectAndCompute(frame1, None)
         kp_curr, descriptor_curr = orb.detectAndCompute(frame2, None)
 
-        print(type(descriptor_prev))
-        print(type(descriptor_curr))
+        #print(type(descriptor_prev))
+        #print(type(descriptor_curr))
 
         out_frame1 = frame1.copy()
         #img = cv2.drawKeypoints(old_frame, kp, out_img)
@@ -293,11 +429,11 @@ class OpticalFlow_ORB(object):
             return kp_prev_list, kp_curr_list
 
         #print(matches)
-        print(type(matches))
+        #print(type(matches))
         if (len(matches) == 0):
             return kp_prev_list, kp_curr_list
 
-        print(descriptor_prev.shape)
+        #print(descriptor_prev.shape)
         #matches = bf.knnMatch(descriptor_prev, descriptor_curr, k=3)
 
         # The matches with shorter distance are the ones we want.
@@ -362,7 +498,7 @@ class OpticalFlow_ORB(object):
             print("length is not correct")
             assert (prev_feat.__len__() == curr_feat.__len__())
         d = curr_feat - prev_feat
-        print(d.shape)
+        #print(d.shape)
         mag = np.hypot(d[:, 0, 0], d[:, 0, 1])
         ang = np.round(np.degrees(np.arctan2(d[:, 0, 1], d[:, 0, 0])))
 

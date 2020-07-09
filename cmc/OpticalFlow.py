@@ -261,7 +261,7 @@ class OpticalFlow(object):
 
         #prev_feat, curr_feat = self.getORBMatches(prev_frame_gray, curr_frame_gray)
 
-        print(len(curr_feat))
+        #print(len(curr_feat))
         #exit()
         raw_angles_l = []
         raw_mag_l = []
@@ -656,6 +656,10 @@ class OpticalFlow(object):
     def step(self, curr_frame, curr_feat):
         print(self.i)
 
+        print(curr_feat)
+        if curr_feat == None:
+            curr_feat = []
+
         prev_frame = curr_frame
         curr_frame = self.video_frames[self.i]
 
@@ -669,8 +673,9 @@ class OpticalFlow(object):
                   " new features.")
 
             # TODO: replace with meaningful feature extractor
-            #prev_feat = self.create_random_features(self.number_of_features, self.range_of_frame(curr_frame))
+            prev_feat = self.create_random_features(self.number_of_features, self.range_of_frame(curr_frame))
 
+            '''
             #prev_feat, curr_feat = self.getORBMatches(curr_frame_gray, curr_frame_gray)
 
             # params for ShiTomasi corner detection
@@ -684,6 +689,7 @@ class OpticalFlow(object):
             curr_frame_gray = cv2.cvtColor(curr_frame, cv2.COLOR_BGR2GRAY)
             prev_feat = cv2.goodFeaturesToTrack(curr_frame_gray, mask=None, **feature_params)
             print(type(prev_feat))
+            '''
             ''''''
 
             #if(prev_feat == None):

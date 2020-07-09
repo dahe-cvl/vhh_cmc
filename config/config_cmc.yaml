@@ -5,7 +5,7 @@ Development:
   DEBUG_FLAG: 1             # 1 ... activate 0 ... deactivate
   ###
   # This parameter is used to specify a SBD results file for debugging mode.
-  SBD_RESULTS_PATH: "/data/share/maxrecall_vhh_mmsi/videos/results/sbd/final_results/8.csv"
+  SBD_RESULTS_PATH: "/data/share/maxrecall_vhh_mmsi/release/videos/results/sbd/final_results/1.csv"
   ###
   # This parameter is used to save a debug package (e.g. including some visualizations, ... - not available yet).
   SAVE_DEBUG_PKG: 0
@@ -46,7 +46,7 @@ OpticalFlow:
   # DEBUG_MODE = 1
   # SAVE_MODE = 2
   # DEBUG_AND_SAVE_MODE = 3
-  MODE: 2
+  MODE: 0
 
 CmcCore:
   ###
@@ -82,7 +82,7 @@ CmcCore:
 
   ###
   # This parameter is used to specify the path to the videos.
-  PATH_VIDEOS: "/data/share/maxrecall_vhh_mmsi/videos/downloaded/"
+  PATH_VIDEOS: "/data/share/maxrecall_vhh_mmsi/release/videos/downloaded/"
 
 Evaluation:
   ###

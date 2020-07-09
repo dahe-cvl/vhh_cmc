@@ -10,6 +10,8 @@ from cmc.OpticalFlow_SURF import OpticalFlow_SURF
 from cmc.OpticalFlow_BRIEF import OpticalFlow_BRIEF
 from cmc.OpticalFlow_FAST import OpticalFlow_FAST
 
+#import matplotlib
+#matplotlib.use('Qt5Agg')
 
 class CMC(object):
     """
@@ -67,7 +69,7 @@ class CMC(object):
             exit()
 
         if (self.config_instance.debug_flag == True):
-            num_shots = 10
+            num_shots = len(shots_np)
         else:
             num_shots = len(shots_np)
 
@@ -78,7 +80,13 @@ class CMC(object):
             print("Evaluation mode is activated ...")
             cap = cv2.VideoCapture(vid_name)
         else:
+            print(self.config_instance.path_videos + "/" + vid_name)
             cap = cv2.VideoCapture(self.config_instance.path_videos + "/" + vid_name)
+
+            #cap = cv2.VideoCapture("/data/share/cmc_eval_dataset/training_data/pan/27_22047.mp4")
+
+
+
         frame_l = []
         cnt = 0
 
@@ -91,11 +99,17 @@ class CMC(object):
             if (ret == True):
                 frame = self.pre_processing_instance.applyTransformOnImg(frame)
                 frame_l.append(frame)
+                #cv2.imshow("asd", frame)
+                #cv2.waitKey(1)
+                #if(cnt == 100):
+                #    exit()
             else:
                 break
 
         all_frames_np = np.array(frame_l)
         print(all_frames_np.shape)
+
+        #all_frames_np = all_frames_np[6493:6608,:,:,:]
 
         results_cmc_l = []
         for idx in range(0, num_shots):
@@ -105,23 +119,27 @@ class CMC(object):
             start = int(shots_np[idx][2])
             stop = int(shots_np[idx][3])
             shot_frames_np = all_frames_np[start:stop + 1, :, :, :]
+            shot_len = stop - start
 
+            if(shot_len <= 10 ):
+                #print("shot length is too small!")
+                class_name = "NA"
+            else:
+                # add new optical flow version
+                '''
+                optical_flow_orb_instance = OpticalFlow_ORB(video_frames=shot_frames_np)
+                mag_l, angles_l = optical_flow_orb_instance.run()
+                class_name = optical_flow_orb_instance.predict_final_result(mag_l,
+                                                                            angles_l,
+                                                                            self.config_instance.class_names)
 
-            # add new optical flow version
-            '''
-            optical_flow_orb_instance = OpticalFlow_ORB(video_frames=shot_frames_np)
-            mag_l, angles_l = optical_flow_orb_instance.run()
-            class_name = optical_flow_orb_instance.predict_final_result(mag_l,
-                                                                        angles_l,
-                                                                        self.config_instance.class_names)
-            '''
+                '''
+                optical_flow_sift_instance = OpticalFlow_SIFT(video_frames=shot_frames_np)
+                mag_l, angles_l = optical_flow_sift_instance.run()
+                class_name = optical_flow_sift_instance.predict_final_result(mag_l,
+                                                                             angles_l,
+                                                                             self.config_instance.class_names)
 
-            optical_flow_sift_instance = OpticalFlow_SIFT(video_frames=shot_frames_np)
-            mag_l, angles_l = optical_flow_sift_instance.run()
-            class_name = optical_flow_sift_instance.predict_final_result(mag_l,
-                                                                        angles_l,
-                                                                        self.config_instance.class_names)
-            
             '''
             optical_flow_surf_instance = OpticalFlow_SURF(video_frames=shot_frames_np)
             mag_l, angles_l = optical_flow_surf_instance.run()
@@ -160,6 +178,10 @@ class CMC(object):
 
             print(pan_list)
             print(tilt_list)
+
+            
+
+            
 
             number_of_all_frames = abs(start - stop)
             if number_of_all_frames == 0:
@@ -212,6 +234,8 @@ class CMC(object):
                     "/".join([self.config_instance.path_raw_results, self.config_instance.path_prefix_raw_results + str(vid_name) + ".avi"]))
             '''
         results_cmc_np = np.array(results_cmc_l)
+        print(results_cmc_np)
+        #exit()
 
         # export results
         if (self.config_instance.save_eval_results == 1):

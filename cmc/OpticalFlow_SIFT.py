@@ -265,7 +265,7 @@ class OpticalFlow_SIFT(object):
         '''
         ''''''
 
-        th = 1.0  # manual set threshold for magnitude
+        th = 5.0  # manual set threshold for magnitude
         percentage = 0.5  # ratio threshold between no-movement and movement
         class_names_n = ['PAN', 'TILT', 'TILT', 'PAN', 'PAN', 'TILT', 'TILT', 'PAN']
 

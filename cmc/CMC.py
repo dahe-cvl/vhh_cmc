@@ -69,7 +69,7 @@ class CMC(object):
             exit()
 
         if (self.config_instance.debug_flag == True):
-            num_shots = len(shots_np)
+            num_shots = 1
         else:
             num_shots = len(shots_np)
 
@@ -82,10 +82,6 @@ class CMC(object):
         else:
             print(self.config_instance.path_videos + "/" + vid_name)
             cap = cv2.VideoCapture(self.config_instance.path_videos + "/" + vid_name)
-
-            #cap = cv2.VideoCapture("/data/share/cmc_eval_dataset/training_data/pan/27_22047.mp4")
-
-
 
         frame_l = []
         cnt = 0
@@ -109,10 +105,10 @@ class CMC(object):
         all_frames_np = np.array(frame_l)
         print(all_frames_np.shape)
 
-        #all_frames_np = all_frames_np[6493:6608,:,:,:]
-
+        #all_frames_np = all_frames_np[1240:1478,:,:,:]
+        shot_start_idx = 0   # used in debugging mode - to select specific shot
         results_cmc_l = []
-        for idx in range(0, num_shots):
+        for idx in range(shot_start_idx, shot_start_idx + num_shots):
             print(shots_np[idx])
             shot_id = int(shots_np[idx][0])
             vid_name = str(shots_np[idx][1])
@@ -121,7 +117,8 @@ class CMC(object):
             shot_frames_np = all_frames_np[start:stop + 1, :, :, :]
             shot_len = stop - start
 
-            if(shot_len <= 10 ):
+            MIN_NUMBER_OF_FRAMES_PER_SHOT = 10
+            if(shot_len <= MIN_NUMBER_OF_FRAMES_PER_SHOT ):
                 #print("shot length is too small!")
                 class_name = "NA"
             else:
@@ -178,10 +175,6 @@ class CMC(object):
 
             print(pan_list)
             print(tilt_list)
-
-            
-
-            
 
             number_of_all_frames = abs(start - stop)
             if number_of_all_frames == 0:

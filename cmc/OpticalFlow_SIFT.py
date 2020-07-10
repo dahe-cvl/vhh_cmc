@@ -76,7 +76,6 @@ class OpticalFlow_SIFT(object):
             mag_mean_n = np.mean(mag_n)
             mag_l_n.append([0, mag_mean_n])
 
-
             angle_n = np.abs(angle_n)  # [:50])
             angle_mean_n = np.mean(angle_n)
             angles_l_n.append([0, angle_mean_n])
@@ -87,8 +86,8 @@ class OpticalFlow_SIFT(object):
             filtered_curr_points = curr_points
             filtered_prev_points = prev_points
 
-            filtered_mag_l_n.append([0, filtered_mag_n])
-            filtered_angles_l_n.append([0, filtered_angle_n])
+            filtered_mag_l_n.append(filtered_mag_n)
+            filtered_angles_l_n.append(filtered_angle_n)
 
             '''
             data_std = np.std(mag_n)
@@ -177,10 +176,10 @@ class OpticalFlow_SIFT(object):
                 a, b = new.astype('int').ravel()
                 c, d = old.astype('int').ravel()
                 frame_curr = cv2.circle(frames_np[i], (a, b), 3, (255, 0, 0), -1)
-                frame_curr = cv2.line(frame_curr, (a, b), (a + int(vector_x[j]) * 1, b),
-                                      (0, 0, 255), 2)
-                frame_curr = cv2.line(frame_curr, (a, b), (a, b + int(vector_y[j]) * 1),
-                                      (0, 255, 0), 2)
+                #frame_curr = cv2.line(frame_curr, (a, b), (a + int(vector_x[j]) * 1, b),
+                #                      (0, 0, 255), 2)
+                #frame_curr = cv2.line(frame_curr, (a, b), (a, b + int(vector_y[j]) * 1),
+                #                      (0, 255, 0), 2)
 
             # img = cv2.add(frame_curr, mask)
             cv2.imshow('frame', frame_curr)
@@ -188,6 +187,7 @@ class OpticalFlow_SIFT(object):
             k = cv2.waitKey(30) & 0xff
             if k == 27:
                 break
+
             '''
 
             '''
@@ -222,14 +222,22 @@ class OpticalFlow_SIFT(object):
             #plt.draw()
             #plt.pause(0.02)
             '''
-        return filtered_mag_l_n, filtered_angles_l_n
+
+        #cv2.destroyAllWindows()
+
+        return mag_l_n, angles_l_n
 
     def predict_final_result(self, mag_l_n, angles_l_n, class_names):
+        #print(type(mag_l_n))
+        #print(len(mag_l_n))
+        #exit()
+
         # calcualate final result
         angles_np = np.array(angles_l_n)
         mag_np = np.array(mag_l_n)
 
         # add filter
+        print(mag_np[:,1:])
         filtered_mag_n, outlier_idx = self.filter1D(mag_np[:,1:], alpha=3)
         filtered_angles_np = np.delete(angles_np[:, 1:], outlier_idx)
 
@@ -240,21 +248,29 @@ class OpticalFlow_SIFT(object):
         vector_y = np.multiply(filtered_mag_n, np.sin(np.deg2rad(filtered_angle_n)))
         vector_x = np.multiply(filtered_mag_n, np.cos(np.deg2rad(filtered_angle_n)))
 
+        b, bins, patches = plt.hist(filtered_angle_n, bins=8, range=[0, 360],
+                                       cumulative=False)  # bins=None, range=None
 
+        '''
         # plot angles over time (frames)
         fig, axs = plt.subplots(3)
         fig.suptitle('mag and angles per feature point in one frame')
+
         axs[0].plot(np.arange(len(filtered_mag_n)), filtered_mag_n)
         axs[1].plot(np.arange(len(filtered_angle_n)), filtered_angle_n)
         b, bins, patches = axs[2].hist(filtered_angle_n, bins=8, range=[0,360], cumulative=False)  #bins=None, range=None
         #plt.ylim(ymax=190, ymin=-190)
         plt.grid(True)
-        #plt.show()
+        plt.show()
+        '''
         ''''''
 
-        th = 5.0  # manual set threshold for magnitude
+        th = 1.0  # manual set threshold for magnitude
         percentage = 0.5  # ratio threshold between no-movement and movement
         class_names_n = ['PAN', 'TILT', 'TILT', 'PAN', 'PAN', 'TILT', 'TILT', 'PAN']
+
+        print("predicted median magnitude: " + str(np.median(filtered_mag_n)))
+        print("threshold magnitude: " + str(th))
 
         class_name = class_names_n[np.argmax(b)]
         if ((class_name == "PAN" and np.median(filtered_mag_n) > th)):
@@ -284,6 +300,9 @@ class OpticalFlow_SIFT(object):
         return class_name
 
     def filter1D(self, data_np, alpha=2):
+        print(type(data_np))
+        print(data_np.shape)
+
         data_std = np.std(data_np)
         data_mean = np.mean(data_np)
         anomaly_cut_off = data_std * alpha

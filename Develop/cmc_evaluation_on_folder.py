@@ -3,10 +3,10 @@ from cmc.Evaluation import Evaluation
 from cmc.Configuration import Configuration
 import numpy as np
 
-cmc_instance = CMC(config_file="../config/config_cmc_evaluation.yaml")
+cmc_instance = CMC(config_file="/home/dhelm/VHH_Develop/pycharm_vhh_cmc/config/config_cmc_evaluation.yaml")
 
 # load video shots from specified dataset folder as numpy
-config_instance = Configuration(config_file="../config/config_cmc_evaluation.yaml")
+config_instance = Configuration(config_file="/home/dhelm/VHH_Develop/pycharm_vhh_cmc/config/config_cmc_evaluation.yaml")
 config_instance.loadConfig()
 eval_instance = Evaluation(config_instance=config_instance)
 eval_instance.load_dataset()

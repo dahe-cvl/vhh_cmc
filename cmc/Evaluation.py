@@ -59,7 +59,7 @@ class Evaluation(object):
         #print(len(self.all_shot_file_list))
 
         # load groundtruth labels
-        test_gt_labels_file = self.path_eval_dataset + "/annotation/test_shots.flist"
+        test_gt_labels_file = self.path_eval_dataset + "/annotation/all_shots_without_tracks.flist"  # test_shots.flist OR all_shots_without_tracks
         #print(test_gt_labels_file)
 
         fp = open(test_gt_labels_file, 'r')

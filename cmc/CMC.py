@@ -4,11 +4,7 @@ from cmc.Configuration import Configuration
 from cmc.PreProcessing import PreProcessing
 import os
 from cmc.OpticalFlow import OpticalFlow
-from cmc.OpticalFlow_ORB import OpticalFlow_ORB
-from cmc.OpticalFlow_SIFT import OpticalFlow_SIFT
-from cmc.OpticalFlow_SURF import OpticalFlow_SURF
-from cmc.OpticalFlow_BRIEF import OpticalFlow_BRIEF
-from cmc.OpticalFlow_FAST import OpticalFlow_FAST
+
 
 #import matplotlib
 #matplotlib.use('Qt5Agg')
@@ -123,12 +119,11 @@ class CMC(object):
                 class_name = "NA"
             else:
                 # add new optical flow version
-                '''
-                optical_flow_orb_instance = OpticalFlow_ORB(video_frames=shot_frames_np)
-                mag_l, angles_l = optical_flow_orb_instance.run()
-                class_name = optical_flow_orb_instance.predict_final_result(mag_l,
-                                                                            angles_l,
-                                                                            self.config_instance.class_names)
+                optical_flow_instance = OpticalFlow(video_frames=shot_frames_np, algorithm="orb")
+                mag_l, angles_l = optical_flow_instance.run()
+                class_name = optical_flow_instance.predict_final_result(mag_l,
+                                                                        angles_l,
+                                                                        self.config_instance.class_names)
 
                 '''
                 optical_flow_sift_instance = OpticalFlow_SIFT(video_frames=shot_frames_np)
@@ -136,7 +131,7 @@ class CMC(object):
                 class_name = optical_flow_sift_instance.predict_final_result(mag_l,
                                                                              angles_l,
                                                                              self.config_instance.class_names)
-
+                '''
             '''
             optical_flow_surf_instance = OpticalFlow_SURF(video_frames=shot_frames_np)
             mag_l, angles_l = optical_flow_surf_instance.run()

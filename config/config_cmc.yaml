@@ -33,6 +33,9 @@ PreProcessing:
 
 OpticalFlow:
   ###
+  # This parameter is used to specify a magnitude threshold to disinguish between no-movement and movement. (e.g. eval dataset: 2, 3, 5)
+  MIN_MAGNITUDE_THRESHOLD: 2.0
+  ###
   # This parameter is used to specify the number of consecutive frames which are needed to register a camera movement.
   SENSITIVITY: 10
   ###

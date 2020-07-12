@@ -9,7 +9,7 @@ from cmc.OpticalFlow_BRIEF import OpticalFlow_BRIEF
 from cmc.OpticalFlow_FAST import OpticalFlow_FAST
 
 class OpticalFlow(object):
-    def __init__(self, video_frames=None, algorithm="sift"):
+    def __init__(self, video_frames=None, algorithm="sift", config_instance=None):
         #self.video_name = "C:\\Users\\dhelm\\Documents\\slow_traffic_small.mp4"
         #self.video_name = "C:\\Users\\dhelm\\Documents\\training_data_patrick_link\\training_data\\tilt\\b88f0e71-a0f2-4efe-ae0d-5b83a0770b73_32.mp4"  # tilt unten nach oben
         #self.video_name = "C:\\Users\\dhelm\\Documents\\training_data_patrick_link\\training_data\\tilt\\35_25178.mp4"  # tilt oben nach unten
@@ -25,6 +25,7 @@ class OpticalFlow(object):
         #self.video_name = "C:\\Users\\dhelm\\Documents\\training_data_patrick_link\\training_data\\pan\\72_65942.mp4"  # pan links nach rechts
 
         self.video_frames = video_frames
+        self.config_instance = config_instance
 
         if (algorithm == "sift"):
             self.feature_detector = OpticalFlow_SIFT(video_frames=video_frames)
@@ -276,8 +277,7 @@ class OpticalFlow(object):
         plt.show()
         '''
         ''''''
-
-        th = 2.0  # manual set threshold for magnitude
+        th = self.config_instance.min_magnitude_threshold  # 2.0  # manual set threshold for magnitude
         percentage = 0.5  # ratio threshold between no-movement and movement
         class_names_n = ['PAN', 'TILT', 'TILT', 'PAN', 'PAN', 'TILT', 'TILT', 'PAN']
 

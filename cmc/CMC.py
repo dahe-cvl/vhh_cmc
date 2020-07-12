@@ -119,7 +119,9 @@ class CMC(object):
                 class_name = "NA"
             else:
                 # add new optical flow version
-                optical_flow_instance = OpticalFlow(video_frames=shot_frames_np, algorithm="orb")
+                optical_flow_instance = OpticalFlow(video_frames=shot_frames_np,
+                                                    algorithm="orb",
+                                                    config_instance=self.config_instance)
                 mag_l, angles_l = optical_flow_instance.run()
                 class_name = optical_flow_instance.predict_final_result(mag_l,
                                                                         angles_l,

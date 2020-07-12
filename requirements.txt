@@ -1,6 +1,5 @@
 PyYAML
 pandas
-opencv-python
 NumPy
 matplotlib
 scipy

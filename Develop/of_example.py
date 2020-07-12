@@ -8,8 +8,8 @@ class SimpleOF(object):
     def __init__(self):
         print("create instance of simple OF")
 
-        #self.video_name = "C:\\Users\\dhelm\\Documents\\999.mp4"
-        self.video_name = "C:\\Users\\dhelm\\Documents\\training_data_patrick_link_reworked\\training_data\\tilt\\tilt_130_74088.mp4"
+        self.video_name = "C:\\Users\\dhelm\\Documents\\1.m4v"
+        #self.video_name = "C:\\Users\\dhelm\\Documents\\training_data_patrick_link_reworked\\training_data\\tilt\\tilt_130_74088.mp4"
         #self.video_name = "C:\\Users\\dhelm\\Documents\\training_data_patrick_link\\training_data\\pan\\tilt_130_74088.mp4"
 
 
@@ -61,6 +61,7 @@ class SimpleOF(object):
         cap = cv.VideoCapture(self.video_name)
         while(1):
             cnt = cnt + 1
+            print(cnt)
             ret, frame = cap.read()
             if (ret == False):
                 break

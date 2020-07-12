@@ -4,12 +4,10 @@ from cmc.Configuration import Configuration
 from cmc.PreProcessing import PreProcessing
 import os
 from cmc.OpticalFlow import OpticalFlow
-from cmc.OpticalFlow_ORB import OpticalFlow_ORB
-from cmc.OpticalFlow_SIFT import OpticalFlow_SIFT
-from cmc.OpticalFlow_SURF import OpticalFlow_SURF
-from cmc.OpticalFlow_BRIEF import OpticalFlow_BRIEF
-from cmc.OpticalFlow_FAST import OpticalFlow_FAST
 
+
+#import matplotlib
+#matplotlib.use('Qt5Agg')
 
 class CMC(object):
     """
@@ -67,7 +65,7 @@ class CMC(object):
             exit()
 
         if (self.config_instance.debug_flag == True):
-            num_shots = 10
+            num_shots = 1
         else:
             num_shots = len(shots_np)
 
@@ -78,7 +76,9 @@ class CMC(object):
             print("Evaluation mode is activated ...")
             cap = cv2.VideoCapture(vid_name)
         else:
+            print(self.config_instance.path_videos + "/" + vid_name)
             cap = cv2.VideoCapture(self.config_instance.path_videos + "/" + vid_name)
+
         frame_l = []
         cnt = 0
 
@@ -91,37 +91,47 @@ class CMC(object):
             if (ret == True):
                 frame = self.pre_processing_instance.applyTransformOnImg(frame)
                 frame_l.append(frame)
+                #cv2.imshow("asd", frame)
+                #cv2.waitKey(1)
+                #if(cnt == 100):
+                #    exit()
             else:
                 break
 
         all_frames_np = np.array(frame_l)
         print(all_frames_np.shape)
 
+        #all_frames_np = all_frames_np[1240:1478,:,:,:]
+        shot_start_idx = 0   # used in debugging mode - to select specific shot
         results_cmc_l = []
-        for idx in range(0, num_shots):
+        for idx in range(shot_start_idx, shot_start_idx + num_shots):
             print(shots_np[idx])
             shot_id = int(shots_np[idx][0])
             vid_name = str(shots_np[idx][1])
             start = int(shots_np[idx][2])
             stop = int(shots_np[idx][3])
             shot_frames_np = all_frames_np[start:stop + 1, :, :, :]
+            shot_len = stop - start
 
-
-            # add new optical flow version
-            '''
-            optical_flow_orb_instance = OpticalFlow_ORB(video_frames=shot_frames_np)
-            mag_l, angles_l = optical_flow_orb_instance.run()
-            class_name = optical_flow_orb_instance.predict_final_result(mag_l,
+            MIN_NUMBER_OF_FRAMES_PER_SHOT = 10
+            if(shot_len <= MIN_NUMBER_OF_FRAMES_PER_SHOT ):
+                #print("shot length is too small!")
+                class_name = "NA"
+            else:
+                # add new optical flow version
+                optical_flow_instance = OpticalFlow(video_frames=shot_frames_np, algorithm="orb")
+                mag_l, angles_l = optical_flow_instance.run()
+                class_name = optical_flow_instance.predict_final_result(mag_l,
                                                                         angles_l,
                                                                         self.config_instance.class_names)
-            '''
 
-            optical_flow_sift_instance = OpticalFlow_SIFT(video_frames=shot_frames_np)
-            mag_l, angles_l = optical_flow_sift_instance.run()
-            class_name = optical_flow_sift_instance.predict_final_result(mag_l,
-                                                                        angles_l,
-                                                                        self.config_instance.class_names)
-            
+                '''
+                optical_flow_sift_instance = OpticalFlow_SIFT(video_frames=shot_frames_np)
+                mag_l, angles_l = optical_flow_sift_instance.run()
+                class_name = optical_flow_sift_instance.predict_final_result(mag_l,
+                                                                             angles_l,
+                                                                             self.config_instance.class_names)
+                '''
             '''
             optical_flow_surf_instance = OpticalFlow_SURF(video_frames=shot_frames_np)
             mag_l, angles_l = optical_flow_surf_instance.run()
@@ -212,6 +222,8 @@ class CMC(object):
                     "/".join([self.config_instance.path_raw_results, self.config_instance.path_prefix_raw_results + str(vid_name) + ".avi"]))
             '''
         results_cmc_np = np.array(results_cmc_l)
+        print(results_cmc_np)
+        #exit()
 
         # export results
         if (self.config_instance.save_eval_results == 1):

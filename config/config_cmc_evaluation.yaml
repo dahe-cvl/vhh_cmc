@@ -51,7 +51,7 @@ OpticalFlow:
 CmcCore:
   ###
   # This parameter is used to specify the class names.
-  CLASS_NAMES: ["pan","tilt", "na"]
+  CLASS_NAMES: ["pan","tilt", "NA"]
 
   ###
   # This parameter is used to save raw results (e.g. debug visualizations).

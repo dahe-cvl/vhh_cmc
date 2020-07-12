@@ -159,6 +159,11 @@ class Evaluation(object):
         print(len(y_score))
         print(len(y_test))
 
+        y_score = [s.lower() for s in y_score]
+        y_test = [s.lower() for s in y_test]
+
+        self.config_instance.class_names = [s.lower() for s in self.config_instance.class_names]
+
         # accuracy: (tp + tn) / (p + n)
         accuracy = accuracy_score(y_test, y_score)
         print('Accuracy: %f' % accuracy)

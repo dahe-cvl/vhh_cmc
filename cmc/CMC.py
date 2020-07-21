@@ -118,111 +118,14 @@ class CMC(object):
                 #print("shot length is too small!")
                 class_name = "NA"
             else:
-                # add new optical flow version
-                optical_flow_instance = OpticalFlow(video_frames=shot_frames_np,
-                                                    algorithm="orb",
-                                                    config_instance=self.config_instance)
-                mag_l, angles_l = optical_flow_instance.run()
-                class_name = optical_flow_instance.predict_final_result(mag_l,
-                                                                        angles_l,
-                                                                        self.config_instance.class_names)
-
-                '''
-                optical_flow_sift_instance = OpticalFlow_SIFT(video_frames=shot_frames_np)
-                mag_l, angles_l = optical_flow_sift_instance.run()
-                class_name = optical_flow_sift_instance.predict_final_result(mag_l,
-                                                                             angles_l,
-                                                                             self.config_instance.class_names)
-                '''
-            '''
-            optical_flow_surf_instance = OpticalFlow_SURF(video_frames=shot_frames_np)
-            mag_l, angles_l = optical_flow_surf_instance.run()
-            class_name = optical_flow_surf_instance.predict_final_result(mag_l,
-                                                                         angles_l,
-                                                                         self.config_instance.class_names)
-            
-            optical_flow_brief_instance = OpticalFlow_BRIEF(video_frames=shot_frames_np)
-            mag_l, angles_l = optical_flow_brief_instance.run()
-            class_name = optical_flow_brief_instance.predict_final_result(mag_l,
-                                                                          angles_l,
-                                                                          self.config_instance.class_names)
-            
-            optical_flow_fast_instance = OpticalFlow_FAST(video_frames=shot_frames_np)
-            mag_l, angles_l = optical_flow_fast_instance.run()
-            class_name = optical_flow_fast_instance.predict_final_result(mag_l,
-                                                                         angles_l,
-                                                                         self.config_instance.class_names)
-            '''
-
-            '''
-            # run optical flow process
-            optical_flow_instance = OpticalFlow(video_frames=shot_frames_np,
-                                                fPath=self.config_instance.path_videos + "/" + vid_name,
-                                                debug_path=self.config_instance.path_raw_results,
-                                                sf=start,
-                                                ef=stop,
-                                                mode=self.config_instance.mode,
-                                                sensitivity=self.config_instance.sensitivity,
-                                                specificity=self.config_instance.specificity,
-                                                border=self.config_instance.border,
-                                                number_of_features=self.config_instance.number_of_features,
-                                                angle_diff_limit=self.config_instance.angle_diff_limit,
-                                                config=None)
-            pan_list, tilt_list = optical_flow_instance.run()
-
-            print(pan_list)
-            print(tilt_list)
-
-            number_of_all_frames = abs(start - stop)
-            if number_of_all_frames == 0:
-                number_of_all_frames = 0.000000000001
-
-            number_of_pan_frames = 0
-            for sf, ef in pan_list:
-                diff = abs(sf - ef)
-                number_of_pan_frames = number_of_pan_frames + diff
-            pans_score = int((number_of_pan_frames * 100) / number_of_all_frames)
-            print(pans_score)
-
-            number_of_tilt_frames = 0
-            for sf, ef in tilt_list:
-                diff = abs(sf - ef)
-                number_of_tilt_frames = number_of_tilt_frames + diff
-            tilts_score = int((number_of_tilt_frames * 100) / number_of_all_frames)
-            print(tilts_score)
-
-            #if(self.config_instance.save_eval_results == 1):
-            #    if (pans_score >= threshold):
-            #        class_name = self.config_instance.class_names[0]
-            #    else:
-            #        class_name = self.config_instance.class_names[1]
-            #else:
-            threshold = 60
-            if (pans_score >= threshold):
-                class_name = self.config_instance.class_names[0]
-            elif(tilts_score >= threshold):
-                class_name = self.config_instance.class_names[1]
-            elif (pans_score >= threshold) and (tilts_score >= threshold):
-                class_name = self.config_instance.class_names[2]
-            else:
-                class_name = self.config_instance.class_names[2]
-            '''
+                print("DL approach - NOT IMPLEMENTED YET")
+                exit()
 
             # prepare results
             print(str(vid_name) + ";" + str(shot_id) + ";" + str(start) + ";" + str(stop) + ";" + str(class_name))
             results_cmc_l.append([str(vid_name) + ";" + str(shot_id) + ";" + str(start) + ";" + str(stop) + ";" + str(class_name)])
             #exit()
 
-            '''
-            # save raw results
-            if(self.config_instance.save_raw_results == 1):
-                optical_flow_instance.to_csv(
-                    "/".join([self.config_instance.path_raw_results, self.config_instance.path_prefix_raw_results + str(vid_name.split('/')[-1]) + ".csv"]))
-                optical_flow_instance.to_png(
-                    "/".join([self.config_instance.path_raw_results, self.config_instance.path_prefix_raw_results + str(vid_name) + ".png"]))
-                optical_flow_instance.to_avi(
-                    "/".join([self.config_instance.path_raw_results, self.config_instance.path_prefix_raw_results + str(vid_name) + ".avi"]))
-            '''
         results_cmc_np = np.array(results_cmc_l)
         print(results_cmc_np)
         #exit()

@@ -223,3 +223,21 @@ ORB features and TH=2
 |    macro avg   | 0.62 | 0.63 | 0.63   |    1213 |
 | weighted avg   | 0.95 | 0.94 | 0.95   |    1213 |
 
+
+
+**Experiment 3D-CNN** 
+
+Dataset: "/data/share/cmc_eval_dataset/"
+Optimizer: SGD
+n_epochs = 100
+expFolder = "test_exp_14"
+early_stopping_threshold = 30
+wDecay = 0.008
+lr = 0.001
+batch_size = 32
+
+test loss: 2.0130020542578264
+test accuracy: 0.6590909090909091
+
+
+

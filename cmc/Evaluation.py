@@ -59,7 +59,7 @@ class Evaluation(object):
         #print(len(self.all_shot_file_list))
 
         # load groundtruth labels
-        test_gt_labels_file = self.path_eval_dataset + "/annotation/all_shots_without_tracks.flist"  # test_shots.flist OR all_shots_without_tracks
+        test_gt_labels_file = self.path_eval_dataset + "/annotation/test_shots.flist"  # test_shots.flist OR all_shots_without_tracks
         #print(test_gt_labels_file)
 
         fp = open(test_gt_labels_file, 'r')
@@ -70,7 +70,10 @@ class Evaluation(object):
         for line in lines:
             line = line.replace('\n', '')
             line = line.replace('\\', '/')
-            line_split = line.split(' ')
+            line = line.replace('\ufeff', '')
+            line_split = line.split(';')
+            print(line_split)
+
             gt_annotation_list.append([line_split[0], line_split[2], line_split[3]])
         gt_annotation_np = np.array(gt_annotation_list)
 
@@ -105,15 +108,65 @@ class Evaluation(object):
         vids_np = np.expand_dims((vids_np), axis=1)
 
         self.final_dataset_np = np.concatenate((vids_np, self.final_dataset_np), axis=1)
+        #exit()
 
-    def run_evaluation(self):
+    def load_dataset_V2(self):
+        """
+        This method is used to load the dataset used to evaluate the algorithm.
+        The dataset must have the following structure:
+        dataset_root_dir/training_data/
+        dataset_root_dir/training_data/tilt/
+        dataset_root_dir/training_data/pan/
+        dataset_root_dir/training_data/annotation/xxx.flist
+        """
+        print("load eval dataset ... ")
+
+        # load samples
+        video_file_path = self.path_eval_dataset + "/videos/"
+
+        # load groundtruth labels
+        test_gt_labels_path = self.path_eval_dataset + "/annotations/cmc/final_results/"   # test_shots.flist"  # test_shots.flist OR all_shots_without_tracks
+        #print(test_gt_labels_file)
+        gt_files = os.listdir(test_gt_labels_path)
+
+        all_data = []
+
+        for file in gt_files:
+            test_gt_labels_file = test_gt_labels_path + file
+            #print(test_gt_labels_file)
+            fp = open(test_gt_labels_file, 'r')
+            lines = fp.readlines()
+            fp.close()
+
+            gt_annotation_list = []
+            for line in lines[1:]:
+                line = line.replace('\n', '')
+                line = line.replace('\\', '/')
+                line = line.replace('\ufeff', '')
+                line_split = line.split(';')
+                gt_annotation_list.append([0, video_file_path + line_split[0], line_split[2], line_split[3], line_split[4]])
+            gt_annotation_np = np.array(gt_annotation_list)
+            all_data.append(gt_annotation_np)
+
+
+        self.final_dataset_np = all_data
+
+
+    def run_evaluation(self, idx=None):
         """
         This method is used to start and run the evaluation process.
         """
         print("calculate evaluation metrics ... ")
 
-        # load all predictions and merge
-        results_file_list = [f for f in os.listdir(self.path_eval_results) if f.endswith('.csv')]
+        if (idx != None):
+            results_file_list = [f for f in os.listdir(self.path_eval_results) if f.endswith('.csv')][idx:idx+1]
+            self.final_dataset_np = self.final_dataset_np[idx:idx+1]
+            #print(self.final_dataset_np)
+            #exit()
+        else:
+            # load all predictions and merge
+            results_file_list = [f for f in os.listdir(self.path_eval_results) if f.endswith('.csv')]
+            self.final_dataset_np = self.final_dataset_np
 
         pred_list = []
         pred_np = []
@@ -133,20 +186,30 @@ class Evaluation(object):
             pred_np = np.array(pred_list)
 
         pred_np = np.delete(pred_np, np.s_[1:2], axis=1)
-        pred_np = np.array(sorted(pred_np, key=lambda pred_np : pred_np[0]))
+        #pred_np = np.array(sorted(pred_np, key=lambda pred_np : pred_np[0]))
         #print(pred_np)
+        #print(pred_np.shape)
 
         # load groundtruth annotations
+        gt_l = []
         for i in range(0, len(self.final_dataset_np)):
-            self.final_dataset_np[i][1] = self.final_dataset_np[i][1].split('/')[-1]
-        gt_np = self.final_dataset_np[:, 1:]
-        gt_np = np.array(sorted(gt_np, key=lambda gt_np: gt_np[0]))
+            #print(self.final_dataset_np[i])
+            for j in range(0, len(self.final_dataset_np[i])):
+                shot = self.final_dataset_np[i][j]
+                shot[1] = shot[1].split('/')[-1]
+                #print(shot)
+                gt_l.append(shot[1:])
+        gt_np = np.array(gt_l)
+        #gt_np = np.array(sorted(gt_np, key=lambda gt_np: gt_np[0]))
         #print(gt_np)
+        #print(gt_np.shape)
 
         # calculate metrics
         pred_np_prep = np.squeeze(pred_np[:, 3:])
         gt_np_prep = np.squeeze(gt_np[:, 3:])
-        self.calculate_metrics(y_score=pred_np_prep, y_test=gt_np_prep)
+        accuracy, precision, recall, f1_score = self.calculate_metrics(y_score=pred_np_prep, y_test=gt_np_prep)
+
+        return accuracy, precision, recall, f1_score
 
     def calculate_metrics(self, y_score, y_test):
         """
@@ -182,6 +245,9 @@ class Evaluation(object):
         print(matrix)
         print(classification_report(y_test, y_score))
 
+
+
+        '''
         print("save confusion matrix ...")
         self.plot_confusion_matrix(cm=matrix,
                                    target_names=self.config_instance.class_names,
@@ -195,6 +261,9 @@ class Evaluation(object):
                                    cmap=None,
                                    normalize=False,
                                    path=self.config_instance.path_eval_results + "/confusion_matrix.png")
+        '''
+
+        return accuracy, precision, recall, f1_score
 
     def plot_confusion_matrix(self, cm=None,
                               target_names=[],
@@ -281,3 +350,31 @@ class Evaluation(object):
         plt.xlabel('Predicted label\naccuracy={:0.4f}; misclass={:0.4f}'.format(accuracy, misclass))
         #plt.savefig(path)
         plt.savefig(path, dpi=500)
+
+    def exportExperimentResults(self, fName, cmc_results_np: np.ndarray):
+        """
+        Method to export cmc results as csv file.
+
+        :param fName: [required] name of result file.
+        :param cmc_results_np: numpy array holding the camera movements classification predictions for each shot of a movie.
+        """
+
+        print("export results to csv!")
+
+        if (len(cmc_results_np) == 0):
+            print("ERROR: numpy is empty")
+            exit()
+
+        print(self.config_instance.path_eval_results)
+        fp = open(self.config_instance.path_eval_results + "/" + fName.split('/')[-1].split('.')[0] + ".csv", 'w')
+
+        header = "exp_name;magnitude_th;distance_th;acc;prec;rec;f1_score"
+        fp.write(header + "\n")
+
+        for i in range(0, len(cmc_results_np)):
+            tmp_line = str(cmc_results_np[i][0])
+            for c in range(1, len(cmc_results_np[i])):
+                tmp_line = tmp_line + ";" + str(cmc_results_np[i][c])
+            fp.write(tmp_line + "\n")
+
+        fp.close()

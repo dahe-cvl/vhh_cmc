@@ -51,6 +51,7 @@ class Configuration:
         self.angle_diff_limit = -1
         self.mode = -1
         self.min_magnitude_threshold = -1
+        self.distance_threshold = -1
 
         # stc_core_config section
         self.class_names = None
@@ -107,6 +108,7 @@ class Configuration:
         self.angle_diff_limit = int(optical_flow_config['ANGLE_DIFF_LIMIT'])
         self.mode = int(optical_flow_config['MODE'])
         self.min_magnitude_threshold = float(optical_flow_config['MIN_MAGNITUDE_THRESHOLD'])
+        self.distance_threshold = float(optical_flow_config['DISTANCE_THRESHOLD'])
 
         # stc_core_config section
         self.class_names = cmc_core_config['CLASS_NAMES']

@@ -4,12 +4,9 @@ import argparse
 from matplotlib import pyplot as plt
 from cmc.OpticalFlow_ORB import OpticalFlow_ORB
 from cmc.OpticalFlow_SIFT import OpticalFlow_SIFT
-from cmc.OpticalFlow_SURF import OpticalFlow_SURF
-from cmc.OpticalFlow_BRIEF import OpticalFlow_BRIEF
-from cmc.OpticalFlow_FAST import OpticalFlow_FAST
 
 class OpticalFlow(object):
-    def __init__(self, video_frames=None, algorithm="sift", config_instance=None):
+    def __init__(self, video_frames=None, algorithm="orb", config_instance=None):
         #self.video_name = "C:\\Users\\dhelm\\Documents\\slow_traffic_small.mp4"
         #self.video_name = "C:\\Users\\dhelm\\Documents\\training_data_patrick_link\\training_data\\tilt\\b88f0e71-a0f2-4efe-ae0d-5b83a0770b73_32.mp4"  # tilt unten nach oben
         #self.video_name = "C:\\Users\\dhelm\\Documents\\training_data_patrick_link\\training_data\\tilt\\35_25178.mp4"  # tilt oben nach unten
@@ -32,7 +29,7 @@ class OpticalFlow(object):
         elif (algorithm == "orb"):
             self.feature_detector = OpticalFlow_ORB(video_frames=video_frames)
         else:
-            print("ERROR: select valid feature extractor [e.g. sift, orb, surf, fast, brief, pesc]")
+            print("ERROR: select valid feature extractor [e.g. sift, orb, pesc]")
             exit()
 
     def run(self):
@@ -60,18 +57,18 @@ class OpticalFlow(object):
         angles_l_n = []
         mag_l_n = []
         for i in range(1, len(frames_np)):
-            print("##########")
+            #print("##########")
 
             prev_frame = frames_np[i - 1]
             curr_frame = frames_np[i]
 
-            kp_prev_list, kp_curr_list = self.feature_detector.getMatches(prev_frame,
-                                                                          curr_frame)
+            distance_threshold = self.config_instance.distance_threshold
+            kp_prev_list, kp_curr_list = self.feature_detector.getMatches(prev_frame, curr_frame, distance_threshold)
 
-            print("---")
-            print("number of features")
-            print(len(kp_curr_list))
-            print(len(kp_prev_list))
+            #print("---")
+            #print("number of features")
+            #print(len(kp_curr_list))
+            #print(len(kp_prev_list))
 
             if (len(kp_prev_list) == 0 or len(kp_curr_list) == 0):
                 mag_l_n.append([0, 0])
@@ -86,6 +83,9 @@ class OpticalFlow(object):
             # mag_raw.append(mag_n.tolist())
 
             mag_n = np.abs(mag_n)  # [:50])
+            #mag_n, outliers_idx = self.filter1D(mag_n, alpha=3)
+            #mag_n = np.delete(mag_n, outliers_idx)
+
             mag_mean_n = np.mean(mag_n)
             mag_l_n.append([0, mag_mean_n])
 
@@ -93,13 +93,7 @@ class OpticalFlow(object):
             angle_mean_n = np.mean(angle_n)
             angles_l_n.append([0, angle_mean_n])
 
-            # TODO: add filter
-            filtered_mag_n = mag_l_n
             filtered_angle_n = angles_l_n
-            filtered_curr_points = curr_points
-            filtered_prev_points = prev_points
-
-            filtered_mag_l_n.append(filtered_mag_n)
             filtered_angles_l_n.append(filtered_angle_n)
 
             '''
@@ -264,20 +258,29 @@ class OpticalFlow(object):
         b, bins, patches = plt.hist(filtered_angle_n, bins=8, range=[0, 360],
                                     cumulative=False)  # bins=None, range=None
 
-        '''
-        # plot angles over time (frames)
-        fig, axs = plt.subplots(3)
-        fig.suptitle('mag and angles per feature point in one frame')
-
-        axs[0].plot(np.arange(len(filtered_mag_n)), filtered_mag_n)
-        axs[1].plot(np.arange(len(filtered_angle_n)), filtered_angle_n)
-        b, bins, patches = axs[2].hist(filtered_angle_n, bins=8, range=[0,360], cumulative=False)  #bins=None, range=None
-        #plt.ylim(ymax=190, ymin=-190)
-        plt.grid(True)
-        plt.show()
-        '''
-        ''''''
         th = self.config_instance.min_magnitude_threshold  # 2.0  # manual set threshold for magnitude
+
+        DEBUG_VIS_FLAG = False
+        if(DEBUG_VIS_FLAG == True):
+            # plot angles over time (frames)
+            fig, axs = plt.subplots(3)
+            fig.suptitle('mag and angles per feature point in one frame')
+            a = np.empty(len(filtered_mag_n))
+            a.fill(th)
+            axs[0].plot(np.arange(len(filtered_mag_n)), a)
+            a = np.empty(len(filtered_mag_n))
+            a.fill(np.median(filtered_mag_n))
+            axs[0].plot(np.arange(len(filtered_mag_n)), a)
+            np.median(filtered_mag_n)
+            axs[0].plot(np.arange(len(filtered_mag_n)), filtered_mag_n)
+            axs[1].plot(np.arange(len(filtered_angle_n)), filtered_angle_n)
+            b, bins, patches = axs[2].hist(filtered_angle_n, bins=8, range=[0,360], cumulative=False)  #bins=None, range=None
+            #plt.ylim(ymax=190, ymin=-190)
+            plt.grid(True)
+            plt.show()
+        ''''''
+        ''''''
+
         percentage = 0.5  # ratio threshold between no-movement and movement
         class_names_n = ['PAN', 'TILT', 'TILT', 'PAN', 'PAN', 'TILT', 'TILT', 'PAN']
 

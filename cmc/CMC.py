@@ -99,13 +99,13 @@ class CMC(object):
                 break
 
         all_frames_np = np.array(frame_l)
-        print(all_frames_np.shape)
+        #print(all_frames_np.shape)
 
         #all_frames_np = all_frames_np[1240:1478,:,:,:]
-        shot_start_idx = 0   # used in debugging mode - to select specific shot
+        shot_start_idx = 0  # used in debugging mode - to select specific shot
         results_cmc_l = []
         for idx in range(shot_start_idx, shot_start_idx + num_shots):
-            print(shots_np[idx])
+            #print(shots_np[idx])
             shot_id = int(shots_np[idx][0])
             vid_name = str(shots_np[idx][1])
             start = int(shots_np[idx][2])
@@ -127,32 +127,6 @@ class CMC(object):
                                                                         angles_l,
                                                                         self.config_instance.class_names)
 
-                '''
-                optical_flow_sift_instance = OpticalFlow_SIFT(video_frames=shot_frames_np)
-                mag_l, angles_l = optical_flow_sift_instance.run()
-                class_name = optical_flow_sift_instance.predict_final_result(mag_l,
-                                                                             angles_l,
-                                                                             self.config_instance.class_names)
-                '''
-            '''
-            optical_flow_surf_instance = OpticalFlow_SURF(video_frames=shot_frames_np)
-            mag_l, angles_l = optical_flow_surf_instance.run()
-            class_name = optical_flow_surf_instance.predict_final_result(mag_l,
-                                                                         angles_l,
-                                                                         self.config_instance.class_names)
-            
-            optical_flow_brief_instance = OpticalFlow_BRIEF(video_frames=shot_frames_np)
-            mag_l, angles_l = optical_flow_brief_instance.run()
-            class_name = optical_flow_brief_instance.predict_final_result(mag_l,
-                                                                          angles_l,
-                                                                          self.config_instance.class_names)
-            
-            optical_flow_fast_instance = OpticalFlow_FAST(video_frames=shot_frames_np)
-            mag_l, angles_l = optical_flow_fast_instance.run()
-            class_name = optical_flow_fast_instance.predict_final_result(mag_l,
-                                                                         angles_l,
-                                                                         self.config_instance.class_names)
-            '''
 
             '''
             # run optical flow process

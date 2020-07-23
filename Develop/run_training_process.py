@@ -1,5 +1,5 @@
 from cmc.CmcDataset import CmcDataset
-from cmc.Model import CNNModel, resnet50, CNN3D
+from cmc.Model import CNNModel, resnet50, CNN3D, CnnLstm
 import torch
 import torchvision.transforms as transforms
 import numpy as np
@@ -203,23 +203,26 @@ class ToNormalizedTensor3D(object):
         shot_frames_l = []
         trans1 = transforms.ToTensor()
         trans2 = transforms.Normalize((106.79066460039768 / 255.0,
-                                       #112.39727916518281 / 255.0,
-                                       #113.79938372074331 / 255.0
+                                       112.39727916518281 / 255.0,
+                                       113.79938372074331 / 255.0
                                       ),
                                       (75.09153312342316 / 255.0,
-                                       #73.49875024709992 / 255.0,
-                                       #73.11534896091715 / 255.0
+                                       73.49875024709992 / 255.0,
+                                       73.11534896091715 / 255.0
                                       ))
 
         for a in range(0, len(frame_seq)):
             frame = np.asarray(frame_seq[a])
-            shot_frames_l.append((trans1(frame)))  #trans2
+            shot_frames_l.append(trans2(trans1(frame)))  #trans2
         seq = torch.stack(shot_frames_l)
 
         #print(seq.size())
         #print(seq.reshape((seq.size()[1], seq.size()[0], seq.size()[2], seq.size()[3])).size())
         #exit()
-        seq_final = seq.reshape((seq.size()[1], seq.size()[0], seq.size()[2], seq.size()[3]))
+        # CNN-LSTM
+        seq_final = seq.reshape((seq.size()[0], seq.size()[1], seq.size()[2], seq.size()[3]))
+        # 3DCNN
+        #seq_final = seq.reshape((seq.size()[1], seq.size()[0], seq.size()[2], seq.size()[3]))
         #print(seq_final.size())
         #exit()
         return seq_final
@@ -235,8 +238,8 @@ def loadDataset(path="", batch_size=64):
     transform_train = transforms.Compose([
         Resize3D((720, 960)),
         CenterCrop3D((720, 720)),
-        Resize3D((224, 224)),
-        ToGrayScale3D(),
+        Resize3D((128, 128)),
+        #ToGrayScale3D(),
         HorizontalFlip3D(),
         VerticalFlip3D(),
         RandomRotate3D(max_rot_range=[-15, 15]),
@@ -247,8 +250,8 @@ def loadDataset(path="", batch_size=64):
     transform_val = transforms.Compose([
         Resize3D((720, 960)),
         CenterCrop3D((720, 720)),
-        Resize3D((256, 256)),
-        ToGrayScale3D(),
+        Resize3D((128, 128)),
+        #ToGrayScale3D(),
         ToNormalizedTensor3D(),
     ])
 
@@ -256,7 +259,7 @@ def loadDataset(path="", batch_size=64):
         Resize3D((720, 960)),
         CenterCrop3D((720, 720)),
         Resize3D((256, 256)),
-        ToGrayScale3D(),
+        #ToGrayScale3D(),
         ToNormalizedTensor3D(),
     ])
 
@@ -387,7 +390,7 @@ expFolder = "test_exp_15"
 early_stopping_threshold = 30
 wDecay = 0.0
 lr = 0.001
-batch_size = 4
+batch_size = 64
 
 trainloader, validloader, testloader = loadDataset(path=db_path, batch_size=batch_size)
 #calculate_statistics(trainloader)
@@ -410,10 +413,10 @@ if train_on_gpu:
 # define model
 ################
 #model = CNN3D(t_dim=32)
-model = CNNModel()
+#model = CNNModel()
+model = CnnLstm()
 
 print(model)
-#exit()
 
 # Find total parameters and trainable parameters
 total_params = sum(p.numel() for p in model.parameters())
@@ -428,6 +431,9 @@ if train_on_gpu:
 if multi_gpu:
     model = nn.DataParallel(model)
 
+
+#exit()
+
 ################
 # Specify the Loss function
 ################
@@ -436,8 +442,8 @@ criterion = nn.CrossEntropyLoss()
 ################
 # Specify the optimizer
 ################
-optimizer = optim.SGD(model.parameters(), lr=lr, momentum=0.9, nesterov=True, weight_decay=wDecay)
-#optimizer = optim.AdamW(model.parameters(), lr=lr, weight_decay=wDecay)
+#optimizer = optim.SGD(model.parameters(), lr=lr, momentum=0.9, nesterov=True, weight_decay=wDecay)
+optimizer = optim.AdamW(model.parameters(), lr=lr, weight_decay=wDecay)
 
 # print("[Creating Learning rate scheduler...]")
 # scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=[50,100,150], gamma=0.1)

@@ -8,155 +8,61 @@ class SimpleOF(object):
     def __init__(self):
         print("create instance of simple OF")
 
-        self.video_name = "C:\\Users\\dhelm\\Documents\\1.m4v"
-        #self.video_name = "C:\\Users\\dhelm\\Documents\\training_data_patrick_link_reworked\\training_data\\tilt\\tilt_130_74088.mp4"
-        #self.video_name = "C:\\Users\\dhelm\\Documents\\training_data_patrick_link\\training_data\\pan\\tilt_130_74088.mp4"
+        #self.video_name = "C:\\Users\\dhelm\\Documents\\1.m4v"
+        self.video_name = "C:\\Users\\dhelm\\Documents\\training_data_patrick_link_reworked\\training_data\\tilt\\tilt_130_74088.mp4"
+        #self.video_name = "C:\\Users\\dhelm\\Documents\\training_data_patrick_link_reworked\\training_data\\pan\\11_885.mp4"
 
 
-        self.orb_feature_extractor = SiftFeatures(self.video_name)
+
 
     def run(self):
-        '''
-        parser = argparse.ArgumentParser(description='This sample demonstrates Lucas-Kanade Optical Flow calculation. \
-                                                      The example file can be downloaded from: \
-                                                      https://www.bogotobogo.com/python/OpenCV_Python/images/mean_shift_tracking/slow_traffic_small.mp4')
-        parser.add_argument('image', type=str, help='path to image file')
-        args = parser.parse_args()
-        cap = cv.VideoCapture(args.image)
-        '''
+        import numpy as np
+        import cv2 as cv
 
-
-
-        # params for ShiTomasi corner detection
-        feature_params = dict(maxCorners=100,
-                              qualityLevel=0.03,
-                              minDistance=2,
-                              blockSize=7
-                             )
-
-        feature_detector = cv.FastFeatureDetector_create(threshold=20,
-                                                         nonmaxSuppression=True)
-        #feature_detector = cv.ORB_create(nfeatures=500,
-        #                                 nlevels=2)
-
-
-
-        # Parameters for lucas kanade optical flow
-        lk_params = dict( winSize=(15, 15),
-                          maxLevel=2,
-                          criteria=(cv.TERM_CRITERIA_EPS | cv.TERM_CRITERIA_COUNT, 10, 0.03))
-
-        prev_image = None
-        dim = (512, 512)
-
-        angles_l = []
         mag_l = []
-
-        filtered_angles_l = []
-
-        plt.figure()
+        ang_l = []
         cnt = 0
-        frame_list = []
 
         cap = cv.VideoCapture(self.video_name)
-        while(1):
+        ret, frame1 = cap.read()
+        prvs = cv.cvtColor(frame1, cv.COLOR_BGR2GRAY)
+        hsv = np.zeros_like(frame1)
+        hsv[..., 1] = 255
+        while (1):
             cnt = cnt + 1
-            print(cnt)
-            ret, frame = cap.read()
-            if (ret == False):
+            ret, frame2 = cap.read()
+            if cnt == 1000 or ret == False:
                 break
-            frame = self.crop(frame, dim)
-            frame_list.append(frame)
-        frames_np = np.array(frame_list)
-        cap.release()
+            next = cv.cvtColor(frame2, cv.COLOR_BGR2GRAY)
+            flow = cv.calcOpticalFlowFarneback(prvs, next, None, 0.5, 3, 15, 3, 5, 1.2, 0)
+            mag, ang = cv.cartToPolar(flow[..., 0], flow[..., 1], angleInDegrees=True)
 
-        print(frames_np.shape)
+            print(cnt)
 
-        REQUIRED_FEATURES = 100
-        n_features = 0
-
+            mag_l.append(np.median(mag))
+            ang_l.append(np.median(ang))
 
 
-        # get initial features
-        frm = frames_np[0]
-        frm_gray = cv.cvtColor(frm, cv.COLOR_BGR2GRAY)
 
-        features = feature_detector.detect(frm_gray, None)
-
-        #keypoints = np.array([kp.pt for kp in features]).astype('float32')
-        #n_features = len(keypoints)
-
-        # match features to next frame
-
-        for i in range(1, len(frames_np)):
-            frame_prev = frames_np[i-1]
-            frame_curr = frames_np[i]
-
-            frame_prev_gray = cv.cvtColor(frame_prev, cv.COLOR_BGR2GRAY)
-            frame_curr_gray = cv.cvtColor(frame_curr, cv.COLOR_BGR2GRAY)
-            #print(frame_gray.shape)
-
-            # select keypoints
-            if n_features < REQUIRED_FEATURES:
-                keypoints_prev = feature_detector.detect(frame_prev, None)
-                prev_points = np.array([kp.pt for kp in keypoints_prev]).astype('float32')
-                n_features = len(prev_points)
-
-            # calculate optical flow
-            curr_points, st, err = cv.calcOpticalFlowPyrLK(frame_prev_gray, frame_curr_gray, prev_points, None, **lk_params)
-            print(curr_points.shape)
-            print(st.shape)
-
-            st = np.squeeze(st)
-            #print(st)
-            curr_points = curr_points[st == 1].reshape(-1, 1, 2)
-            prev_points = prev_points[st == 1].reshape(-1, 1, 2)
-            print("######################")
-            print(curr_points.shape)
-            print(prev_points.shape)
-            #continue
-
-            mag, angle = self.compute_magnitude_angle(curr_points, prev_points)
-            #print(mag[:5])
-            #print(angle[:5])
-
-            mag_mean = np.mean(mag)
-            angle_mean = np.mean(angle)
-            #print(mag_mean)
-            print(angle_mean)
-
-            angles_l.append(angle_mean)
-            mag_l.append(mag_mean)
-            ''''''
-
-            # draw the tracks
-            for i, (new, old) in enumerate(zip(curr_points, prev_points)):
-                a,b = new.ravel()
-                c,d = old.ravel()
-                #mask = cv.line(mask, (a, b), (c, d), 1)
-                frame_curr = cv.circle(frame_curr, (a, b), 5, -1)
-            #img = cv.add(frame_curr, mask)
-            cv.imshow('frame', frame_curr)
-
-            # plot angles over time
-            plt.plot(np.arange(len(angles_l)), angles_l)
-            #plt.plot(np.arange(len(mag_l)), mag_l)
-            plt.ylim(ymax=190, ymin=-190)
-            plt.grid(True)
-            #plt.show()
-            plt.draw()
-            plt.pause(0.002)
-            #exit()
-            ''''''
-
+            '''
+            hsv[..., 0] = ang * 180 / np.pi / 2
+            hsv[..., 2] = cv.normalize(mag, None, 0, 255, cv.NORM_MINMAX)
+            bgr = cv.cvtColor(hsv, cv.COLOR_HSV2BGR)
+            cv.imshow('frame2', bgr)
             k = cv.waitKey(30) & 0xff
             if k == 27:
                 break
+            elif k == ord('s'):
+                cv.imwrite('opticalfb.png', frame2)
+                cv.imwrite('opticalhsv.png', bgr)
+            '''
+            prvs = next
 
-
-            # Now update the previous frame and previous points
-            #old_gray = frame_gray.copy()
-            #p0 = good_new.reshape(-1,1,2)
+        plt.figure()
+        plt.plot(np.arange(len(mag_l)), mag_l, color='k')
+        plt.figure()
+        plt.plot(np.arange(len(ang_l)), ang_l, color='y')
+        plt.show()
 
 
     def crop(self, img: np.ndarray, dim: tuple):

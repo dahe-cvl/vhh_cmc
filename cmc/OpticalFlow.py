@@ -244,7 +244,7 @@ class OpticalFlow(object):
         mag_np = np.array(mag_l_n)
 
         # add filter
-        print(mag_np[:, 1:])
+        #print(mag_np[:, 1:])
         filtered_mag_n, outlier_idx = self.filter1D(mag_np[:, 1:], alpha=3)
         filtered_angles_np = np.delete(angles_np[:, 1:], outlier_idx)
 
@@ -378,7 +378,7 @@ class OpticalFlow(object):
             print("length is not correct")
             assert (prev_feat.__len__() == curr_feat.__len__())
         d = curr_feat - prev_feat
-        print(d.shape)
+        #print(d.shape)
         mag = np.hypot(d[:, 0, 0], d[:, 0, 1])
         ang = np.round(np.degrees(np.arctan2(d[:, 0, 1], d[:, 0, 0])))
 

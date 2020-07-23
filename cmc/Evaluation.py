@@ -245,9 +245,6 @@ class Evaluation(object):
         print(matrix)
         print(classification_report(y_test, y_score))
 
-
-
-        '''
         print("save confusion matrix ...")
         self.plot_confusion_matrix(cm=matrix,
                                    target_names=self.config_instance.class_names,
@@ -261,9 +258,9 @@ class Evaluation(object):
                                    cmap=None,
                                    normalize=False,
                                    path=self.config_instance.path_eval_results + "/confusion_matrix.png")
-        '''
+        ''''''
 
-        return accuracy, precision, recall, f1_score
+        return accuracy, precision, recall, f1
 
     def plot_confusion_matrix(self, cm=None,
                               target_names=[],

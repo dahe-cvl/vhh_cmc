@@ -6,9 +6,10 @@ import numpy as np
 eval_instance = None
 exp_results = []
 
-exp_file_list = ["/home/dhelm/VHH_Develop/pycharm_vhh_cmc/config/config_cmc_exp1.yaml",
-                 "/home/dhelm/VHH_Develop/pycharm_vhh_cmc/config/config_cmc_exp2.yaml",
-                 "/home/dhelm/VHH_Develop/pycharm_vhh_cmc/config/config_cmc_exp3.yaml"]
+exp_file_list = ["/home/dhelm/VHH_Develop/pycharm_vhh_cmc/config/config_cmc_exp4.yaml",
+                 "/home/dhelm/VHH_Develop/pycharm_vhh_cmc/config/config_cmc_exp5.yaml",
+                 "/home/dhelm/VHH_Develop/pycharm_vhh_cmc/config/config_cmc_exp6.yaml"
+                ]
 
 for i, exp_file in enumerate(exp_file_list):
     cmc_instance = CMC(config_file=exp_file)

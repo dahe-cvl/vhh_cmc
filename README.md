@@ -47,11 +47,6 @@ with all installed python packages and it should include *vhh-cmc*.
    * export CUDA_VISIBLE_DEVICES=0
    * export PYTHONPATH=$PYTHONPATH:/XXX/vhh_cmc/:/XXX/vhh_cmc/Develop/:/XXX/vhh_cmc/Demo/
 
-
-> **_NOTE:_**
-  You can check the success of the installation by using the commend *pip list*. This command should give you a list
-  with all installed python packages and it should include *vhh_cmc*.
-
 **Run demo script**
 
    * change to root directory of the repository

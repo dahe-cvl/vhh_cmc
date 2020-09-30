@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from cmc.Configuration import Configuration
+from vhh_cmc.Configuration import Configuration
 
 
 class PreProcessing(object):

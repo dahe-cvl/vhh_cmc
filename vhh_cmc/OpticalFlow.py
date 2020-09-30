@@ -2,8 +2,8 @@ import cv2
 import numpy as np
 import argparse
 from matplotlib import pyplot as plt
-from cmc.OpticalFlow_ORB import OpticalFlow_ORB
-from cmc.OpticalFlow_SIFT import OpticalFlow_SIFT
+from vhh_cmc.OpticalFlow_ORB import OpticalFlow_ORB
+from vhh_cmc.OpticalFlow_SIFT import OpticalFlow_SIFT
 
 class OpticalFlow(object):
     def __init__(self, video_frames=None, algorithm="orb", config_instance=None):

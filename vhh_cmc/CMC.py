@@ -1,9 +1,9 @@
 import cv2
 import numpy as np
-from cmc.Configuration import Configuration
-from cmc.PreProcessing import PreProcessing
+from vhh_cmc.Configuration import Configuration
+from vhh_cmc.PreProcessing import PreProcessing
 import os
-from cmc.OpticalFlow import OpticalFlow
+from vhh_cmc.OpticalFlow import OpticalFlow
 
 
 #import matplotlib

@@ -31,8 +31,15 @@ HTML format (only usable if repository is available in local storage): [vhh_cmc_
 
 **Install the cmc package and all dependencies:**
 
+   * Update pip and setuptools (tested using pip\==20.2.3 and setuptools==50.3.0)
+   * Install the Wheel package: ```pip install wheel```
    * change to the root directory of the repository (includes setup.py)
-   * python setup.py install
+   * ```python setup.py bdist_wheel```
+   * The aforementioned command should create a /dist directory containing a wheel. Install the package using ```python -m pip install dist/xxx.whl```
+   
+> **_NOTE:_**
+You can check the success of the installation by using the commend *pip list*. This command should give you a list
+with all installed python packages and it should include *vhh-cmc*.
 
 **Setup environment variables:**
 

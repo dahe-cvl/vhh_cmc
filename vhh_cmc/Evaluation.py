@@ -1,5 +1,5 @@
-from cmc.Configuration import Configuration
-from cmc.PreProcessing import PreProcessing
+from vhh_cmc.Configuration import Configuration
+from vhh_cmc.PreProcessing import PreProcessing
 import os
 import numpy as np
 import cv2

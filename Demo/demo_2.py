@@ -1,5 +1,5 @@
 import sys
-from cmc import cmc_io, CMC
+from vhh_cmc import cmc_io, CMC
 
 def run(config):
 

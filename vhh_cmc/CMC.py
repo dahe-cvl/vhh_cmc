@@ -31,7 +31,8 @@ class CMC(object):
 
         if (self.config_instance.debug_flag == True):
             print("DEBUG MODE activated!")
-            self.debug_results = "/data/share/maxrecall_vhh_mmsi/videos/results/cmc/develop/"
+            self.debug_results = self.config_instance.path_debug_results
+            print("save debug results to: " + str(self.debug_results))
 
         self.pre_processing_instance = PreProcessing(config_instance=self.config_instance)
 

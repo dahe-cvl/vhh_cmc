@@ -36,6 +36,7 @@ class Configuration:
         self.debug_flag = -1
         self.sbd_results_path = None
         self.save_debug_pkg_flag = -1
+        self.path_debug_results = None
 
         # pre-processing section
         self.flag_convert2Gray = -1
@@ -92,6 +93,7 @@ class Configuration:
         self.debug_flag = int(developer_config['DEBUG_FLAG'])
         self.sbd_results_path = developer_config['SBD_RESULTS_PATH']
         self.save_debug_pkg_flag = int(developer_config['SAVE_DEBUG_PKG'])
+        self.path_debug_results = developer_config['PATH_DEBUG_RESULTS']
 
         # pre-processing section
         self.flag_convert2Gray = int(pre_processing_config['CONVERT2GRAY_FLAG'])

@@ -7,6 +7,9 @@ Development:
   # This parameter is used to specify a SBD results file for debugging mode.
   SBD_RESULTS_PATH: "/data/share/maxrecall_vhh_mmsi/release/videos/results/sbd/final_results/1.csv"
   ###
+  # This parameter is used to specify the results path in debug mode
+  PATH_DEBUG_RESULTS: "/data/share/maxrecall_vhh_mmsi/develop/videos/results/cmc/develop/"  
+  ###
   # This parameter is used to save a debug package (e.g. including some visualizations, ... - not available yet).
   SAVE_DEBUG_PKG: 0
 

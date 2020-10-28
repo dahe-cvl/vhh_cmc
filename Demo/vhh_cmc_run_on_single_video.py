@@ -1,6 +1,16 @@
 from vhh_cmc.CMC import CMC
+import os
 
-cmc_instance = CMC(config_file="/caa/Homes01/dhelm/working/vhh_release_test/vhh_cmc/config/config_cmc_debug.yaml")
-cmc_instance.runOnSingleVideo(shots_per_vid_np=None, max_recall_id=1)
+config_file = "/caa/Homes01/dhelm/working/vhh/develop/vhh_cmc/config/config_cmc.yaml"
+cmc_instance = CMC(config_file)
 
+results_path = "/data/share/maxrecall_vhh_mmsi/develop/videos/results/sbd/final_results/"
+results_file_list = os.listdir(results_path)
+print(results_file_list)
 
+for file in results_file_list:
+    print(file)
+    shots_np = cmc_instance.loadSbdResults(results_path + file)
+    print(shots_np)
+    max_recall_id = int(file.split('.')[0])
+    cmc_instance.runOnSingleVideo(shots_per_vid_np=shots_np, max_recall_id=max_recall_id)

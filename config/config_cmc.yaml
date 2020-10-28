@@ -63,10 +63,10 @@ CmcCore:
 
   ###
   # This parameter is used to save raw results (e.g. debug visualizations).
-  SAVE_RAW_RESULTS: 1       # 1 ... yes 0 ... no
+  SAVE_RAW_RESULTS: 0       # 1 ... yes 0 ... no
   ###
   # This parameter is used to specify the path for saving the raw results.
-  PATH_RAW_RESULTS: "/data/share/maxrecall_vhh_mmsi/videos/results/cmc/raw_results/"
+  PATH_RAW_RESULTS: "/data/share/maxrecall_vhh_mmsi/develop/videos/results/cmc/raw_results/"
   NUMBER_OF_FRAMES_PER_SHOT: 5  # save x frames per shot
   ###
   # This parameter is used to specify the prefix for the results file.
@@ -80,7 +80,7 @@ CmcCore:
   SAVE_FINAL_RESULTS: 1     # 1 ... yes 0 ... no
   ###
   # This parameter is used to specify the path for saving the final results.
-  PATH_FINAL_RESULTS: "/data/share/maxrecall_vhh_mmsi/videos/results/cmc/final_results/"
+  PATH_FINAL_RESULTS: "/data/share/maxrecall_vhh_mmsi/develop/videos/results/cmc/final_results/"
   ###
   # This parameter is used to specify the prefix for the results file.
   PREFIX_FINAL_RESULTS: "results_"

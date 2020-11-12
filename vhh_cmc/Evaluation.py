@@ -36,7 +36,7 @@ class Evaluation(object):
         self.all_shot_file_list = []
         self.final_dataset_np = []
 
-    def load_dataset(self):
+    def load_cmc_eval_db_v2(self):
         """
         This method is used to load the dataset used to evaluate the algorithm.
         The dataset must have the following structure:
@@ -50,24 +50,29 @@ class Evaluation(object):
         # load samples
         tilt_samples_path = self.path_eval_dataset + "/training_data/tilt/"
         pan_samples_path = self.path_eval_dataset + "/training_data/pan/"
+        na_samples_path = self.path_eval_dataset + "/training_data/na/"
+        path_annotations = self.path_eval_dataset + "/annotation_new/"
 
         tilt_shot_file_list = os.listdir(tilt_samples_path)
         pan_shot_file_list = os.listdir(pan_samples_path)
+        na_shot_file_list = os.listdir(na_samples_path)
 
-        self.all_shot_file_list = tilt_shot_file_list + pan_shot_file_list
+        self.all_shot_file_list = tilt_shot_file_list + pan_shot_file_list + na_shot_file_list
+        self.all_shot_file_list.sort()
         all_shot_file_np = np.array(self.all_shot_file_list)
-        #print(len(self.all_shot_file_list))
+        print(len(self.all_shot_file_list))
 
         # load groundtruth labels
-        test_gt_labels_file = self.path_eval_dataset + "/annotation/test_shots.flist"  # test_shots.flist OR all_shots_without_tracks
-        #print(test_gt_labels_file)
-
+        test_gt_labels_file = path_annotations + "/test_shots_without_track.csv"
+        print(test_gt_labels_file)
+      
         fp = open(test_gt_labels_file, 'r')
         lines = fp.readlines()
         fp.close()
 
         gt_annotation_list = []
         for line in lines:
+            print(line)
             line = line.replace('\n', '')
             line = line.replace('\\', '/')
             line = line.replace('\ufeff', '')
@@ -75,13 +80,12 @@ class Evaluation(object):
             print(line_split)
 
             gt_annotation_list.append([line_split[0], line_split[2], line_split[3]])
-        gt_annotation_np = np.array(gt_annotation_list)
-
-        #print(len(gt_annotation_np))
+        gt_annotation_np = np.array(gt_annotation_list)       
 
         final_dataset = []
         for i in range(0, len(gt_annotation_np)):
-            path = os.path.join(self.path_eval_dataset, gt_annotation_np[i][0])
+            #path = os.path.join(self.path_eval_dataset, gt_annotation_np[i][0])
+            path = gt_annotation_np[i][0]
             video_name = path.split('/')[-1]
             start = int(gt_annotation_np[i][1])
             stop = int(gt_annotation_np[i][2]) - 1
@@ -90,27 +94,12 @@ class Evaluation(object):
             #print(video_name)
             idx = np.squeeze(np.where(video_name == all_shot_file_np)[0])
             sample_path = all_shot_file_np[idx]
+            final_dataset.append([path, i, start, stop, class_name])
 
-            if(len(sample_path) == 0):
-                continue
-
-            #print("-------------")
-            #print(path)
-            #print(start)
-            #print(stop)
-            #print(sample_path)
-            #print(class_name)
-
-            final_dataset.append([path, start, stop, class_name])
+        final_dataset.sort()
         self.final_dataset_np = np.array(final_dataset)
 
-        vids_np = np.arange(0, len(self.final_dataset_np))
-        vids_np = np.expand_dims((vids_np), axis=1)
-
-        self.final_dataset_np = np.concatenate((vids_np, self.final_dataset_np), axis=1)
-        #exit()
-
-    def load_dataset_V2(self):
+    def load_vhhmmsi_GT_V2_db(self):
         """
         This method is used to load the dataset used to evaluate the algorithm.
         The dataset must have the following structure:
@@ -121,36 +110,36 @@ class Evaluation(object):
         """
         print("load eval dataset ... ")
 
-        # load samples
-        video_file_path = self.path_eval_dataset + "/videos/"
+        path_annotations = self.path_eval_dataset + "/annotations/cmc/"
 
         # load groundtruth labels
-        test_gt_labels_path = self.path_eval_dataset + "/annotations/cmc/final_results/"   # test_shots.flist"  # test_shots.flist OR all_shots_without_tracks
-        #print(test_gt_labels_file)
-        gt_files = os.listdir(test_gt_labels_path)
-
-        all_data = []
-
-        for file in gt_files:
-            test_gt_labels_file = test_gt_labels_path + file
-            #print(test_gt_labels_file)
-            fp = open(test_gt_labels_file, 'r')
+        test_gt_labels_file = os.listdir(path_annotations)
+        test_gt_labels_file.sort()
+        print(test_gt_labels_file)
+        
+        final_dataset = []
+        gt_annotation_list = []
+        for file in test_gt_labels_file:
+            fp = open(path_annotations + file, 'r')
             lines = fp.readlines()
             fp.close()
-
-            gt_annotation_list = []
-            for line in lines[1:]:
+            lines = lines[1:]
+            
+            for line in lines:
+                #print(line)
                 line = line.replace('\n', '')
                 line = line.replace('\\', '/')
                 line = line.replace('\ufeff', '')
                 line_split = line.split(';')
-                gt_annotation_list.append([0, video_file_path + line_split[0], line_split[2], line_split[3], line_split[4]])
-            gt_annotation_np = np.array(gt_annotation_list)
-            all_data.append(gt_annotation_np)
+                #print(line_split)
+                #if(line_split[4] == "track"):
+                #    #line_split[4] = "na"
+                #    continue
 
-
-        self.final_dataset_np = all_data
-
+                gt_annotation_list.append([line_split[0], int(line_split[1]), int(line_split[2]), int(line_split[3]), line_split[4]])
+                
+        gt_annotation_np = np.array(gt_annotation_list)
+        self.final_dataset_np = gt_annotation_np
 
     def run_evaluation(self, idx=None):
         """
@@ -166,13 +155,18 @@ class Evaluation(object):
         else:
             # load all predictions and merge
             results_file_list = [f for f in os.listdir(self.path_eval_results) if f.endswith('.csv')]
-            self.final_dataset_np = self.final_dataset_np
+            results_file_list.sort()
+            final_gt_np = self.final_dataset_np
+            print(self.final_dataset_np[:20])
+            idx_track = np.where(self.final_dataset_np[:, 4:] == "track")[0]
+            print(idx_track)
+            #exit()
 
         pred_list = []
         pred_np = []
         for i, file in enumerate(results_file_list):
             results_file = os.path.join(self.path_eval_results, file)
-            print(results_file)
+            #print(results_file)
             fp = open(results_file, 'r')
             lines = fp.readlines()
             lines = lines[1:]
@@ -182,33 +176,29 @@ class Evaluation(object):
             for line in lines:
                 line = line.replace('\n', '')
                 line_split = line.split(';')
-                pred_list.append([line_split[0].split('/')[-1], line_split[1], line_split[2], line_split[3], line_split[4]])
-            pred_np = np.array(pred_list)
+                pred_list.append([line_split[0], int(line_split[1]), int(line_split[2]), int(line_split[3]), line_split[4]])
+        pred_list.sort()
+        pred_np = np.array(pred_list)
 
-        pred_np = np.delete(pred_np, np.s_[1:2], axis=1)
-        #pred_np = np.array(sorted(pred_np, key=lambda pred_np : pred_np[0]))
-        #print(pred_np)
-        #print(pred_np.shape)
+        pred_np_without_track = np.delete(pred_np, idx_track, 0)
+        print(pred_np_without_track[:20])
+        print(pred_np_without_track.shape)
 
-        # load groundtruth annotations
-        gt_l = []
-        for i in range(0, len(self.final_dataset_np)):
-            #print(self.final_dataset_np[i])
-            for j in range(0, len(self.final_dataset_np[i])):
-                shot = self.final_dataset_np[i][j]
-                shot[1] = shot[1].split('/')[-1]
-                #print(shot)
-                gt_l.append(shot[1:])
-        gt_np = np.array(gt_l)
-        #gt_np = np.array(sorted(gt_np, key=lambda gt_np: gt_np[0]))
-        #print(gt_np)
-        #print(gt_np.shape)
-
+        gt_np_prep_without_track = np.delete(self.final_dataset_np, idx_track, 0)
+        print(gt_np_prep_without_track[:20])
+        print(gt_np_prep_without_track.shape)
+       
         # calculate metrics
-        pred_np_prep = np.squeeze(pred_np[:, 3:])
-        gt_np_prep = np.squeeze(gt_np[:, 3:])
-        accuracy, precision, recall, f1_score = self.calculate_metrics(y_score=pred_np_prep, y_test=gt_np_prep)
+        #pred_np_prep = np.squeeze(pred_np[:, 4:])
+        #gt_np_prep = np.squeeze(final_gt_np[:, 4:])
 
+        pred_np_prep = np.squeeze(pred_np_without_track[:, 4:])
+        gt_np_prep = np.squeeze(gt_np_prep_without_track[:, 4:])
+
+        #print(pred_np)
+        #print(final_gt_np)
+
+        accuracy, precision, recall, f1_score = self.calculate_metrics(y_score=pred_np_prep, y_test=gt_np_prep)
         return accuracy, precision, recall, f1_score
 
     def calculate_metrics(self, y_score, y_test):
@@ -219,25 +209,29 @@ class Evaluation(object):
         :param y_score: This parameter must hold a valid numpy array with the class prediction per shot .
         :param y_test: This parameter must hold a valid numpy array with the groundtruth labels per shot.
         """
-        print(len(y_score))
-        print(len(y_test))
+        #print(len(y_score))
+        #print(len(y_test))
 
         y_score = [s.lower() for s in y_score]
         y_test = [s.lower() for s in y_test]
 
         self.config_instance.class_names = [s.lower() for s in self.config_instance.class_names]
 
+        #print(y_score)
+        #print(y_test)
+        print(self.config_instance.class_names)
+
         # accuracy: (tp + tn) / (p + n)
         accuracy = accuracy_score(y_test, y_score)
         print('Accuracy: %f' % accuracy)
         # precision tp / (tp + fp)
-        precision = precision_score(y_test, y_score, average='weighted')
+        precision = precision_score(y_test, y_score, average='macro')
         print('Precision: %f' % precision)
         # recall: tp / (tp + fn)
-        recall = recall_score(y_test, y_score, average='weighted')
+        recall = recall_score(y_test, y_score, average='macro')
         print('Recall: %f' % recall)
         # f1: 2 tp / (2 tp + fp + fn)
-        f1 = f1_score(y_test, y_score, average='weighted')
+        f1 = f1_score(y_test, y_score, average='macro')
         print('F1 score: %f' % f1)
 
         # confusion matrix
@@ -251,66 +245,29 @@ class Evaluation(object):
                                    title='Confusion matrix',
                                    cmap=None,
                                    normalize=True,
-                                   path=self.config_instance.path_eval_results + "/confusion_matrix_normalize.png")
+                                   path=self.config_instance.path_eval_results + "/confusion_matrix_normalize.pdf")
         self.plot_confusion_matrix(cm=matrix,
                                    target_names=self.config_instance.class_names,
                                    title='Confusion matrix',
                                    cmap=None,
                                    normalize=False,
-                                   path=self.config_instance.path_eval_results + "/confusion_matrix.png")
+                                   path=self.config_instance.path_eval_results + "/confusion_matrix.pdf")
         ''''''
 
         return accuracy, precision, recall, f1
 
     def plot_confusion_matrix(self, cm=None,
-                              target_names=[],
-                              title='Confusion matrix',
-                              cmap=None,
-                              normalize=True,
-                              path=""):
-        """
-        given a sklearn confusion matrix (cm), make a nice plot
-
-        Arguments
-        ---------
-        cm:           confusion matrix from sklearn.metrics.confusion_matrix
-
-        target_names: given classification classes such as [0, 1, 2]
-                      the class names, for example: ['high', 'medium', 'low']
-
-        title:        the text to display at the top of the matrix
-
-        cmap:         the gradient of the values displayed from matplotlib.pyplot.cm
-                      see http://matplotlib.org/examples/color/colormaps_reference.html
-                      plt.get_cmap('jet') or plt.cm.Blues
-
-        normalize:    If False, plot the raw numbers
-                      If True, plot the proportions
-
-        Usage
-        -----
-        plot_confusion_matrix(cm           = cm,                  # confusion matrix created by
-                                                                  # sklearn.metrics.confusion_matrix
-                              normalize    = True,                # show proportions
-                              target_names = y_labels_vals,       # list of names of the classes
-                              title        = best_estimator_name) # title of graph
-
-        Citiation
-        ---------
-        http://scikit-learn.org/stable/auto_examples/model_selection/plot_confusion_matrix.html
-        :param cm:
-        :param target_names:
-        :param title:
-        :param cmap:
-        :param normalize:
-        :param path:
-
-        """
+                          target_names=[],
+                          title='Confusion matrix',
+                          cmap=None,
+                          normalize=True,
+                          path=""):
         import matplotlib.pyplot as plt
         import numpy as np
         import itertools
         from matplotlib import pyplot as plt
         plt.rc('pdf', fonttype=42)
+
 
         accuracy = np.trace(cm) / float(np.sum(cm))
         misclass = 1 - accuracy
@@ -318,10 +275,10 @@ class Evaluation(object):
         if cmap is None:
             cmap = plt.get_cmap('Blues')
 
-        plt.figure(figsize=(8, 6))
+        plt.figure() #figsize=(8, 6)
         plt.imshow(cm, interpolation='nearest', cmap=cmap)
-        plt.title(title)
-        #plt.colorbar()
+        #plt.title(title)
+        plt.colorbar()
 
         if target_names is not None:
             tick_marks = np.arange(len(target_names))
@@ -335,17 +292,18 @@ class Evaluation(object):
         for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
             if normalize:
                 plt.text(j, i, "{:0.4f}".format(cm[i, j]),
-                         horizontalalignment="center",
-                         color="white" if cm[i, j] > thresh else "black")
+                        horizontalalignment="center",
+                        color="white" if cm[i, j] > thresh else "black")
             else:
                 plt.text(j, i, "{:,}".format(cm[i, j]),
-                         horizontalalignment="center",
-                         color="white" if cm[i, j] > thresh else "black")
+                        horizontalalignment="center",
+                        color="white" if cm[i, j] > thresh else "black")
 
         plt.tight_layout()
-        plt.ylabel('True label')
-        plt.xlabel('Predicted label\naccuracy={:0.4f}; misclass={:0.4f}'.format(accuracy, misclass))
-        #plt.savefig(path)
+        plt.ylabel('Ground truth label')
+        plt.xlabel('Predicted label - accuracy={:0.4f}; misclass={:0.4f}'.format(accuracy, misclass))
+        # plt.savefig(path)
+        plt.tight_layout(pad=0.4, h_pad=0.4, w_pad=0.4)
         plt.savefig(path, dpi=500)
 
     def exportExperimentResults(self, fName, cmc_results_np: np.ndarray):

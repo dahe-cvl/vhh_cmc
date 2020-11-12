@@ -123,11 +123,12 @@ class CMC(object):
                 optical_flow_instance = OpticalFlow(video_frames=shot_frames_np,
                                                     algorithm="orb",
                                                     config_instance=self.config_instance)
-                mag_l, angles_l = optical_flow_instance.run()
+                mag_l, angles_l, x_sum_l, y_sum_l = optical_flow_instance.run()
                 class_name = optical_flow_instance.predict_final_result(mag_l,
                                                                         angles_l,
+                                                                        x_sum_l,
+                                                                        y_sum_l,
                                                                         self.config_instance.class_names)
-
 
             '''
             # run optical flow process

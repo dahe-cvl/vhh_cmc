@@ -54,6 +54,8 @@ class OpticalFlow(object):
         filtered_mag_l_n = []
         filtered_angles_l_n = []
 
+        vector_x_sum_l = []
+        vector_y_sum_l = []
         angles_l_n = []
         mag_l_n = []
         for i in range(1, len(frames_np)):
@@ -79,12 +81,40 @@ class OpticalFlow(object):
             prev_points = np.array(kp_prev_list).astype('float').reshape(-1, 1, 2)
             mag_n, angle_n = self.compute_magnitude_angle(prev_points,
                                                           curr_points)
+            
+            #print(mag_n)
+            #print(angle_n)
             # angle_raw.append(angle_n.tolist())
             # mag_raw.append(mag_n.tolist())
+            ''''''
+            #mag_n = np.abs(mag_n)  # [:50])
+            mag_n, outlier_idx = self.filter1D(mag_n, alpha=2.5)
+            angles_cleanup = []
+            angles_orig_np = angle_n
+            for s in range(0, len(angles_orig_np)):
+                if(outlier_idx == s):
+                    angle_mean = (angles_orig_np[s-1] + angles_orig_np[s+1]) / 2.0
+                    angles_cleanup.append(angle_mean)
+                else:
+                    angles_cleanup.append(angles_orig_np[s])
+            angle_n = np.array(angles_cleanup)  
+            
+            #print(mag_n)
+            #print(angle_n)
 
-            mag_n = np.abs(mag_n)  # [:50])
-            #mag_n, outliers_idx = self.filter1D(mag_n, alpha=3)
             #mag_n = np.delete(mag_n, outliers_idx)
+
+            vector_y = np.multiply(mag_n, np.sin(np.deg2rad(angle_n)))
+            vector_x = np.multiply(mag_n, np.cos(np.deg2rad(angle_n)))
+
+            vector_y_sum = vector_y.sum() / len(vector_y)
+            vector_x_sum = vector_x.sum() / len(vector_x)
+            #print("vector_y_sum: " + str(vector_y_sum))
+            #print("vector_x_sum: " + str(vector_x_sum))
+
+            vector_x_sum_l.append([0, vector_x_sum])
+            vector_y_sum_l.append([0, vector_y_sum])
+            #exit()
 
             mag_mean_n = np.mean(mag_n)
             mag_l_n.append([0, mag_mean_n])
@@ -231,108 +261,180 @@ class OpticalFlow(object):
             '''
 
         # cv2.destroyAllWindows()
+        return mag_l_n, angles_l_n, vector_x_sum_l, vector_y_sum_l
 
-        return mag_l_n, angles_l_n
-
-    def predict_final_result(self, mag_l_n, angles_l_n, class_names):
+       def predict_final_result(self, mag_l_n, angles_l_n, x_sum_l, y_sum_l, class_names):
         # print(type(mag_l_n))
         # print(len(mag_l_n))
         # exit()
 
         # calcualate final result
-        angles_np = np.array(angles_l_n)
-        mag_np = np.array(mag_l_n)
+        angles_np = np.array(angles_l_n) 
+        mag_np = np.array(mag_l_n)  
 
-        # add filter
-        #print(mag_np[:, 1:])
-        filtered_mag_n, outlier_idx = self.filter1D(mag_np[:, 1:], alpha=3)
-        filtered_angles_np = np.delete(angles_np[:, 1:], outlier_idx)
+        x_comp = np.array(x_sum_l)  
+        y_comp = np.array(y_sum_l)  
+        print(angles_np.shape)
+        print(mag_np.shape)
+        print(x_comp.shape)
+        print(y_comp.shape)
 
-        filtered_angle_n, outlier_idx = self.filter1D(filtered_angles_np, alpha=2)
-        filtered_mag_n = np.delete(filtered_mag_n, outlier_idx)
+        x_comp_n = x_comp.sum() / len(x_comp)
+        y_comp_n = y_comp.sum() / len(y_comp)
 
-        # calculate x - y components - NOT USED YET
-        vector_y = np.multiply(filtered_mag_n, np.sin(np.deg2rad(filtered_angle_n)))
-        vector_x = np.multiply(filtered_mag_n, np.cos(np.deg2rad(filtered_angle_n)))
+        print("x_sum: " + str(x_comp_n))
+        print("y_sum: " + str(y_comp_n))
 
-        b, bins, patches = plt.hist(filtered_angle_n, bins=8, range=[0, 360],
+        th = self.config_instance.min_magnitude_threshold  # 2.0  # manual set threshold for magnitude
+        mag_condition_pan = abs(x_comp_n) > th and abs(x_comp_n - y_comp_n) > ((abs(x_comp_n) + abs(y_comp_n)) / 2 )
+        mag_condition_tilt = abs(y_comp_n) > th and abs(x_comp_n - y_comp_n) > ((abs(x_comp_n) + abs(y_comp_n)) / 2 )
+       
+
+        '''
+        # add filter - 1.5
+        filtered_mag_n, outlier_idx = self.filter1D(mag_np[:, 1:], alpha=1.5)
+        angles_cleanup = []
+        angles_orig_np = angles_np[:, 1:]
+        for s in range(0, len(angles_orig_np)):
+            if(outlier_idx == s):
+                angle_mean = (angles_orig_np[s-1] + angles_orig_np[s+1]) / 2.0
+                angles_cleanup.append(angle_mean)
+            else:
+                angles_cleanup.append(angles_orig_np[s])
+        filtered_angles_np = np.array(angles_cleanup)  
+        #filtered_angles_np = np.delete(angles_np[:, 1:], outlier_idx)
+
+        # add filter - 1.5
+        filtered_mag_n, outlier_idx = self.filter1D(filtered_mag_n, alpha=1.5)
+        angles_cleanup = []
+        angles_orig_np = angles_np[:, 1:]
+        for s in range(0, len(angles_orig_np)):
+            if(outlier_idx == s):
+                angle_mean = (angles_orig_np[s-1] + angles_orig_np[s+1]) / 2.0
+                angles_cleanup.append(angle_mean)
+            else:
+                angles_cleanup.append(angles_orig_np[s])
+        filtered_angles_np = np.array(angles_cleanup)  
+
+        # add filter - 1.5
+        filtered_mag_n, outlier_idx = self.filter1D(filtered_mag_n, alpha=1.5)
+        angles_cleanup = []
+        angles_orig_np = angles_np[:, 1:]
+        for s in range(0, len(angles_orig_np)):
+            if(outlier_idx == s):
+                angle_mean = (angles_orig_np[s-1] + angles_orig_np[s+1]) / 2.0
+                angles_cleanup.append(angle_mean)
+            else:
+                angles_cleanup.append(angles_orig_np[s])
+        filtered_angles_np = np.array(angles_cleanup)  
+
+        '''
+
+        # add filter - 1.5
+        filtered_angles_np, outlier_idx = self.filter1D(angles_np[:, 1:], alpha=1.5)
+        
+        # add filter - 1.5
+        filtered_angles_np, outlier_idx = self.filter1D(filtered_angles_np, alpha=1.5)
+
+        #filtered_angles_np = np.delete(angles_np[:, 1:], outlier_idx)
+
+        
+        #filtered_mag_n = self.filter1D(mag_np[:, 1:], alpha=1.5)
+        #filtered_angles_np = self.filter1D(angles_np[:, 1:], alpha=1.5)
+
+        #print(filtered_mag_n.shape)
+        #print(np.mean(filtered_mag_n))
+        #print(np.mean(mag_np[:, 1:]))
+        #exit()
+        #print(len(outlier_idx))
+        #print(filtered_angles_np.shape)
+        '''
+        #filtered_angle_n, outlier_idx = self.filter1D(filtered_angles_np, alpha=2)
+        #filtered_mag_n = np.delete(filtered_mag_n, outlier_idx)
+
+        # calculate x - y components 
+        vector_y = np.abs(np.multiply(filtered_mag_np, np.sin(np.deg2rad(filtered_angles_np))))
+        vector_x = np.abs(np.multiply(filtered_mag_np, np.cos(np.deg2rad(filtered_angles_np))))
+
+        '''
+
+        b, bins, patches = plt.hist(filtered_angles_np, bins=8, range=[0, 360],
                                     cumulative=False)  # bins=None, range=None
 
         th = self.config_instance.min_magnitude_threshold  # 2.0  # manual set threshold for magnitude
 
-        DEBUG_VIS_FLAG = False
-        if(DEBUG_VIS_FLAG == True):
-            # plot angles over time (frames)
-            fig, axs = plt.subplots(3)
-            fig.suptitle('mag and angles per feature point in one frame')
-            a = np.empty(len(filtered_mag_n))
-            a.fill(th)
-            axs[0].plot(np.arange(len(filtered_mag_n)), a)
-            a = np.empty(len(filtered_mag_n))
-            a.fill(np.median(filtered_mag_n))
-            axs[0].plot(np.arange(len(filtered_mag_n)), a)
-            np.median(filtered_mag_n)
-            axs[0].plot(np.arange(len(filtered_mag_n)), filtered_mag_n)
-            axs[1].plot(np.arange(len(filtered_angle_n)), filtered_angle_n)
-            b, bins, patches = axs[2].hist(filtered_angle_n, bins=8, range=[0,360], cumulative=False)  #bins=None, range=None
-            #plt.ylim(ymax=190, ymin=-190)
-            plt.grid(True)
-            plt.show()
-        ''''''
-        ''''''
-
         percentage = 0.5  # ratio threshold between no-movement and movement
         class_names_n = ['PAN', 'TILT', 'TILT', 'PAN', 'PAN', 'TILT', 'TILT', 'PAN']
 
-        print("predicted median magnitude: " + str(np.median(filtered_mag_n)))
-        print("threshold magnitude: " + str(th))
+        DEBUG_VIS_FLAG = False
+        if(DEBUG_VIS_FLAG == True):
+            # plot angles over time (frames)
+            fig, axs = plt.subplots(1)
+            axs.plot(np.arange(len(mag_np[:, 1:])), mag_np[:, 1:])
+            axs.plot(np.arange(len(filtered_mag_np)), filtered_mag_np)
+            #b, bins, patches = axs.hist(filtered_angles_np, bins=8, range=[0,360], cumulative=False, alpha=0.7, rwidth=0.85)  #bins=None, range=None
+            #minor_locator = AutoMinorLocator(2)
+            #plt.gca().xaxis.set_minor_locator(minor_locator)
+            #xticks = [(bins[idx+1] + value)/2 for idx, value in enumerate(bins[:-1])]
+            #xticks_labels = [ "[{:d}°-{:d}°]\n{:s}".format(int(value), int(bins[idx+1]), class_names_n[idx]) for idx, value in enumerate(bins[:-1])]
+            #plt.xticks(xticks, labels=xticks_labels, rotation=45)
+            #plt.grid(axis='y', alpha=0.75)
+            plt.tight_layout(pad=0.4, h_pad=0.4, w_pad=0.4)
+            plt.savefig(self.config_instance.path_debug_results + "mag.pdf", dpi=500)
+            plt.cla()
+       
+        #print("predicted mean magnitude: " + str(np.mean(filtered_mag_np)))
+        #print("predicted vector x: " + str(np.mean(vector_x)))
+        #print("predicted vector y: " + str(np.mean(vector_y)))
+        #print("predicted median magnitude: " + str(np.median(filtered_mag_np)))
+        #print("threshold magnitude: " + str(th))
 
         class_name = class_names_n[np.argmax(b)]
-        if ((class_name == "PAN" and np.median(filtered_mag_n) > th)):
+        print("predicted class_name (angles): " + str(class_name))
+        print("PAN: " + str(mag_condition_pan))
+        print("TILT: " + str(mag_condition_tilt))
+
+        if (class_name == "PAN" and mag_condition_pan == True):
             class_name = "PAN"
-        elif ((class_name == "TILT" and np.median(filtered_mag_n) > th)):
+        elif (class_name == "TILT" and mag_condition_tilt == True):
             class_name = "TILT"
         else:
             class_name = "NA"
-
-        '''
-        print(np.mean(angles_np))
-        angle = np.mean(angles_np)
-        print("predicted angle: " + str(angle))
-
-        print(np.mean(mag_np))
-        mag = np.mean(mag_np)
-        print("predicted mag: " + str(mag))
-
-        if ((angle >= 140 and angle < 220) or (angle >= -40 and angle < 40) and (mag > 20)):
-            class_name = class_names[0]
-        elif ((angle >= 50 and angle < 130) or (angle >= 230 and angle < 310) and (mag > 20)):
-            class_name = class_names[1]
-        else:
-            class_name = class_names[2]
-        print(class_name)
-        '''
+        
         return class_name
 
     def filter1D(self, data_np, alpha=2):
-        print(type(data_np))
-        print(data_np.shape)
-
+        #print(type(data_np))
+        #print(data_np.shape)
         data_std = np.std(data_np)
         data_mean = np.mean(data_np)
         anomaly_cut_off = data_std * alpha
-
         lower_limit = data_mean - anomaly_cut_off
         upper_limit = data_mean + anomaly_cut_off
-        print(lower_limit)
+
         # Generate outliers
         outliers_idx = []
-        for o, outlier in enumerate(data_np):
-            if outlier > upper_limit or outlier < lower_limit:
-                outliers_idx.append(o)
-        filtered_data_np = np.delete(data_np, outliers_idx)
-        return filtered_data_np, outliers_idx
+        filtered_data = []
+        for j in range(0, len(data_np)):
+            if(j < len(data_np) - 1):
+                nxt = data_np[j+1]
+                curr = data_np[j]
+                prv = data_np[j-1]
+            else:
+                nxt = data_np[j]
+                curr = data_np[j]
+                prv = data_np[j-1]
 
+            if curr > upper_limit or curr < lower_limit:
+                data_mean = (prv + nxt) / 2.0
+                filtered_data.append(data_mean)
+                outliers_idx.append(j)
+            else:
+                filtered_data.append(curr)
+        
+        filtered_data_np = np.array(filtered_data)
+        return filtered_data_np, outliers_idx
+        
     def crop(self, img: np.ndarray, dim: tuple):
         """
         This method is used to crop a specified region of interest from a given image.

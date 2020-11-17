@@ -5,23 +5,19 @@ class Configuration:
     """
     This class is needed to read the configuration parameters specified in the configuration.yaml file.
     The instance of the class is holding all parameters during runtime.
-
     .. note::
        e.g. ./config/config_vhh_test.yaml
-
         the yaml file is separated in multiple sections
         config['Development']
         config['PreProcessing']
         config['CmcCore']
         config['Evaluation']
-
         whereas each section should hold related and meaningful parameters.
     """
 
     def __init__(self, config_file: str):
         """
         Constructor
-
         :param config_file: [required] path to configuration file (e.g. PATH_TO/config.yaml)
                                        must be with extension ".yaml"
         """
@@ -36,6 +32,7 @@ class Configuration:
         self.debug_flag = -1
         self.sbd_results_path = None
         self.save_debug_pkg_flag = -1
+        self.path_debug_results = None
 
         # pre-processing section
         self.flag_convert2Gray = -1
@@ -51,6 +48,7 @@ class Configuration:
         self.angle_diff_limit = -1
         self.mode = -1
         self.min_magnitude_threshold = -1
+        self.distance_threshold = -1
 
         # stc_core_config section
         self.class_names = None
@@ -91,6 +89,7 @@ class Configuration:
         self.debug_flag = int(developer_config['DEBUG_FLAG'])
         self.sbd_results_path = developer_config['SBD_RESULTS_PATH']
         self.save_debug_pkg_flag = int(developer_config['SAVE_DEBUG_PKG'])
+        self.path_debug_results = developer_config['PATH_DEBUG_RESULTS']
 
         # pre-processing section
         self.flag_convert2Gray = int(pre_processing_config['CONVERT2GRAY_FLAG'])
@@ -107,6 +106,7 @@ class Configuration:
         self.angle_diff_limit = int(optical_flow_config['ANGLE_DIFF_LIMIT'])
         self.mode = int(optical_flow_config['MODE'])
         self.min_magnitude_threshold = float(optical_flow_config['MIN_MAGNITUDE_THRESHOLD'])
+        self.distance_threshold = float(optical_flow_config['DISTANCE_THRESHOLD'])
 
         # stc_core_config section
         self.class_names = cmc_core_config['CLASS_NAMES']

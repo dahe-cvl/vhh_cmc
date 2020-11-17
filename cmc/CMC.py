@@ -70,7 +70,7 @@ class CMC(object):
             num_shots = len(shots_np)
 
         # read all frames of video
-        vid_name = shots_np[0][1]
+        vid_name = shots_np[0][0]
 
         if(self.config_instance.save_eval_results == 1):
             print("Evaluation mode is activated ...")
@@ -102,12 +102,12 @@ class CMC(object):
         print(all_frames_np.shape)
 
         #all_frames_np = all_frames_np[1240:1478,:,:,:]
-        shot_start_idx = 0   # used in debugging mode - to select specific shot
+        shot_start_idx = 2   # used in debugging mode - to select specific shot
         results_cmc_l = []
         for idx in range(shot_start_idx, shot_start_idx + num_shots):
             print(shots_np[idx])
-            shot_id = int(shots_np[idx][0])
-            vid_name = str(shots_np[idx][1])
+            shot_id = int(shots_np[idx][1])
+            vid_name = str(shots_np[idx][0])
             start = int(shots_np[idx][2])
             stop = int(shots_np[idx][3])
             shot_frames_np = all_frames_np[start:stop + 1, :, :, :]
@@ -118,7 +118,12 @@ class CMC(object):
                 #print("shot length is too small!")
                 class_name = "NA"
             else:
-                print("DL approach - NOT IMPLEMENTED YET")
+                 # add new optical flow version
+                optical_flow_instance = OpticalFlow(video_frames=shot_frames_np,
+                                                    algorithm="orb",
+                                                    config_instance=self.config_instance)
+                mag_l, angles_l = optical_flow_instance.run()
+                optical_flow_instance.predict_final_result(mag_l, angles_l, self.config_instance.class_names)
                 exit()
 
             # prepare results

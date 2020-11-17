@@ -22,12 +22,11 @@ class OpticalFlow_ORB(object):
 
         self.video_frames = video_frames
 
-    def getMatches(self, frame1, frame2):
+    def getMatches(self, frame1, frame2, distance_threshold=0.75):
         kp_curr_list = []
         kp_prev_list = []
 
-        orb = cv2.ORB_create(nfeatures=1000)
-
+        orb = cv2.ORB_create(nfeatures=2000)
         kp_prev, descriptor_prev = orb.detectAndCompute(frame1, None)
         kp_curr, descriptor_curr = orb.detectAndCompute(frame2, None)
 
@@ -49,29 +48,38 @@ class OpticalFlow_ORB(object):
         #print(out_img_prev.shape)
         #print(out_img_curr.shape)
 
-        # Create a Brute Force Matcher object.
-        bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
-
+        ''''''
+        bf = cv2.BFMatcher()
         # Perform the matching between the ORB descriptors of the training image and the test image
         try:
-            matches = bf.match(descriptor_prev, descriptor_curr)
+            matches = bf.knnMatch(descriptor_prev, descriptor_curr, k=2)
+            #print(matches)
         except:
             return kp_prev_list, kp_curr_list
 
-        #print(matches)
-        #print(type(matches))
-        if (len(matches) == 0):
+        # Apply ratio test
+        good_matches = []
+        if (len(matches) > 0):
+            if (len(matches[0]) == 2):
+                for m, n in matches:
+                    if m.distance < distance_threshold * n.distance:
+                        good_matches.append([m])
+            elif (len(matches[0]) == 1):
+                for m in matches:
+                    if m[0].distance < distance_threshold:
+                        good_matches.append([m])
+        ''''''
+        # good_matches = np.squeeze(np.array(good_matches)).tolist()
+        # print((good_matches))
+
+        # print(matches)
+        # print(type(good_matches))
+        if (len(good_matches) == 0):
             return kp_prev_list, kp_curr_list
 
-        #print(descriptor_prev.shape)
-        #matches = bf.knnMatch(descriptor_prev, descriptor_curr, k=3)
-
-        # The matches with shorter distance are the ones we want.
-        matches = sorted(matches, key=lambda x: x.distance)
-
-        for match in matches:
-            kp_curr_list.append(kp_curr[match.trainIdx].pt)
-            kp_prev_list.append(kp_prev[match.queryIdx].pt)
+        for match in good_matches:
+            kp_curr_list.append(kp_curr[match[0].trainIdx].pt)
+            kp_prev_list.append(kp_prev[match[0].queryIdx].pt)
 
         '''
         result = cv2.drawMatches(out_img_curr, kp_curr, out_img_prev, kp_prev, matches[:1], out_img_prev, flags=2)

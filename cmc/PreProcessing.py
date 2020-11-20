@@ -51,8 +51,41 @@ class PreProcessing(object):
         :return: This method returns a grayscale image (WxHx1).
         """
         img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        img_gray = np.expand_dims(img_gray, axis=-1)
+        #img_gray = np.expand_dims(img_gray, axis=-1)
+        img_gray = cv2.cvtColor(img_gray, cv2.COLOR_GRAY2RGB)
         return img_gray
+
+    def standardizeGray(self, img: np.ndarray):
+        """
+        This method is used to standardize input data to value range [0, 1].
+
+        :param img: This parameter must hold a valid numpy image.
+        :return: This method returns a grayscale image (WxHx1).
+        """
+        
+        print(img.shape)
+        means = np.mean(img)
+        stds = np.std(img)
+
+        x_centered = img - means
+        x_standardized = x_centered / stds
+        return np.nan_to_num(x_standardized)
+
+    def normalizeGray(self, img: np.ndarray):
+        """
+        This method is used to normalize input data to value range [0, 1].
+
+        :param img: This parameter must hold a valid numpy image.
+        :return: This method returns a grayscale image (WxHx1).
+        """
+
+        means = np.mean(img)
+        stds = np.std(img)
+        #print(means)
+        #print(stds)
+
+        x_normalized = (img - np.min(img)) / (np.max(img) - np.min(img))
+        return np.nan_to_num(x_normalized)
 
     def crop(self, img: np.ndarray, dim: tuple):
         """

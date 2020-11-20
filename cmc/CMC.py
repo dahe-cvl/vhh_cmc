@@ -101,8 +101,9 @@ class CMC(object):
         all_frames_np = np.array(frame_l)
         print(all_frames_np.shape)
 
+
         #all_frames_np = all_frames_np[1240:1478,:,:,:]
-        shot_start_idx = 2   # used in debugging mode - to select specific shot
+        shot_start_idx = 10 # 10 #29   # used in debugging mode - to select specific shot
         results_cmc_l = []
         for idx in range(shot_start_idx, shot_start_idx + num_shots):
             print(shots_np[idx])
@@ -112,6 +113,11 @@ class CMC(object):
             stop = int(shots_np[idx][3])
             shot_frames_np = all_frames_np[start:stop + 1, :, :, :]
             shot_len = stop - start
+            
+
+            # normalize shot
+            #shot_frames_normalized_np = self.pre_processing_instance.normalizeGray(shot_frames_np)
+            #print(shot_frames_normalized_np.shape)
 
             MIN_NUMBER_OF_FRAMES_PER_SHOT = 10
             if(shot_len <= MIN_NUMBER_OF_FRAMES_PER_SHOT ):
@@ -122,7 +128,9 @@ class CMC(object):
                 optical_flow_instance = OpticalFlow(video_frames=shot_frames_np,
                                                     algorithm="orb",
                                                     config_instance=self.config_instance)
-                mag_l, angles_l = optical_flow_instance.run()
+                mag_l, angles_l = optical_flow_instance.runDense()
+
+                #mag_l, angles_l = optical_flow_instance.runVO()
                 optical_flow_instance.predict_final_result(mag_l, angles_l, self.config_instance.class_names)
                 exit()
 

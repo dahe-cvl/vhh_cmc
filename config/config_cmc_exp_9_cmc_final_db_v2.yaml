@@ -1,11 +1,10 @@
-
 Development:
   ###
   # This parameter is used to activate or deactivate the debug mode.
-  DEBUG_FLAG: 1             # 1 ... activate 0 ... deactivate
+  DEBUG_FLAG: 0             # 1 ... activate 0 ... deactivate
   ###
   # This parameter is used to specify a SBD results file for debugging mode.
-  SBD_RESULTS_PATH: "/data/share/datasets/vhh_mmsi_test_db_v2/annotations/sbd/2.csv"
+  SBD_RESULTS_PATH: "/data/share/maxrecall_vhh_mmsi/release/videos/results/sbd/final_results/2.csv"
   ###
   # This parameter is used to specify the results path in debug mode
   PATH_DEBUG_RESULTS: "/data/share/maxrecall_vhh_mmsi/develop/videos/results/cmc/develop/"
@@ -16,7 +15,7 @@ Development:
 PreProcessing:
   ###
   # This flag is used to convert a input frame into a grayscale frame (0... deactivate, 1 ... activate).
-  CONVERT2GRAY_FLAG: 1
+  CONVERT2GRAY_FLAG: 0
   ###
   # This flag is used to center crop a input frame (0... deactivate, 1 ... activate).
   CENTER_CROP_FLAG: 1       # crop image (origin: image center) with maximum width or height
@@ -30,7 +29,7 @@ PreProcessing:
 OpticalFlow:
   ###
   # This parameter is used to specify a magnitude threshold to disinguish between no-movement and movement. (e.g. eval dataset: 2, 3, 5)
-  MIN_MAGNITUDE_THRESHOLD: 2.0
+  MIN_MAGNITUDE_THRESHOLD: 0.5
   ###
   # This parameter is used to specify a distance threshold for outlier detection of feature matches
   DISTANCE_THRESHOLD: 0.75
@@ -60,14 +59,14 @@ OpticalFlow:
 CmcCore:
   ###
   # This parameter is used to specify the class names.
-  CLASS_NAMES: ["PAN","TILT","NA"]
+  CLASS_NAMES: ["pan","tilt","na"]
 
   ###
   # This parameter is used to save raw results (e.g. debug visualizations).
-  SAVE_RAW_RESULTS: 1       # 1 ... yes 0 ... no
+  SAVE_RAW_RESULTS: 0       # 1 ... yes 0 ... no
   ###
   # This parameter is used to specify the path for saving the raw results.
-  PATH_RAW_RESULTS: "/data/share/maxrecall_vhh_mmsi/videos/results/cmc/raw_results/"
+  PATH_RAW_RESULTS: "/data/share/jocch_paper_cmc_results/raw_results/"
   NUMBER_OF_FRAMES_PER_SHOT: 5  # save x frames per shot
   ###
   # This parameter is used to specify the prefix for the results file.
@@ -81,7 +80,7 @@ CmcCore:
   SAVE_FINAL_RESULTS: 1     # 1 ... yes 0 ... no
   ###
   # This parameter is used to specify the path for saving the final results.
-  PATH_FINAL_RESULTS: "/data/share/maxrecall_vhh_mmsi/videos/results/cmc/final_results/"
+  PATH_FINAL_RESULTS: "/data/share/jocch_paper_cmc_results/final_results/"
   ###
   # This parameter is used to specify the prefix for the results file.
   PREFIX_FINAL_RESULTS: "results_"
@@ -91,21 +90,21 @@ CmcCore:
 
   ###
   # This parameter is used to specify the path to the videos.
-  PATH_VIDEOS: "/data/share/maxrecall_vhh_mmsi/develop/videos/downloaded//"
+  PATH_VIDEOS: "/data/share/datasets/cmc_final_dataset_v2/"  #   /data/share/maxrecall_vhh_mmsi/develop/videos/downloaded/
 
 Evaluation:
   ###
   # This parameter is used to save evaluation results (e.g. visualizations, ... ).
-  SAVE_EVAL_RESULTS: 0
+  SAVE_EVAL_RESULTS: 1
   ###
   # This parameter is used the raw results path.
-  PATH_RAW_RESULTS: "/data/share/maxrecall_vhh_mmsi/videos/results/cmc/raw_results/"
+  PATH_RAW_RESULTS: "/data/share/maxrecall_vhh_mmsi/develop/videos/results/cmc/raw_results/"
   ###
   # This parameter is used to specify the path to store the evaluation results path.
-  PATH_EVAL_RESULTS: "/data/share/maxrecall_vhh_mmsi/videos/results/cmc/develop/"
+  PATH_EVAL_RESULTS: "/data/share/jocch_paper_cmc_results/cmc_final_db_v2_final_results_mag_th_0_5/"
   ###
   # This parameter is used to groundtruth annotations used for evaluation.
   PATH_GT_ANNOTATIONS: "/caa/Projects02/vhh/private/database_nobackup/VHH_datasets/annotations/ShotBoundaryDetection/imediacities/sbd_imc_annotations_20191231.csv"
   ###
   # This parameter is used to specify the path to the dataset used for the evaluation.
-  PATH_EVAL_DATASET: "/data/share/cmc_eval_dataset/"
+  PATH_EVAL_DATASET: "/data/share/datasets/cmc_final_dataset_v2/"   # vhh_mmsi_test_db_v2   cmc_final_dataset_v2

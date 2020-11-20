@@ -26,7 +26,7 @@ class OpticalFlow_ORB(object):
         kp_curr_list = []
         kp_prev_list = []
 
-        orb = cv2.ORB_create(nfeatures=5000)
+        orb = cv2.ORB_create(nfeatures=2000)
         kp_prev, descriptor_prev = orb.detectAndCompute(frame1, None)
         kp_curr, descriptor_curr = orb.detectAndCompute(frame2, None)
 

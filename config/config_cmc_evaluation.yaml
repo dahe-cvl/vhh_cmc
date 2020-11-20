@@ -27,7 +27,10 @@ PreProcessing:
 OpticalFlow:
   ###
   # This parameter is used to specify a magnitude threshold to disinguish between no-movement and movement. (e.g. eval dataset: 2, 3, 5)
-  MIN_MAGNITUDE_THRESHOLD: 2.0
+  MIN_MAGNITUDE_THRESHOLD: 5.0
+  ###
+  # This parameter is used to specify a distance threshold for outlier detection of feature matches
+  DISTANCE_THRESHOLD: 0.75
   ###
   # This parameter is used to specify the number of consecutive frames which are needed to register a camera movement.
   SENSITIVITY: 10
@@ -54,7 +57,7 @@ OpticalFlow:
 CmcCore:
   ###
   # This parameter is used to specify the class names.
-  CLASS_NAMES: ["pan","tilt", "NA"]
+  CLASS_NAMES: ["pan","tilt", "track", "NA"]
 
   ###
   # This parameter is used to save raw results (e.g. debug visualizations).
@@ -96,10 +99,10 @@ Evaluation:
   PATH_RAW_RESULTS: "/data/share/maxrecall_vhh_mmsi/videos/results/cmc/raw_results/"
   ###
   # This parameter is used to specify the path to store the evaluation results path.
-  PATH_EVAL_RESULTS: "/data/share/maxrecall_vhh_mmsi/videos/results/cmc/develop/optical_flow_eval/"
+  PATH_EVAL_RESULTS: "/data/share/maxrecall_vhh_mmsi/videos/results/cmc/develop/optical_flow_test/"
   ###
   # This parameter is used to groundtruth annotations used for evaluation.
   PATH_GT_ANNOTATIONS: "/caa/Projects02/vhh/private/database_nobackup/VHH_datasets/annotations/ShotBoundaryDetection/imediacities/sbd_imc_annotations_20191231.csv"
   ###
   # This parameter is used to specify the path to the dataset used for the evaluation.
-  PATH_EVAL_DATASET: "/data/share/cmc_eval_dataset/"
+  PATH_EVAL_DATASET: "/data/share/vhh_mmsi_test_db/"

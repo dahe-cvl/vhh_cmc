@@ -5,7 +5,10 @@ Development:
   DEBUG_FLAG: 1             # 1 ... activate 0 ... deactivate
   ###
   # This parameter is used to specify a SBD results file for debugging mode.
-  SBD_RESULTS_PATH: "/data/share/maxrecall_vhh_mmsi/videos/results/sbd/final_results/999.csv"
+  SBD_RESULTS_PATH: "/data/share/maxrecall_vhh_mmsi/release/videos/results/sbd/final_results/1.csv"
+  ###
+  # This parameter is used to specify the results path in debug mode
+  PATH_DEBUG_RESULTS: "/data/share/maxrecall_vhh_mmsi/develop/videos/results/cmc/develop/"  
   ###
   # This parameter is used to save a debug package (e.g. including some visualizations, ... - not available yet).
   SAVE_DEBUG_PKG: 0
@@ -25,6 +28,12 @@ PreProcessing:
   RESIZE_DIM: 512, 512      # resize dimension -> height, width
 
 OpticalFlow:
+  ###
+  # This parameter is used to specify a magnitude threshold to disinguish between no-movement and movement. (e.g. eval dataset: 2, 3, 5)
+  MIN_MAGNITUDE_THRESHOLD: 5.0
+  ###
+  # This parameter is used to specify a distance threshold for outlier detection of feature matches
+  DISTANCE_THRESHOLD: 0.75
   ###
   # This parameter is used to specify the number of consecutive frames which are needed to register a camera movement.
   SENSITIVITY: 10
@@ -82,7 +91,7 @@ CmcCore:
 
   ###
   # This parameter is used to specify the path to the videos.
-  PATH_VIDEOS: "/data/share/maxrecall_vhh_mmsi/videos/downloaded/"
+  PATH_VIDEOS: "/data/share/maxrecall_vhh_mmsi/release/videos/downloaded/"
 
 Evaluation:
   ###

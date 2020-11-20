@@ -2,16 +2,11 @@ import cv2
 import numpy as np
 import argparse
 from matplotlib import pyplot as plt
-from cmc.OpticalFlow_ORB import OpticalFlow_ORB
-from cmc.OpticalFlow_SIFT import OpticalFlow_SIFT
-from cmc.OpticalFlow_SURF import OpticalFlow_SURF
-from cmc.OpticalFlow_BRIEF import OpticalFlow_BRIEF
-from cmc.OpticalFlow_FAST import OpticalFlow_FAST
-from cmc.OpticalFlow_Dense import OpticalFlow_Dense
-
+from vhh_cmc.OpticalFlow_ORB import OpticalFlow_ORB
+from vhh_cmc.OpticalFlow_SIFT import OpticalFlow_SIFT
 
 class OpticalFlow(object):
-    def __init__(self, video_frames=None, algorithm="sift", config_instance=None):
+    def __init__(self, video_frames=None, algorithm="orb", config_instance=None):
         #self.video_name = "C:\\Users\\dhelm\\Documents\\slow_traffic_small.mp4"
         #self.video_name = "C:\\Users\\dhelm\\Documents\\training_data_patrick_link\\training_data\\tilt\\b88f0e71-a0f2-4efe-ae0d-5b83a0770b73_32.mp4"  # tilt unten nach oben
         #self.video_name = "C:\\Users\\dhelm\\Documents\\training_data_patrick_link\\training_data\\tilt\\35_25178.mp4"  # tilt oben nach unten
@@ -36,7 +31,7 @@ class OpticalFlow(object):
         elif (algorithm == "orb"):
             self.feature_detector = OpticalFlow_ORB(video_frames=video_frames)
         else:
-            print("ERROR: select valid feature extractor [e.g. sift, orb, surf, fast, brief, pesc]")
+            print("ERROR: select valid feature extractor [e.g. sift, orb, pesc]")
             exit()
 
     def runVO(self):
@@ -277,6 +272,7 @@ class OpticalFlow(object):
             #prev_frame = frames_np[i - 1]
             #curr_frame = frames_np[i]
 
+<<<<<<< HEAD:cmc/OpticalFlow.py
             cv2.imshow("orig", frames_np[i])
 
             blocks_per_frame = []
@@ -294,6 +290,15 @@ class OpticalFlow(object):
             distance_threshold = self.config_instance.distance_threshold
             kp_prev_list, kp_curr_list = self.feature_detector.getMatches(prev_frame, curr_frame, distance_threshold)            
             print(len(kp_curr_list))
+=======
+            distance_threshold = self.config_instance.distance_threshold
+            kp_prev_list, kp_curr_list = self.feature_detector.getMatches(prev_frame, curr_frame, distance_threshold)
+
+            #print("---")
+            #print("number of features")
+            #print(len(kp_curr_list))
+            #print(len(kp_prev_list))
+>>>>>>> master:vhh_cmc/OpticalFlow.py
 
             if (len(kp_prev_list) == 0 or len(kp_curr_list) == 0):
                 #mag_l_n.append([0, 0])
@@ -314,6 +319,7 @@ class OpticalFlow(object):
                 seed_idx = i
 
             mag_n, angle_n = self.compute_magnitude_angle(prev_points,
+<<<<<<< HEAD:cmc/OpticalFlow.py
                                                         curr_points)
 
             
@@ -333,11 +339,19 @@ class OpticalFlow(object):
             k = cv2.waitKey()
             continue
 
+=======
+                                                          curr_points)
+            
+>>>>>>> master:vhh_cmc/OpticalFlow.py
             #print(mag_n)
             #print(angle_n)
             # angle_raw.append(angle_n.tolist())
             # mag_raw.append(mag_n.tolist())
+<<<<<<< HEAD:cmc/OpticalFlow.py
             '''
+=======
+            ''''''
+>>>>>>> master:vhh_cmc/OpticalFlow.py
             #mag_n = np.abs(mag_n)  # [:50])
             mag_n, outlier_idx = self.filter1D(mag_n, alpha=2.5)
             angles_cleanup = []
@@ -349,7 +363,11 @@ class OpticalFlow(object):
                 else:
                     angles_cleanup.append(angles_orig_np[s])
             angle_n = np.array(angles_cleanup)  
+<<<<<<< HEAD:cmc/OpticalFlow.py
             '''
+=======
+            
+>>>>>>> master:vhh_cmc/OpticalFlow.py
             #print(mag_n)
             #print(angle_n)
 
@@ -357,6 +375,7 @@ class OpticalFlow(object):
 
             vector_y = np.multiply(mag_n, np.sin(np.deg2rad(angle_n)))
             vector_x = np.multiply(mag_n, np.cos(np.deg2rad(angle_n)))
+<<<<<<< HEAD:cmc/OpticalFlow.py
 
             vector_y_sum = vector_y.sum() / len(vector_y)
             vector_x_sum = vector_x.sum() / len(vector_x)
@@ -368,12 +387,31 @@ class OpticalFlow(object):
             #exit()
 
             mag_n = np.abs(mag_n)
+=======
+
+            vector_y_sum = vector_y.sum() / len(vector_y)
+            vector_x_sum = vector_x.sum() / len(vector_x)
+            #print("vector_y_sum: " + str(vector_y_sum))
+            #print("vector_x_sum: " + str(vector_x_sum))
+
+            vector_x_sum_l.append([0, vector_x_sum])
+            vector_y_sum_l.append([0, vector_y_sum])
+            #exit()
+
+>>>>>>> master:vhh_cmc/OpticalFlow.py
             mag_mean_n = np.mean(mag_n)
             mag_l_n.append(mag_mean_n)
 
             angle_n = np.abs(angle_n)  # [:50])
             angle_mean_n = np.mean(angle_n)
+<<<<<<< HEAD:cmc/OpticalFlow.py
             angles_l_n.append(angle_mean_n)
+=======
+            angles_l_n.append([0, angle_mean_n])
+
+            filtered_angle_n = angles_l_n
+            filtered_angles_l_n.append(filtered_angle_n)
+>>>>>>> master:vhh_cmc/OpticalFlow.py
 
             '''
             data_std = np.std(mag_n)
@@ -533,6 +571,7 @@ class OpticalFlow(object):
         mag_filtered4 = np.array(mag_cleanup)  
         '''
 
+<<<<<<< HEAD:cmc/OpticalFlow.py
         from pykalman import KalmanFilter
         kf = KalmanFilter()
         measurements = mag_l_n  # 3 observations
@@ -576,14 +615,21 @@ class OpticalFlow(object):
         return mag_l_n, angles_l_n, vector_x_sum_l, vector_y_sum_l
 
     def predict_final_result(self, mag_l_n, angles_l_n, class_names):
+=======
+        # cv2.destroyAllWindows()
+        return mag_l_n, angles_l_n, vector_x_sum_l, vector_y_sum_l
+
+       def predict_final_result(self, mag_l_n, angles_l_n, x_sum_l, y_sum_l, class_names):
+>>>>>>> master:vhh_cmc/OpticalFlow.py
         # print(type(mag_l_n))
         # print(len(mag_l_n))
         # exit()
 
         # calcualate final result
-        angles_np = np.array(angles_l_n)
-        mag_np = np.array(mag_l_n)
+        angles_np = np.array(angles_l_n) 
+        mag_np = np.array(mag_l_n)  
 
+<<<<<<< HEAD:cmc/OpticalFlow.py
         print(np.mean(angles_np))
         print(np.std(angles_np))
 
@@ -596,62 +642,137 @@ class OpticalFlow(object):
         print(mag_np[:, 1:])
         filtered_mag_n, outlier_idx = self.filter1D(mag_np[:, 1:], alpha=3)
         filtered_angles_np = np.delete(angles_np[:, 1:], outlier_idx)
+=======
+        x_comp = np.array(x_sum_l)  
+        y_comp = np.array(y_sum_l)  
+        print(angles_np.shape)
+        print(mag_np.shape)
+        print(x_comp.shape)
+        print(y_comp.shape)
+>>>>>>> master:vhh_cmc/OpticalFlow.py
 
-        filtered_angle_n, outlier_idx = self.filter1D(filtered_angles_np, alpha=2)
-        filtered_mag_n = np.delete(filtered_mag_n, outlier_idx)
+        x_comp_n = x_comp.sum() / len(x_comp)
+        y_comp_n = y_comp.sum() / len(y_comp)
 
-        # calculate x - y components - NOT USED YET
-        vector_y = np.multiply(filtered_mag_n, np.sin(np.deg2rad(filtered_angle_n)))
-        vector_x = np.multiply(filtered_mag_n, np.cos(np.deg2rad(filtered_angle_n)))
+        print("x_sum: " + str(x_comp_n))
+        print("y_sum: " + str(y_comp_n))
 
-        b, bins, patches = plt.hist(filtered_angle_n, bins=8, range=[0, 360],
+        th = self.config_instance.min_magnitude_threshold  # 2.0  # manual set threshold for magnitude
+        mag_condition_pan = abs(x_comp_n) > th and abs(x_comp_n - y_comp_n) > ((abs(x_comp_n) + abs(y_comp_n)) / 2 )
+        mag_condition_tilt = abs(y_comp_n) > th and abs(x_comp_n - y_comp_n) > ((abs(x_comp_n) + abs(y_comp_n)) / 2 )
+       
+
+        '''
+        # add filter - 1.5
+        filtered_mag_n, outlier_idx = self.filter1D(mag_np[:, 1:], alpha=1.5)
+        angles_cleanup = []
+        angles_orig_np = angles_np[:, 1:]
+        for s in range(0, len(angles_orig_np)):
+            if(outlier_idx == s):
+                angle_mean = (angles_orig_np[s-1] + angles_orig_np[s+1]) / 2.0
+                angles_cleanup.append(angle_mean)
+            else:
+                angles_cleanup.append(angles_orig_np[s])
+        filtered_angles_np = np.array(angles_cleanup)  
+        #filtered_angles_np = np.delete(angles_np[:, 1:], outlier_idx)
+
+        # add filter - 1.5
+        filtered_mag_n, outlier_idx = self.filter1D(filtered_mag_n, alpha=1.5)
+        angles_cleanup = []
+        angles_orig_np = angles_np[:, 1:]
+        for s in range(0, len(angles_orig_np)):
+            if(outlier_idx == s):
+                angle_mean = (angles_orig_np[s-1] + angles_orig_np[s+1]) / 2.0
+                angles_cleanup.append(angle_mean)
+            else:
+                angles_cleanup.append(angles_orig_np[s])
+        filtered_angles_np = np.array(angles_cleanup)  
+
+        # add filter - 1.5
+        filtered_mag_n, outlier_idx = self.filter1D(filtered_mag_n, alpha=1.5)
+        angles_cleanup = []
+        angles_orig_np = angles_np[:, 1:]
+        for s in range(0, len(angles_orig_np)):
+            if(outlier_idx == s):
+                angle_mean = (angles_orig_np[s-1] + angles_orig_np[s+1]) / 2.0
+                angles_cleanup.append(angle_mean)
+            else:
+                angles_cleanup.append(angles_orig_np[s])
+        filtered_angles_np = np.array(angles_cleanup)  
+
+        '''
+
+        # add filter - 1.5
+        filtered_angles_np, outlier_idx = self.filter1D(angles_np[:, 1:], alpha=1.5)
+        
+        # add filter - 1.5
+        filtered_angles_np, outlier_idx = self.filter1D(filtered_angles_np, alpha=1.5)
+
+        #filtered_angles_np = np.delete(angles_np[:, 1:], outlier_idx)
+
+        
+        #filtered_mag_n = self.filter1D(mag_np[:, 1:], alpha=1.5)
+        #filtered_angles_np = self.filter1D(angles_np[:, 1:], alpha=1.5)
+
+        #print(filtered_mag_n.shape)
+        #print(np.mean(filtered_mag_n))
+        #print(np.mean(mag_np[:, 1:]))
+        #exit()
+        #print(len(outlier_idx))
+        #print(filtered_angles_np.shape)
+        '''
+        #filtered_angle_n, outlier_idx = self.filter1D(filtered_angles_np, alpha=2)
+        #filtered_mag_n = np.delete(filtered_mag_n, outlier_idx)
+
+        # calculate x - y components 
+        vector_y = np.abs(np.multiply(filtered_mag_np, np.sin(np.deg2rad(filtered_angles_np))))
+        vector_x = np.abs(np.multiply(filtered_mag_np, np.cos(np.deg2rad(filtered_angles_np))))
+
+        '''
+
+        b, bins, patches = plt.hist(filtered_angles_np, bins=8, range=[0, 360],
                                     cumulative=False)  # bins=None, range=None
 
-        '''
-        # plot angles over time (frames)
-        fig, axs = plt.subplots(3)
-        fig.suptitle('mag and angles per feature point in one frame')
-
-        axs[0].plot(np.arange(len(filtered_mag_n)), filtered_mag_n)
-        axs[1].plot(np.arange(len(filtered_angle_n)), filtered_angle_n)
-        b, bins, patches = axs[2].hist(filtered_angle_n, bins=8, range=[0,360], cumulative=False)  #bins=None, range=None
-        #plt.ylim(ymax=190, ymin=-190)
-        plt.grid(True)
-        plt.show()
-        '''
-        ''''''
         th = self.config_instance.min_magnitude_threshold  # 2.0  # manual set threshold for magnitude
+
         percentage = 0.5  # ratio threshold between no-movement and movement
         class_names_n = ['PAN', 'TILT', 'TILT', 'PAN', 'PAN', 'TILT', 'TILT', 'PAN']
 
-        print("predicted median magnitude: " + str(np.median(filtered_mag_n)))
-        print("threshold magnitude: " + str(th))
+        DEBUG_VIS_FLAG = False
+        if(DEBUG_VIS_FLAG == True):
+            # plot angles over time (frames)
+            fig, axs = plt.subplots(1)
+            axs.plot(np.arange(len(mag_np[:, 1:])), mag_np[:, 1:])
+            axs.plot(np.arange(len(filtered_mag_np)), filtered_mag_np)
+            #b, bins, patches = axs.hist(filtered_angles_np, bins=8, range=[0,360], cumulative=False, alpha=0.7, rwidth=0.85)  #bins=None, range=None
+            #minor_locator = AutoMinorLocator(2)
+            #plt.gca().xaxis.set_minor_locator(minor_locator)
+            #xticks = [(bins[idx+1] + value)/2 for idx, value in enumerate(bins[:-1])]
+            #xticks_labels = [ "[{:d}°-{:d}°]\n{:s}".format(int(value), int(bins[idx+1]), class_names_n[idx]) for idx, value in enumerate(bins[:-1])]
+            #plt.xticks(xticks, labels=xticks_labels, rotation=45)
+            #plt.grid(axis='y', alpha=0.75)
+            plt.tight_layout(pad=0.4, h_pad=0.4, w_pad=0.4)
+            plt.savefig(self.config_instance.path_debug_results + "mag.pdf", dpi=500)
+            plt.cla()
+       
+        #print("predicted mean magnitude: " + str(np.mean(filtered_mag_np)))
+        #print("predicted vector x: " + str(np.mean(vector_x)))
+        #print("predicted vector y: " + str(np.mean(vector_y)))
+        #print("predicted median magnitude: " + str(np.median(filtered_mag_np)))
+        #print("threshold magnitude: " + str(th))
 
         class_name = class_names_n[np.argmax(b)]
-        if ((class_name == "PAN" and np.median(filtered_mag_n) > th)):
+        print("predicted class_name (angles): " + str(class_name))
+        print("PAN: " + str(mag_condition_pan))
+        print("TILT: " + str(mag_condition_tilt))
+
+        if (class_name == "PAN" and mag_condition_pan == True):
             class_name = "PAN"
-        elif ((class_name == "TILT" and np.median(filtered_mag_n) > th)):
+        elif (class_name == "TILT" and mag_condition_tilt == True):
             class_name = "TILT"
         else:
             class_name = "NA"
-
-        '''
-        print(np.mean(angles_np))
-        angle = np.mean(angles_np)
-        print("predicted angle: " + str(angle))
-
-        print(np.mean(mag_np))
-        mag = np.mean(mag_np)
-        print("predicted mag: " + str(mag))
-
-        if ((angle >= 140 and angle < 220) or (angle >= -40 and angle < 40) and (mag > 20)):
-            class_name = class_names[0]
-        elif ((angle >= 50 and angle < 130) or (angle >= 230 and angle < 310) and (mag > 20)):
-            class_name = class_names[1]
-        else:
-            class_name = class_names[2]
-        print(class_name)
-        '''
+        
         return class_name
 
     def filter1D(self, data_np, alpha=2):
@@ -685,7 +806,7 @@ class OpticalFlow(object):
         
         filtered_data_np = np.array(filtered_data)
         return filtered_data_np, outliers_idx
-
+        
     def crop(self, img: np.ndarray, dim: tuple):
         """
         This method is used to crop a specified region of interest from a given image.
@@ -731,7 +852,7 @@ class OpticalFlow(object):
             print("length is not correct")
             assert (prev_feat.__len__() == curr_feat.__len__())
         d = curr_feat - prev_feat
-        print(d.shape)
+        #print(d.shape)
         mag = np.hypot(d[:, 0, 0], d[:, 0, 1])
         ang = np.round(np.degrees(np.arctan2(d[:, 0, 1], d[:, 0, 0])))
 

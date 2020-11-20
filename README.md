@@ -15,6 +15,8 @@ HTML format (only usable if repository is available in local storage): [vhh_cmc_
 
    * Ubuntu 18.04 LTS
    * python version 3.6.x
+   
+### 0 Environment Setup (optional)
 
 **Create a virtual environment:**
 
@@ -24,6 +26,17 @@ HTML format (only usable if repository is available in local storage): [vhh_cmc_
 **Activate the environment:**
 
    * source /xxx/vhh_cmc/bin/activate
+   
+### 1A Install using Pip
+
+The VHH Shot Boundary Detection package is available on [PyPI](https://pypi.org/project/vhh-cmc/) and can be installed via ```pip```.
+
+* Update pip and setuptools (tested using pip\==20.2.3 and setuptools==50.3.0)
+* ```pip install vhh-cmc```
+
+Alternatively, you can also build the package from source.
+
+### 1B Install by building from Source
 
 **Checkout vhh_cmc repository to a specified folder:**
 
@@ -31,27 +44,38 @@ HTML format (only usable if repository is available in local storage): [vhh_cmc_
 
 **Install the cmc package and all dependencies:**
 
+   * Update ```pip``` and ```setuptools``` (tested using pip\==20.2.3 and setuptools==50.3.0)
+   * Install the ```wheel``` package: ```pip install wheel```
    * change to the root directory of the repository (includes setup.py)
-   * python setup.py install
+   * ```python setup.py bdist_wheel```
+   * The aforementioned command should create a /dist directory containing a wheel. Install the package using ```python -m pip install dist/xxx.whl```
+   
+> **_NOTE:_**
+You can check the success of the installation by using the commend *pip list*. This command should give you a list
+with all installed python packages and it should include *vhh-cmc*.
 
-**Setup environment variables:**
+### 2 Setup environment variables (optional)
 
    * source /data/dhelm/python_virtenv/vhh_sbd_env/bin/activate
    * export CUDA_VISIBLE_DEVICES=0
    * export PYTHONPATH=$PYTHONPATH:/XXX/vhh_cmc/:/XXX/vhh_cmc/Develop/:/XXX/vhh_cmc/Demo/
 
-
-> **_NOTE:_**
-  You can check the success of the installation by using the commend *pip list*. This command should give you a list
-  with all installed python packages and it should include *vhh_cmc*.
-
-**Run demo script**
+### 3 Run demo script (optional)
 
    * change to root directory of the repository
    * python Demo/vhh_cmc_run_on_single_video.py
+   
+## Release Generation
 
+* Create and checkout release branch: (e.g. v1.1.0): ```git checkout -b v1.1.0```
+* Update version number in setup.py
+* Update Sphinx documentation and release version
+* Make sure that ```pip``` and ```setuptools``` are up to date
+* Install ```wheel``` and ```twine```
+* Build Source Archive and Built Distribution using ```python setup.py sdist bdist_wheel```
+* Upload package to PyPI using ```twine upload dist/*```
 
-**Evaluation & Results**
+## Evaluation & Results
 
 Experiment 1:
 Most Common Angle + Random Features + LK Optical Flow (pescoller)
@@ -221,6 +245,7 @@ ORB features and TH=2
 |     accuracy   |      |      | 0.94   |    1213 |
 |----------------|------|------|--------|--------|
 |    macro avg   | 0.62 | 0.63 | 0.63   |    1213 |
+<<<<<<< HEAD
 | weighted avg   | 0.95 | 0.94 | 0.95   |    1213 |
 
 
@@ -241,3 +266,6 @@ test accuracy: 0.6590909090909091
 
 
 
+=======
+| weighted avg   | 0.95 | 0.94 | 0.95   |    1213 |
+>>>>>>> master

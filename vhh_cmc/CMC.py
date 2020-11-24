@@ -75,13 +75,15 @@ class CMC(object):
 
         if(self.config_instance.save_eval_results == 1):
             print("Evaluation mode is activated ...")
-            cap = cv2.VideoCapture(vid_name)
+            cap = cv2.VideoCapture(self.config_instance.path_videos + "/" + vid_name)
         else:
             print(self.config_instance.path_videos + "/" + vid_name)
             cap = cv2.VideoCapture(self.config_instance.path_videos + "/" + vid_name)
 
         frame_l = []
         cnt = 0
+
+        #print(vid_name)
 
         while(True):
             cnt = cnt + 1
@@ -100,7 +102,6 @@ class CMC(object):
                 break
 
         all_frames_np = np.array(frame_l)
-        #print(all_frames_np.shape)
 
         #all_frames_np = all_frames_np[1240:1478,:,:,:]
         shot_start_idx = 0  # used in debugging mode - to select specific shot
@@ -128,14 +129,8 @@ class CMC(object):
                 optical_flow_instance = OpticalFlow(video_frames=shot_frames_np,
                                                     algorithm="orb",
                                                     config_instance=self.config_instance)
-<<<<<<< HEAD:cmc/CMC.py
-                mag_l, angles_l = optical_flow_instance.runDense()
-
-                #mag_l, angles_l = optical_flow_instance.runVO()
-                optical_flow_instance.predict_final_result(mag_l, angles_l, self.config_instance.class_names)
-                exit()
-=======
                 mag_l, angles_l, x_sum_l, y_sum_l = optical_flow_instance.run()
+                #mag_l, angles_l, x_sum_l, y_sum_l = optical_flow_instance.runDense()
                 class_name = optical_flow_instance.predict_final_result(mag_l,
                                                                         angles_l,
                                                                         x_sum_l,
@@ -195,7 +190,6 @@ class CMC(object):
             else:
                 class_name = self.config_instance.class_names[2]
             '''
->>>>>>> master:vhh_cmc/CMC.py
 
             # prepare results
             print(str(vid_name) + ";" + str(shot_id) + ";" + str(start) + ";" + str(stop) + ";" + str(class_name))

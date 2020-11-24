@@ -6,6 +6,10 @@ __pycache__/
 # C extensions
 *.so
 
+
+#wandb
+wandb/
+
 # Distribution / packaging
 .Python
 develop-eggs/

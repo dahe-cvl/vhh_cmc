@@ -1,4 +1,4 @@
-from cmc.CMC import CMC
+from vhh_cmc.CMC import CMC
 import os
 
 #####################################################################
@@ -6,7 +6,7 @@ import os
 #####################################################################
 
 video_path = "/data/share/maxrecall_vhh_mmsi/develop/videos/downloaded/"  
-dstPath = "/data/share/datasets/cmc_v1/extracted_frames/"  
+dstPath = "/data/share/datasets/cmc_v1/extracted_frames_val/"  
 
 #####################################################################
 

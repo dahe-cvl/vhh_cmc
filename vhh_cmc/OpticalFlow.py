@@ -4,6 +4,7 @@ import argparse
 from matplotlib import pyplot as plt
 from vhh_cmc.OpticalFlow_ORB import OpticalFlow_ORB
 from vhh_cmc.OpticalFlow_SIFT import OpticalFlow_SIFT
+from vhh_cmc.OpticalFlow_Dense import OpticalFlow_Dense
 
 class OpticalFlow(object):
     def __init__(self, video_frames=None, algorithm="orb", config_instance=None):
@@ -24,7 +25,7 @@ class OpticalFlow(object):
         self.video_frames = video_frames
         self.config_instance = config_instance
 
-        self.number_of_blocks = 16  # 2x2 blocks
+        self.number_of_blocks = 32  # 2x2 blocks
 
         if (algorithm == "sift"):
             self.feature_detector = OpticalFlow_SIFT(video_frames=video_frames)
@@ -138,6 +139,11 @@ class OpticalFlow(object):
 
         angles_l_n = []
         mag_l_n = []
+
+        all_frame_u_mean_l = []
+        all_frame_v_mean_l = []
+        all_frame_mag_mean_l = []
+        all_frame_ang_mean_l = []
         for i in range(1, len(frames_np)):
             prev_frame = frames_np[i - 1]
             curr_frame = frames_np[i]
@@ -145,22 +151,42 @@ class OpticalFlow(object):
             prev_frame = cv2.cvtColor(prev_frame, cv2.COLOR_BGR2GRAY)
             curr_frame = cv2.cvtColor(curr_frame, cv2.COLOR_BGR2GRAY)
 
-            mag, ang = of_dense_instance.getFlow(prev_frame, curr_frame)
+            mag, ang, u, v = of_dense_instance.getFlow(prev_frame, curr_frame)
             #mag_l_n.append(mag)
             #angles_l_n.append(np.degrees(ang))
 
             #print("################")
-            mag_blocks_per_frame = []
-            ang_blocks_per_frame = []
+            block_u_mean_l = []
+            block_v_mean_l = []
+
+            block_mag_mean_l = []
+            block_ang_mean_l = []
             for r in range(0, self.number_of_blocks):
                 for c in range(0, self.number_of_blocks):
                     # block 
-                    mag_block = self.getBlock(frame=mag, row=r, col=c)
-                    ang_block = self.getBlock(frame=np.degrees(ang), row=r, col=c)
-                    mag_blocks_per_frame.append(np.mean(mag_block))
-                    ang_blocks_per_frame.append(np.mean(ang_block))
+                    #mag_block = self.getBlock(frame=mag, row=r, col=c)
+                    #ang_block = self.getBlock(frame=np.degrees(ang), row=r, col=c)
+                    #mag_blocks_per_frame.append(np.mean(mag_block))
+                    #ang_blocks_per_frame.append(np.mean(ang_block))
 
+                    u_block = self.getBlock(frame=u, row=r, col=c)
+                    v_block = self.getBlock(frame=v, row=r, col=c)
+                    block_mag, block_ang = cv2.cartToPolar(u_block, v_block)
+
+                    #mag_mean = int(np.mean(mag_block))
+                    #print(mag_mean)
+
+                    block_mag_mean = np.mean(block_mag)
+                    block_ang_mean = np.mean(np.degrees(block_ang))
+                    block_mag_mean_l.append(block_mag_mean)
+                    block_ang_mean_l.append(block_ang_mean)
+
+                    u_mean = np.mean(u_block)
+                    v_mean = np.mean(v_block)
+                    block_u_mean_l.append(u_mean)
+                    block_v_mean_l.append(v_mean)
                     
+                    '''
                     print("frame_id: (" + str(i - 1) + "/" 
                             + str(i) 
                             + ") - block " 
@@ -171,17 +197,43 @@ class OpticalFlow(object):
                             + " - " + str(np.std(mag_block)) 
                             + " - " + str(np.mean(ang_block)) 
                             + " - " + str(np.std(ang_block)))      
-                    '''  '''           
+                    '''         
                     #cv2.imshow("block " + str(r) + "-" + str(c), mag_block)
 
-            mag_blocks_per_frame_np = np.array(mag_blocks_per_frame)
-            ang_blocks_per_frame_np = np.array(ang_blocks_per_frame)
+            
+            block_mag_mean_np = np.array(block_mag_mean_l)
+            block_ang_mean_np = np.array(block_ang_mean_l)
+
+            frame_mag_mean_np = np.mean(block_mag_mean_np)
+            frame_mag_std_np = np.std(block_mag_mean_np)
+            frame_ang_mean_np = np.mean(block_ang_mean_np)
+            frame_ang_std_np = np.std(block_ang_mean_np)
+
+            all_frame_mag_mean_l.append([0, frame_mag_mean_np])
+            all_frame_ang_mean_l.append([0, frame_ang_mean_np])
+
+
+            block_u_mean_np = np.array(block_u_mean_l)
+            block_v_mean_np = np.array(block_v_mean_l)
+
+            frame_u_mean_np = np.mean(block_u_mean_np)
+            frame_u_std_np = np.std(block_u_mean_np)
+            frame_v_mean_np = np.mean(block_v_mean_np)
+            frame_v_std_np = np.std(block_v_mean_np)
+
+            all_frame_u_mean_l.append([0, frame_u_mean_np])
+            all_frame_v_mean_l.append([0, frame_v_mean_np])
+
+
+            
+            #mag_blocks_per_frame_np = np.array(mag_blocks_per_frame)
+            #ang_blocks_per_frame_np = np.array(ang_blocks_per_frame)
             #print(mag_blocks_per_frame_np.shape)
             #print(ang_blocks_per_frame_np)
 
             #print(ang_blocks_per_frame_np)
-            mag_l_n.append(mag_blocks_per_frame)
-            angles_l_n.append(ang_blocks_per_frame)
+            #mag_l_n.append(mag_blocks_per_frame)
+            #angles_l_n.append(ang_blocks_per_frame)
 
             #b, bins, patches = plt.hist(ang_blocks_per_frame_np.flatten(), bins=8, range=[0, 360],
             #                        cumulative=False)  # bins=None, range=None
@@ -198,32 +250,12 @@ class OpticalFlow(object):
             cv2.imshow('dense flow', dense_flow)
             k = cv2.waitKey(3) & 0xff
             '''
-        mag_np = np.array(mag_l_n)
-        ang_np = np.array(angles_l_n)
+        mag_np = np.array(all_frame_mag_mean_l)
+        ang_np = np.array(all_frame_ang_mean_l)
+        u_np = np.array(all_frame_u_mean_l)
+        v_np = np.array(all_frame_v_mean_l)
 
-        print(mag_np.shape)
-        print(ang_np.shape)     
-
-        #print(np.mean(mag_np))
-        #print(np.mean(mag_np, axis=1))
-        
-        #print(np.std(mag_np))
-
-        #print(np.mean(ang_np))
-        #print(np.std(ang_np))
-
-        #h = plt.hist2d(np.mean(mag_np, axis=1), np.mean(ang_np, axis=1))
-        #h = plt.hist2d(mag_np[:, :1], ang_np[:, :1])
-        #h = plt.hist2d(mag_np[:, 8:9], ang_np[:, 8:9])
-        #h = plt.hist2d(mag_np[:, 5:6], ang_np[:, 5:6])
-        #h = plt.hist2d(mag_np[:, 12:13], ang_np[:, 12:13])
-        #plt.colorbar(h[3])
-        #plt.show()
-
-        exit()
-
-
-        
+        '''
         # plot number of features
         #plt.figure(1)
         fig, axs = plt.subplots(2)
@@ -244,10 +276,8 @@ class OpticalFlow(object):
         plt.show()
         #plt.draw()
         #plt.pause(0.02)
-        ''''''
-        exit()
-
-        return mag_np, ang_np
+        '''
+        return all_frame_mag_mean_l, all_frame_ang_mean_l, all_frame_u_mean_l, all_frame_v_mean_l
 
 
     def run(self):
@@ -265,32 +295,13 @@ class OpticalFlow(object):
         seed_idx = 0
 
         MIN_NUM_FEATURES = 500
-
+        seed_idx = 0
         for i in range(1, len(frames_np)):
             #print("##########")
-
-            #prev_frame = frames_np[i - 1]
-            #curr_frame = frames_np[i]
-
-<<<<<<< HEAD:cmc/OpticalFlow.py
-            cv2.imshow("orig", frames_np[i])
-
-            blocks_per_frame = []
-            for r in range(0, self.number_of_blocks):
-                for c in range(0, self.number_of_blocks):
-                    # block 
-                    frame_block = self.getBlock(frame=frames_np[i], row=r, col=c)
-                    blocks_per_frame.append(frame_block)
-                    print(frame_block.shape)
-                    cv2.imshow("block " + str(r) + "-" + str(c), frame_block)
 
             prev_frame = frames_np[seed_idx]
             curr_frame = frames_np[i]
 
-            distance_threshold = self.config_instance.distance_threshold
-            kp_prev_list, kp_curr_list = self.feature_detector.getMatches(prev_frame, curr_frame, distance_threshold)            
-            print(len(kp_curr_list))
-=======
             distance_threshold = self.config_instance.distance_threshold
             kp_prev_list, kp_curr_list = self.feature_detector.getMatches(prev_frame, curr_frame, distance_threshold)
 
@@ -298,60 +309,30 @@ class OpticalFlow(object):
             #print("number of features")
             #print(len(kp_curr_list))
             #print(len(kp_prev_list))
->>>>>>> master:vhh_cmc/OpticalFlow.py
 
             if (len(kp_prev_list) == 0 or len(kp_curr_list) == 0):
                 #mag_l_n.append([0, 0])
                 #angles_l_n.append([0, 0])
-                mag_l_n.append(0)
-                angles_l_n.append(0)
+                mag_l_n.append([0, 0])
+                angles_l_n.append([0, 0])
                 continue
 
             curr_points = np.array(kp_curr_list).astype('float').reshape(-1, 1, 2)
             prev_points = np.array(kp_prev_list).astype('float').reshape(-1, 1, 2)
-            print(len(curr_points))
-            print(len(prev_points))
-
+            mag_n, angle_n = self.compute_magnitude_angle(prev_points,
+                                                          curr_points)
+            
             number_of_features = len(curr_points)
             number_of_features_l.append(number_of_features)
 
             if(number_of_features <= MIN_NUM_FEATURES):
                 seed_idx = i
 
-            mag_n, angle_n = self.compute_magnitude_angle(prev_points,
-<<<<<<< HEAD:cmc/OpticalFlow.py
-                                                        curr_points)
-
-            
-            # draw orig with n feature points
-            n_feature_points = len(curr_points)
-            for j, (new, old) in enumerate(zip(curr_points, prev_points)):
-                if (j > n_feature_points):
-                    break
-                a, b = new.astype('int').ravel()
-                c, d = old.astype('int').ravel()
-                frame_curr = cv2.circle(frames_np, (a, b), 2, (255, 0, 0), -1)
-                frame_curr = cv2.line(frame_curr, (a, b), (a + 5, b + 5), (255, 0, 0), 1)
-            # img = cv2.add(frame_curr, mask)
-            cv2.imshow("feature points per block " + str(r) + "-" + str(c), frame_curr)
-            ''''''
-            
-            k = cv2.waitKey()
-            continue
-
-=======
-                                                          curr_points)
-            
->>>>>>> master:vhh_cmc/OpticalFlow.py
             #print(mag_n)
             #print(angle_n)
             # angle_raw.append(angle_n.tolist())
             # mag_raw.append(mag_n.tolist())
-<<<<<<< HEAD:cmc/OpticalFlow.py
-            '''
-=======
             ''''''
->>>>>>> master:vhh_cmc/OpticalFlow.py
             #mag_n = np.abs(mag_n)  # [:50])
             mag_n, outlier_idx = self.filter1D(mag_n, alpha=2.5)
             angles_cleanup = []
@@ -363,11 +344,7 @@ class OpticalFlow(object):
                 else:
                     angles_cleanup.append(angles_orig_np[s])
             angle_n = np.array(angles_cleanup)  
-<<<<<<< HEAD:cmc/OpticalFlow.py
-            '''
-=======
             
->>>>>>> master:vhh_cmc/OpticalFlow.py
             #print(mag_n)
             #print(angle_n)
 
@@ -375,7 +352,6 @@ class OpticalFlow(object):
 
             vector_y = np.multiply(mag_n, np.sin(np.deg2rad(angle_n)))
             vector_x = np.multiply(mag_n, np.cos(np.deg2rad(angle_n)))
-<<<<<<< HEAD:cmc/OpticalFlow.py
 
             vector_y_sum = vector_y.sum() / len(vector_y)
             vector_x_sum = vector_x.sum() / len(vector_x)
@@ -386,241 +362,20 @@ class OpticalFlow(object):
             vector_y_sum_l.append([0, vector_y_sum])
             #exit()
 
-            mag_n = np.abs(mag_n)
-=======
-
-            vector_y_sum = vector_y.sum() / len(vector_y)
-            vector_x_sum = vector_x.sum() / len(vector_x)
-            #print("vector_y_sum: " + str(vector_y_sum))
-            #print("vector_x_sum: " + str(vector_x_sum))
-
-            vector_x_sum_l.append([0, vector_x_sum])
-            vector_y_sum_l.append([0, vector_y_sum])
-            #exit()
-
->>>>>>> master:vhh_cmc/OpticalFlow.py
             mag_mean_n = np.mean(mag_n)
-            mag_l_n.append(mag_mean_n)
+            mag_l_n.append([0, mag_mean_n])
 
             angle_n = np.abs(angle_n)  # [:50])
             angle_mean_n = np.mean(angle_n)
-<<<<<<< HEAD:cmc/OpticalFlow.py
-            angles_l_n.append(angle_mean_n)
-=======
             angles_l_n.append([0, angle_mean_n])
 
             filtered_angle_n = angles_l_n
             filtered_angles_l_n.append(filtered_angle_n)
->>>>>>> master:vhh_cmc/OpticalFlow.py
 
-            '''
-            data_std = np.std(mag_n)
-            data_mean = np.mean(mag_n)
-            anomaly_cut_off = data_std * 3
-            lower_limit = data_mean - anomaly_cut_off
-            upper_limit = data_mean + anomaly_cut_off
-            print(lower_limit)
-            # Generate outliers
-            outliers_idx = []
-            for o, outlier in enumerate(mag_n):
-                if outlier > upper_limit or outlier < lower_limit:
-                    outliers_idx.append(o)
-            filtered_mag_n = np.delete(mag_n, outliers_idx)
-            filtered_angle_n = np.delete(angle_n, outliers_idx)
-            filtered_curr_points = np.delete(curr_points, outliers_idx, axis=0)
-            filtered_prev_points = np.delete(prev_points, outliers_idx, axis=0)
-            filtered_mag_n = np.abs(filtered_mag_n)  # [:50])
-            filtered_mag_mean_n = np.median(filtered_mag_n)
-            filtered_mag_l_n.append([0, filtered_mag_mean_n])
-            filtered_angle_n = np.abs(filtered_angle_n)  # [:50])
-            filtered_angle_mean_n = np.median(filtered_angle_n)
-            '''
-            
-
-            '''
-            # plot angles over time
-            #plt.figure(1)
-            fig, axs = plt.subplots(2)
-            fig.suptitle('mag and angles per feature point in one frame')
-            axs[0].plot(np.arange(len(mag_n)), mag_n)
-            axs[0].plot(outliers_idx, mag_n[outliers_idx])
-            axs[0].plot(np.arange(len(filtered_mag_n)), filtered_mag_n)
-            axs[1].plot(np.arange(len(angle_n)), angle_n)
-            #plt.ylim(ymax=190, ymin=-190)
-            plt.grid(True)
-            plt.show()
-            #plt.draw()
-            #plt.pause(0.02)
-            '''
-            '''
-            # draw the tracks
-            mask = np.zeros_like(frames_np[i])
-            for j, (new, old) in enumerate(zip(curr_points, prev_points)):
-                if(j > 10):
-                    break;
-                a, b = new.ravel().astype('int')
-                c, d = old.ravel().astype('int')
-                mask = cv2.line(mask, (a, b), (c, d), (255, 0, 0), 1)
-                frame_curr = cv2.circle(frames_np[i], (a, b), 5, (255, 0, 0), -1)
-            img = cv2.add(frame_curr, mask)
-            cv2.imshow('frame', img)
-            k = cv2.waitKey(30) & 0xff
-            if k == 27:
-                break
-            '''
-            
-
-            '''
-            # draw orig with n feature points
-            n_feature_points = len(curr_points)
-            for j, (new, old) in enumerate(zip(curr_points, prev_points)):
-                if (j > n_feature_points):
-                    break
-                a, b = new.astype('int').ravel()
-                c, d = old.astype('int').ravel()
-                frame_curr = cv2.circle(frames_np[i], (a, b), 2, (255, 0, 0), -1)
-                frame_curr = cv2.line(frame_curr, (a, b), (a + 5, b + 5), (255, 0, 0), 1)
-            # img = cv2.add(frame_curr, mask)
-            cv2.imshow('frame', frame_curr)
-            k = cv2.waitKey(100) & 0xff
-            if k == 27:
-                break
-            '''
-
-            '''
-            #print(curr_points)
-            #print(curr_points.shape)
-            #print(filtered_curr_points)
-            #print(filtered_curr_points.shape)
-            # draw orig with n feature points
-            n_feature_points = len(filtered_curr_points)
-            for j, (new, old) in enumerate(zip(filtered_curr_points, filtered_prev_points)):
-                if (j > n_feature_points):
-                    break
-                a, b = new.astype('int').ravel()
-                c, d = old.astype('int').ravel()
-                frame_curr = cv2.circle(frames_np[i], (a, b), 3, (255, 0, 0), -1)
-                #frame_curr = cv2.line(frame_curr, (a, b), (a + int(vector_x[j]) * 1, b),
-                #                      (0, 0, 255), 2)
-                #frame_curr = cv2.line(frame_curr, (a, b), (a, b + int(vector_y[j]) * 1),
-                #                      (0, 255, 0), 2)
-            # img = cv2.add(frame_curr, mask)
-            cv2.imshow('frame', frame_curr)
-            k = cv2.waitKey(30) & 0xff
-            if k == 27:
-                break
-            
-            '''
-
-            '''
-            # plot angles over time
-            #plt.figure(1)
-            fig, axs = plt.subplots(3)
-            fig.suptitle('mag and angles per feature point in one frame')
-            axs[0].plot(np.arange(len(mag_n)), mag_n)
-            axs[0].plot(outliers_idx, mag_n[outliers_idx])
-            axs[0].plot(np.arange(len(filtered_mag_n)), filtered_mag_n)
-            axs[1].plot(np.arange(len(angle_n)), angle_n)
-            axs[2].imshow(frame_curr)
-            #plt.ylim(ymax=190, ymin=-190)
-            plt.grid(True)
-            plt.show()
-            k = cv2.waitKey(100) & 0xff
-            if k == 27:
-                break
-            #plt.draw()
-            #plt.pause(0.02)
-            '''
-
-            '''
-            # plot angles over time
-            #plt.figure(1)
-            fig, axs = plt.subplots(2)
-            fig.suptitle('mag and angles per feature point in one frame')
-            axs[0].plot(np.arange(len(mag_n)), mag_n)
-            axs[0].plot(outliers_idx, mag_n[outliers_idx])
-            axs[0].plot(np.arange(len(filtered_mag_n)), filtered_mag_n)
-            axs[1].plot(np.arange(len(angle_n)), angle_n)
-            #plt.ylim(ymax=190, ymin=-190)
-            plt.grid(True)
-            plt.show()
-            #plt.draw()
-            #plt.pause(0.02)
-            '''
-        '''
-        mag_filtered1, outlier_idx = self.filter1D(np.array(mag_l_n), alpha=0.3)
-        angles_cleanup = []
-        angles_orig_np = angles_l_n
-        for s in range(0, len(angles_orig_np)):
-            if(outlier_idx == s):
-                angle_mean = (angles_orig_np[s-1] + angles_orig_np[s+1]) / 2.0
-                angles_cleanup.append(angle_mean)
-            else:
-                angles_cleanup.append(angles_orig_np[s])
-        angle_filtered1 = np.array(angles_cleanup)  
-
-        angle_filtered4, outlier_idx = self.filter1D(angle_filtered1, alpha=0.3)
-        mag_cleanup = []
-        mag_orig_np = mag_filtered1
-        for s in range(0, len(mag_orig_np)):
-            if(outlier_idx == s):
-                mag_mean = (mag_orig_np[s-1] + mag_orig_np[s+1]) / 2.0
-                mag_cleanup.append(mag_mean)
-            else:
-                mag_cleanup.append(mag_orig_np[s])
-        mag_filtered4 = np.array(mag_cleanup)  
-        '''
-
-<<<<<<< HEAD:cmc/OpticalFlow.py
-        from pykalman import KalmanFilter
-        kf = KalmanFilter()
-        measurements = mag_l_n  # 3 observations
-        kf = kf.em(measurements, n_iter=20)
-        (smoothed_state_means, smoothed_state_covariances) = kf.smooth(measurements)
-        kalman_filtered_mag = np.squeeze(smoothed_state_means)
-        print(kalman_filtered_mag.shape)
-        kalman_filtered_mag_cov = np.squeeze(smoothed_state_covariances)
-
-        measurements = angles_l_n  # 3 observations
-        kf = kf.em(measurements, n_iter=20)
-        (smoothed_state_means, smoothed_state_covariances) = kf.smooth(measurements)
-        kalman_filtered_angle = np.squeeze(smoothed_state_means)
-        kalman_filtered_angle_cov = np.squeeze(smoothed_state_covariances)
-        
-        # plot number of features
-        #plt.figure(1)
-        fig, axs = plt.subplots(3)
-        #fig.suptitle('number')
-        axs[0].plot(np.arange(len(number_of_features_l)), number_of_features_l)
-        #axs[1].plot(np.arange(len(mag_l_n)), mag_l_n)
-        #axs[1].plot(np.arange(len(mag_filtered1)), mag_filtered1)
-        #axs[1].plot(np.arange(len(mag_filtered2)), mag_filtered2)
-        #axs[1].plot(np.arange(len(mag_filtered4)), mag_filtered4)
-        axs[1].plot(np.arange(len(kalman_filtered_mag)), kalman_filtered_mag)
-        #axs[2].plot(np.arange(len(kalman_filtered_mag_cov)), kalman_filtered_mag_cov)
-        axs[2].plot(np.arange(len(angles_l_n)), angles_l_n)
-        #axs[2].plot(np.arange(len(angle_filtered4)), angle_filtered4)
-        axs[2].plot(np.arange(len(kalman_filtered_angle)), kalman_filtered_angle)
-        #axs[4].plot(np.arange(len(kalman_filtered_angle_cov)), kalman_filtered_angle_cov)
-        #plt.ylim(ymax=190, ymin=-190)
-        plt.grid(True)
-        plt.show()
-        #plt.draw()
-        #plt.pause(0.02)
-        ''''''
-
-        # cv2.destroyAllWindows()
-        #print(angles_l_n)
-        exit()
-        return mag_l_n, angles_l_n, vector_x_sum_l, vector_y_sum_l
-
-    def predict_final_result(self, mag_l_n, angles_l_n, class_names):
-=======
         # cv2.destroyAllWindows()
         return mag_l_n, angles_l_n, vector_x_sum_l, vector_y_sum_l
 
-       def predict_final_result(self, mag_l_n, angles_l_n, x_sum_l, y_sum_l, class_names):
->>>>>>> master:vhh_cmc/OpticalFlow.py
+    def predict_final_result(self, mag_l_n, angles_l_n, x_sum_l, y_sum_l, class_names):
         # print(type(mag_l_n))
         # print(len(mag_l_n))
         # exit()
@@ -629,27 +384,12 @@ class OpticalFlow(object):
         angles_np = np.array(angles_l_n) 
         mag_np = np.array(mag_l_n)  
 
-<<<<<<< HEAD:cmc/OpticalFlow.py
-        print(np.mean(angles_np))
-        print(np.std(angles_np))
-
-        print(np.mean(mag_np))
-        print(np.std(mag_np))
-
-        exit()
-
-        # add filter
-        print(mag_np[:, 1:])
-        filtered_mag_n, outlier_idx = self.filter1D(mag_np[:, 1:], alpha=3)
-        filtered_angles_np = np.delete(angles_np[:, 1:], outlier_idx)
-=======
         x_comp = np.array(x_sum_l)  
         y_comp = np.array(y_sum_l)  
         print(angles_np.shape)
         print(mag_np.shape)
         print(x_comp.shape)
         print(y_comp.shape)
->>>>>>> master:vhh_cmc/OpticalFlow.py
 
         x_comp_n = x_comp.sum() / len(x_comp)
         y_comp_n = y_comp.sum() / len(y_comp)
@@ -675,7 +415,6 @@ class OpticalFlow(object):
                 angles_cleanup.append(angles_orig_np[s])
         filtered_angles_np = np.array(angles_cleanup)  
         #filtered_angles_np = np.delete(angles_np[:, 1:], outlier_idx)
-
         # add filter - 1.5
         filtered_mag_n, outlier_idx = self.filter1D(filtered_mag_n, alpha=1.5)
         angles_cleanup = []
@@ -687,7 +426,6 @@ class OpticalFlow(object):
             else:
                 angles_cleanup.append(angles_orig_np[s])
         filtered_angles_np = np.array(angles_cleanup)  
-
         # add filter - 1.5
         filtered_mag_n, outlier_idx = self.filter1D(filtered_mag_n, alpha=1.5)
         angles_cleanup = []
@@ -699,7 +437,6 @@ class OpticalFlow(object):
             else:
                 angles_cleanup.append(angles_orig_np[s])
         filtered_angles_np = np.array(angles_cleanup)  
-
         '''
 
         # add filter - 1.5
@@ -723,11 +460,9 @@ class OpticalFlow(object):
         '''
         #filtered_angle_n, outlier_idx = self.filter1D(filtered_angles_np, alpha=2)
         #filtered_mag_n = np.delete(filtered_mag_n, outlier_idx)
-
         # calculate x - y components 
         vector_y = np.abs(np.multiply(filtered_mag_np, np.sin(np.deg2rad(filtered_angles_np))))
         vector_x = np.abs(np.multiply(filtered_mag_np, np.cos(np.deg2rad(filtered_angles_np))))
-
         '''
 
         b, bins, patches = plt.hist(filtered_angles_np, bins=8, range=[0, 360],

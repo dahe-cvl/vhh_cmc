@@ -125,9 +125,11 @@ class Video(object):
             print("ERROR: start_id must be smaller (or equal) then stop_id!")
             return []
 
-        if(start_id < 0 or stop_id < 0):
-            print("ERROR: frame index out of range!")
-            return []
+        if(start_id == -1 or stop_id == -1):
+            print("INFO: no frame range specified. use all possible frames!")
+            start_id = 0
+            stop_id = int(self.number_of_frames) - 1
+
 
         frame_number = 0
         self.vid.set(cv2.CAP_PROP_POS_FRAMES, frame_number) # optional
@@ -137,10 +139,21 @@ class Video(object):
         for i in range(start_id, stop_id+1):
             self.vid.set(cv2.CAP_PROP_POS_FRAMES, i)
             success, image = self.vid.read()
+            print(image.shape)
+
+
 
             if(pre_process != None):
-                image = pre_process.applyTransformOnImg(image)
+                
+                image = np.reshape(image, (image.shape[2], image.shape[0], image.shape[1]))
+                print(image.shape)
+                
+
+                image = pre_process(image)
                 frames_l.append(image)
+                print(image.shape)
+                
+                exit()
             else:    
                 frames_l.append(image)
         self.vid.release()
@@ -149,8 +162,8 @@ class Video(object):
         time_diff = time_stamp_end - time_stamp_start
 
         if(pre_process != None):
-            frames_np = np.array(frames_l)
-            return frames_np, time_diff
+            frame_tensors = torch.stack(frames_l)
+            return frame_tensors, time_diff
         else:    
             frames_np = np.array(frames_l)
             return frames_np, time_diff

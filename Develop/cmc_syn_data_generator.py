@@ -245,6 +245,10 @@ class CmcSynDataGenerator(object):
         for i, file in enumerate(file_list):
             print("process frame (" + str(i+1) + "|" + str(len(file_list)) + "): " + str(self.image_path + file))
             img = cv2.imread(self.image_path + file)
+
+            if(img.shape[0] <= bb_w or img.shape[1] <= bb_h):
+                print("WARNING: image is too small! skip!")
+                continue
             
             # CREATE PANS
             class_name = "pan"
@@ -489,7 +493,7 @@ class CmcSynDataGenerator(object):
         return mag, ang
 
 
-image_path = "/data/share/datasets/cmc_v1/extracted_frames/"
+image_path = "/data/share/datasets/cmc_v1/extracted_frames_train/"
 results_path = "/data/share/datasets/cmc_v1/train/"
 obj = CmcSynDataGenerator(image_path, results_path)
 obj.run()

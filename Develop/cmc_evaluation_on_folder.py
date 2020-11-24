@@ -18,10 +18,10 @@ exp_file_list = [#"./config/config_cmc_exp_1_vhh_mmsi_test_db_v2.yaml",
                  #"./config/config_cmc_exp_8_vhh_mmsi_test_db_v2.yaml"
                  ] #vhh_mmsi_test_db_v2_final_results_mag_th_2
 '''
-exp_file_list = [#"./config/config_cmc_exp_1_cmc_final_db_v2.yaml",
-                 #"./config/config_cmc_exp_2_cmc_final_db_v2.yaml",
-                 #"./config/config_cmc_exp_3_cmc_final_db_v2.yaml",
-                 #"./config/config_cmc_exp_4_cmc_final_db_v2.yaml",
+exp_file_list = ["./config/config_cmc_exp_1_cmc_final_db_v2.yaml",
+                 "./config/config_cmc_exp_2_cmc_final_db_v2.yaml",
+                 "./config/config_cmc_exp_3_cmc_final_db_v2.yaml",
+                 "./config/config_cmc_exp_4_cmc_final_db_v2.yaml",
                  #"./config/config_cmc_exp_6_cmc_final_db_v2.yaml",
                  #"./config/config_cmc_exp_5_cmc_final_db_v2.yaml",
                  #"./config/config_cmc_exp_7_cmc_final_db_v2.yaml",
@@ -50,7 +50,7 @@ for i, exp_file in enumerate(exp_file_list):
     ACTIVE_FLAG = True
     if(ACTIVE_FLAG == True):
         all_shots_np = eval_instance.final_dataset_np
-        vids_idx = np.unique(all_shots_np[:, :1])   
+        vids_idx = np.unique(all_shots_np[:, :1]) 
           
         for s, idx in enumerate(vids_idx.tolist()):    
             shot_idx = np.where(all_shots_np[:, :1] == idx)[0]

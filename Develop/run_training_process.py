@@ -1,6 +1,5 @@
-from vhh_cmc.CmcDataset import CmcDataset
-from vhh_cmc.Video import Video
-from vhh_cmc.Model import CnnLstm, Cnn3dModel
+from cmc.CmcDataset import CmcDataset
+from cmc.Model import CNNModel, resnet50, CNN3D, CnnLstm,CNN
 import torch
 import torchvision.transforms as transforms
 import numpy as np
@@ -25,7 +24,10 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 import random
-import wandb
+
+import torch.cuda as cutorch
+
+
 
 print("start training ... ")
 
@@ -119,6 +121,30 @@ class Resize3D(object):
     def __repr__(self):
         return self.__class__.__name__ + '_Resize3D_'
 
+class ToFrequencyDomain3D(object):
+    def __call__(self, frame_seq):
+        #print(frame_seq.shape)
+
+        final_frames = []
+        for i in range(0, len(frame_seq)):
+            frame = np.asarray(frame_seq[i])
+
+            f = np.fft.fftn(frame)
+            f = np.fft.fftshift(f)
+            magnitude_spectrum = 20 * np.log(np.abs(f))
+            angle = np.angle(f)
+
+            final_frames.append(angle)
+        final_frames_np = np.array(final_frames).astype('float32')
+
+        #print(final_frames_np.shape)
+        #print(final_frames_np.dtype)
+        #exit()
+        return final_frames_np
+
+    def __repr__(self):
+        return self.__class__.__name__ + '_ToFrequencyDomain3D_'
+
 
 class HorizontalFlip3D(object):
 
@@ -199,34 +225,38 @@ class ToTensorShape3D(object):
 
 class ToNormalizedTensor3D(object):
 
-    def __init__(self, statistics_summary_l):
-        self.statistics_summary_l = statistics_summary_l
-
     def __call__(self, frame_seq):
-        
+        #print(frame_seq.shape)
+
         shot_frames_l = []
         trans1 = transforms.ToTensor()
-        trans2 = transforms.Normalize((float(self.statistics_summary_l[0]) / 255.0,
-                                       float(self.statistics_summary_l[1]) / 255.0,
-                                       float(self.statistics_summary_l[2]) / 255.0
+        trans2 = transforms.Normalize((106.79066460039768 / 255.0,
+                                       #112.39727916518281 / 255.0,
+                                       #113.79938372074331 / 255.0
                                       ),
-                                      (float(self.statistics_summary_l[3]) / 255.0,
-                                       float(self.statistics_summary_l[4]) / 255.0,
-                                       float(self.statistics_summary_l[5]) / 255.0
+                                      (75.09153312342316 / 255.0,
+                                       #73.49875024709992 / 255.0,
+                                       #73.11534896091715 / 255.0
                                       ))
 
         for a in range(0, len(frame_seq)):
             frame = np.asarray(frame_seq[a])
-            frame = trans1(frame)
-            frame = trans2(frame)
-            shot_frames_l.append(frame)
+            shot_frames_l.append(trans2(trans1(frame)))  #trans2
         seq = torch.stack(shot_frames_l)
-        
+
+        #print(seq.size())
+        #print(seq.reshape((seq.size()[1], seq.size()[0], seq.size()[2], seq.size()[3])).size())
+        #exit()
         # CNN-LSTM
         #seq_final = seq.reshape((seq.size()[0], seq.size()[1], seq.size()[2], seq.size()[3]))
+        #print(seq_final.size())
+        #exit()
+
+
         # 3DCNN
-        seq_final = seq.permute(1, 0, 2, 3)
-        
+        seq_final = seq.reshape((seq.size()[1], seq.size()[0], seq.size()[2], seq.size()[3]))
+        #print(seq_final.size())
+        #exit()
         return seq_final
 
     def __repr__(self):
@@ -237,34 +267,35 @@ def loadDataset(path="", batch_size=64):
         print("ERROR: you must specifiy a valid dataset path!")
         exit()
 
-    statistics_summary_l = load_statistics(db_path=path)
-
     transform_train = transforms.Compose([
         Resize3D((720, 960)),
         CenterCrop3D((720, 720)),
         Resize3D((128, 128)),
-        #ToGrayScale3D(),
-        #HorizontalFlip3D(),
-        #VerticalFlip3D(),
-        #RandomRotate3D(max_rot_range=[-15, 15]),
+        ToGrayScale3D(),
+        HorizontalFlip3D(),
+        VerticalFlip3D(),
+        RandomRotate3D(max_rot_range=[-15, 15]),
+        ToFrequencyDomain3D(),
         #ToTensorShape3D(),
-        ToNormalizedTensor3D(statistics_summary_l),
+        ToNormalizedTensor3D(),
     ])
 
     transform_val = transforms.Compose([
         Resize3D((720, 960)),
         CenterCrop3D((720, 720)),
         Resize3D((128, 128)),
-        #ToGrayScale3D(),
-        ToNormalizedTensor3D(statistics_summary_l),
+        ToGrayScale3D(),
+        ToFrequencyDomain3D(),
+        ToNormalizedTensor3D(),
     ])
 
     transform_test = transforms.Compose([
         Resize3D((720, 960)),
         CenterCrop3D((720, 720)),
         Resize3D((128, 128)),
-        #ToGrayScale3D(),
-        ToNormalizedTensor3D(statistics_summary_l),
+        ToGrayScale3D(),
+        ToFrequencyDomain3D(),
+        ToNormalizedTensor3D(),
     ])
 
     db_path = path
@@ -281,13 +312,6 @@ def loadDataset(path="", batch_size=64):
                             subset=None,
                             transform=transform_val,
                             target_transform=None)
-    
-    valid_data2 = CmcDataset(path=db_path,
-                            db_set="val_02",
-                            shuffle=False,
-                            subset=None,
-                            transform=transform_val,
-                            target_transform=None)
 
     test_data = CmcDataset(path=db_path,
                             db_set="test",
@@ -296,7 +320,7 @@ def loadDataset(path="", batch_size=64):
                             transform=transform_test,
                             target_transform=None)
 
-    num_workers = 4
+    num_workers = 6
     # Dataloader iterators, make sure to shuffle
     trainloader = DataLoader(train_data,
                              batch_size=batch_size,
@@ -313,13 +337,6 @@ def loadDataset(path="", batch_size=64):
                              shuffle=False,
                              num_workers=num_workers
                              )
-    
-    validloader2 = DataLoader(valid_data2,
-                             batch_size=batch_size,
-                             # sampler=valid_sampler,
-                             shuffle=False,
-                             num_workers=num_workers
-                             )
 
     testloader = DataLoader(test_data,
                             batch_size=batch_size,
@@ -329,10 +346,9 @@ def loadDataset(path="", batch_size=64):
 
     print("train samples: " + str(len(train_data)))
     print("valid samples: " + str(len(valid_data)))
-    print("valid samples 2: " + str(len(valid_data2)))
     print("test samples: " + str(len(test_data)))
 
-    return trainloader, validloader, validloader2, testloader
+    return trainloader, validloader, testloader
 
 def matplotlib_imshow(img, one_channel=False):
     print("imshow function ... ")
@@ -347,49 +363,23 @@ def matplotlib_imshow(img, one_channel=False):
     else:
         plt.imshow(np.transpose(npimg, (1, 2, 0)))
 
-def calculate_statistics(path=None, batch_size=-1):
-
-    transform_train = transforms.Compose([
-        Resize3D((720, 960)),
-        #CenterCrop3D((720, 720)),
-        Resize3D((64, 64)),
-        #ToGrayScale3D(),
-        #ToTensorShape3D(),
-    ])
-
-    db_path = path
-    train_data = CmcDataset(path=db_path,
-                            db_set="train",
-                            shuffle=False,
-                            subset=None,
-                            transform=transform_train,
-                            target_transform=None)
-
-    num_workers = 4
-    trainloader = DataLoader(train_data,
-                             batch_size=batch_size,
-                             # sampler=train_sampler,
-                             shuffle=True,
-                             num_workers=num_workers
-                             )
-
-    print("train samples: " + str(len(train_data)))
-
-
+def calculate_statistics(trainloader):
     all_frames_l = []
     for i, (inputs, labels) in enumerate(trainloader):
-        print("--TRAIN--")
-        print(i)
-        print(inputs.size())
-        print(labels.size())
-
+        #print("----")
+        #print(i)
+        #print(inputs.size())
+        #print(labels.size())
         # Convert torch tensor to Variable
         inputs = Variable(inputs)
+        print(inputs.size())
+        print(type(inputs))
+
         inputs_np = inputs.detach().cpu().numpy()
         print(inputs_np.shape)
         all_frames_l.extend(inputs_np)
-        #print(np.min(inputs_np))
-        #print(np.max(inputs_np))
+        print(np.min(inputs_np))
+        print(np.max(inputs_np))
         #exit()
 
     all_frames_np = np.array(all_frames_l)
@@ -405,7 +395,6 @@ def calculate_statistics(path=None, batch_size=-1):
     all_samples_g_np = all_frames_np[:, 1:2, :, :]
     all_samples_b_np = all_frames_np[:, 2:3, :, :]
 
-    statistics_summary = []
     print("calculate mean value for each color channel ... ")
     mean_r = np.mean(all_samples_r_np)
     mean_g = np.mean(all_samples_g_np)
@@ -413,7 +402,7 @@ def calculate_statistics(path=None, batch_size=-1):
     print(mean_r)
     print(mean_g)
     print(mean_b)
-    
+
     print("calculate standard deviation of zero-centered frames ... ")
     std_r = np.std(all_samples_r_np)
     std_g = np.std(all_samples_g_np)
@@ -422,79 +411,25 @@ def calculate_statistics(path=None, batch_size=-1):
     print(std_g)
     print(std_b)
 
-    statistics_summary.append(mean_r)
-    statistics_summary.append(mean_g)
-    statistics_summary.append(mean_b)
-    statistics_summary.append(std_r)
-    statistics_summary.append(std_g)
-    statistics_summary.append(std_b)
+    # 106.79066460039768 / 255.0
+    # 112.39727916518281 / 255.0
+    # 113.79938372074331 / 255.0
+    # 75.09153312342316 / 255.0
+    # 73.49875024709992 / 255.0
+    # 73.11534896091715 / 255.0
 
-    # save statistics txt
-    lines = statistics_summary
-    lines = []
-    fp = open(db_path + "/statistics.txt", 'w')
-    for line in statistics_summary:
-        fp.write(str(line) + "\n")
-    fp.close()
-
-def load_statistics(db_path):
-
-    # load statistics txt
-    fp = open(db_path + "/statistics.txt", 'r')
-    lines = fp.readlines()
-    fp.close()
-
-    statistics_summary = []
-    for line in lines:
-        line = line.replace('\n', '')
-        statistics_summary.append(float(line))
-    
-    print("mean values for each color channel ... ")
-    print(statistics_summary[0])
-    print(statistics_summary[1])
-    print(statistics_summary[2])
-    
-    print("standard deviations of zero-centered frames ... ")
-    print(statistics_summary[3])
-    print(statistics_summary[4])
-    print(statistics_summary[5])
-
-    return statistics_summary
-
-
-RUN_MODE = "train"  # test vs train vs inference 
-
-db_path = "/data/share/datasets/cmc_v1/"
-exp_folder_path = "/caa/Projects02/vhh/private/experiments_nobackup/cmc/"
-project_name = "cmc_3dcnn"
-experiment_name = "experiment-2"
-
-n_epochs = 50
-early_stopping_threshold = 10
-wDecay = 0.0
+db_path = "/data/share/datasets/cmc_final_dataset_v2/"
+#db_path = "/data/share/cmc_eval_dataset/"
+n_epochs = 200
+expFolder = "freq_test_exp_24"
+early_stopping_threshold = 35
+wDecay = 0.008
 lr = 0.0001
 batch_size = 16
 
-# prepare experiment folder structure
-exp_final_path = exp_folder_path + "/" + project_name + "/" + experiment_name
-if not os.path.exists(exp_final_path):
-    os.makedirs(exp_final_path)
-
-#calculate_statistics(path=db_path, batch_size=batch_size)
+trainloader, validloader, testloader = loadDataset(path=db_path, batch_size=batch_size)
+#calculate_statistics(trainloader)
 #exit()
-
-if(RUN_MODE == "train"):
-    os.environ["WANDB_API_KEY"] = "7ab633461569be4b899d278d59e518ad4ad26361"
-    #os.environ["WANDB_MODE"] = "dryrun"
-
-    exp_config={"epochs": n_epochs, 
-                "batch_size": batch_size, 
-                "learning_rate": lr, 
-                "wDecay": wDecay
-                }
-    wandb.init(dir=exp_final_path, project=project_name, name=experiment_name, config=exp_config)
-
-trainloader, validloader, validloader2, testloader = loadDataset(path=db_path, batch_size=batch_size)
 
 train_on_gpu = torch.cuda.is_available()
 print("Train on gpu: " + str(train_on_gpu))
@@ -512,11 +447,19 @@ if train_on_gpu:
 ################
 # define model
 ################
-#model = CNN3D(t_dim=50)
-model = Cnn3dModel(num_classes=3)
-#model = CnnLstm()
+#model = CNN3D(t_dim=32)
+model = CNNModel()
 
-#print(model)
+# load pre-trained weights
+#model.load_state_dict(torch.load("/home/dhelm/VHH_Develop/pycharm_vhh_cmc/runs/" +
+#                                 "test_exp_23" + "/best_model.pth")['net'])
+
+#model = CnnLstm()
+#model = CNN()
+
+print(model)
+
+exit()
 
 # Find total parameters and trainable parameters
 total_params = sum(p.numel() for p in model.parameters())
@@ -537,164 +480,103 @@ if multi_gpu:
 ################
 # Specify the Loss function
 ################
-#criterion = nn.CrossEntropyLoss()
-criterion = nn.NLLLoss()
+criterion = nn.CrossEntropyLoss()
 
-print(RUN_MODE)
-if(RUN_MODE == "train"):
+################
+# Specify the optimizer
+################
+#optimizer = optim.SGD(model.parameters(), lr=lr, momentum=0.9, nesterov=True, weight_decay=wDecay)
+optimizer = optim.AdamW(model.parameters(), lr=lr, weight_decay=wDecay)
 
-    ################
-    # Specify the optimizer
-    ################
-    optimizer = optim.SGD(model.parameters(), lr=lr, momentum=0.9, nesterov=True, weight_decay=wDecay)
-    #optimizer = optim.AdamW(model.parameters(), lr=lr, weight_decay=wDecay)
+# print("[Creating Learning rate scheduler...]")
+# scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=[50,100,150], gamma=0.1)
 
-    # print("[Creating Learning rate scheduler...]")
-    # scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=[50,100,150], gamma=0.1)
+# Define the lists to store the results of loss and accuracy
+best_acc = 0.0
+best_loss = 10.0
+early_stopping_cnt = 0
 
 
-    # Define the lists to store the results of loss and accuracy
-    best_acc = 0.0
-    best_loss = 10.0
-    early_stopping_cnt = 0
 
-    wandb.watch(model)
+'''
+writer = SummaryWriter(log_dir="./runs/" + expFolder)
 
-    for epoch in range(0, n_epochs):
-        tLoss_sum = 0
-        tAcc_sum = 0
-        vLoss_sum = 0
-        vAcc_sum = 0
-        ###################
-        # train the model #
-        ###################
-        model.train()
-        for i, (inputs, labels) in enumerate(trainloader):
-            #print("--TRAIN--")
-            #print(i)
-            #print(inputs.size())
-            #print(labels.size())
-            
-            # Convert torch tensor to Variable
-            inputs = Variable(inputs)
-            labels = Variable(labels)
+# get some random training images
+dataiter = iter(trainloader)
+images, labels = dataiter.next()
 
-            # If we have GPU, shift the data to GPU
-            CUDA = torch.cuda.is_available()
-            if CUDA:
-                inputs = inputs.cuda()
-                labels = labels.cuda()
+print(images.size())
+print(images.reshape(images.size()[0], images.size()[2], images.size()[1], images.size()[3], images.size()[4]).size())
+images = images.reshape(images.size()[0], images.size()[2], images.size()[1], images.size()[3], images.size()[4])
+print(images.size())
 
-            '''
-            #####################################
-            # Log wand: sequences 
-            # time, channels, width, height
-            #####################################
-            for b in range(0, len(inputs)):
-                seq_np = inputs[b].detach().cpu().numpy()
-                seq_final_np = np.transpose(seq_np, (1, 0, 2, 3))
-                wandb.log({"video_" + str(b): wandb.Video(seq_final_np, fps=4, format="mp4")})
-            ''' 
+# create grid of images
 
-            # run forward pass
-            outputs = model(inputs)
-            tLoss = criterion(outputs, labels)
-            tLoss_sum += tLoss.item()
+for a in range(0, 5):
 
-            # run backward pass
-            optimizer.zero_grad()
-            tLoss.backward()
-            optimizer.step()
+    img_grid = torchvision.utils.make_grid(images[a])
+    print(img_grid.size())
 
-            preds = outputs.argmax(1, keepdim=True)
-            correct = preds.eq(labels.view_as(preds)).sum()
-            acc = correct.float() / preds.shape[0]
-            tAcc_sum += acc.item()
+    # show images
+    matplotlib_imshow(img_grid, one_channel=True)
 
-        ###################
-        # eval  the model #
-        ###################
-        model.eval()
-        with torch.no_grad():
-            for i, (inputs, labels) in enumerate(validloader2):
-                #print("--EVAL--")
-                #print(i)
-                #print(inputs.size())
-                #print(labels.size())
-                # Convert torch tensor to Variable
-                inputs = Variable(inputs)
-                labels = Variable(labels)
+    # write to tensorboard
+    writer.add_image('test_' + str(a), img_grid)
 
-                # If we have GPU, shift the data to GPU
-                CUDA = torch.cuda.is_available()
-                if CUDA:
-                    inputs = inputs.cuda()
-                    labels = labels.cuda()
+writer.close()
+exit()
+'''
 
-                # run forward pass
-                outputs = model(inputs)
-                vLoss = criterion(outputs, labels)
-                vLoss_sum += vLoss.item()
+writer = SummaryWriter(log_dir="./runs/" + expFolder)
 
-                preds = outputs.argmax(1, keepdim=True)
-                correct = preds.eq(labels.view_as(preds)).sum()
-                acc = correct.float() / preds.shape[0]
-                vAcc_sum += acc.item()
-
-        print('Epoch [{:d}/{:d}]: train_loss: {:.3f}  train_acc: {:.3f} val_loss: {:.3f} val_acc: {:.3f}'.format(
-            epoch + 1, n_epochs, tLoss_sum / len(trainloader), tAcc_sum / len(trainloader), vLoss_sum / len(validloader), vAcc_sum / len(validloader)))
-
-        wandb.log({"train_loss": tLoss_sum / len(trainloader),
-                "train_acc": tAcc_sum / len(trainloader),
-                "val_loss": vLoss_sum / len(validloader),
-                "val_acc": vAcc_sum / len(validloader)
-                })
-
-        
-        ###############################
-        # Save checkpoint.
-        ###############################
-        
-        acc_curr = 100. * (vAcc_sum / len(validloader))
-        vloss_curr = vLoss_sum / len(validloader)
-        if acc_curr > best_acc:
-            print('Saving...')
-            state = {
-                'net': model.state_dict(),
-                'acc': acc_curr,
-                'loss': vloss_curr,
-                'epoch': epoch,
-            }
-            torch.save(state, exp_final_path + "/" "best_model" + ".pth")
-            best_acc = acc_curr
-            # best_loss = vloss_cur
-            early_stopping_cnt = 0
-        # scheduler.step()
-        
-        ###############################
-        # early stopping.
-        ###############################
-        if (acc_curr <= best_acc):
-            early_stopping_cnt = early_stopping_cnt + 1
-        if (early_stopping_cnt >= early_stopping_threshold):
-            print('Early stopping active --> stop training ...')
-            break
-        ''''''
-
-        del tLoss
-        del vLoss
-
-elif(RUN_MODE == "test"):
-    ###################
-    # test the model #
-    ###################
-
-    model.load_state_dict(torch.load(exp_final_path + "/" "best_model" + ".pth")['net'])
-
+for epoch in range(0, n_epochs):
+    tLoss_sum = 0
+    tAcc_sum = 0
     vLoss_sum = 0
     vAcc_sum = 0
+    ###################
+    # train the model #
+    ###################
+    model.train()
+    for i, (inputs, labels) in enumerate(trainloader):
+        #print("----")
+        #print(i)
+        #print(inputs.size())
+        #print(labels.size())
+        # Convert torch tensor to Variable
+        inputs = Variable(inputs)
+        labels = Variable(labels)
+
+        # If we have GPU, shift the data to GPU
+        CUDA = torch.cuda.is_available()
+        if CUDA:
+            inputs = inputs.cuda()
+            labels = labels.cuda()
+
+        # run forward pass
+        outputs = model(inputs)
+        tLoss = criterion(outputs, labels)
+        tLoss_sum += tLoss.item()
+
+        # run backward pass
+        optimizer.zero_grad()
+        tLoss.backward()
+        optimizer.step()
+
+        outputs = torch.softmax(outputs, dim=1)
+        preds = outputs.argmax(1, keepdim=True)
+        correct = preds.eq(labels.view_as(preds)).sum()
+        acc = correct.float() / preds.shape[0]
+        tAcc_sum += acc.item()
+
+        del tLoss
+        del outputs
+
+    ###################
+    # eval the model #
+    ###################
     model.eval()
-    for i, (inputs, labels) in enumerate(testloader):
+    for i, (inputs, labels) in enumerate(validloader):
         # print("----")
         # print(i)
         # print(inputs.size())
@@ -711,77 +593,122 @@ elif(RUN_MODE == "test"):
 
         # run forward pass
         outputs = model(inputs)
+
         # print(outputs)
         # exit()
         vLoss = criterion(outputs, labels)
         vLoss_sum += vLoss.item()
 
+        outputs = torch.softmax(outputs, dim=1)
         preds = outputs.argmax(1, keepdim=True)
         correct = preds.eq(labels.view_as(preds)).sum()
         acc = correct.float() / preds.shape[0]
         vAcc_sum += acc.item()
 
-    print("test loss: " + str(vLoss_sum / len(testloader)))
-    print("test accuracy: " + str(vAcc_sum / len(testloader)))
+        del vLoss
+        del outputs
 
-elif(RUN_MODE == "inference"):
+    print('Epoch [{:d}/{:d}]: train_loss: {:.3f}  train_acc: {:.3f} val_loss: {:.3f} val_acc: {:.3f}'.format(
+        epoch + 1, n_epochs, tLoss_sum / len(trainloader), tAcc_sum / len(trainloader), vLoss_sum / len(validloader), vAcc_sum / len(validloader)))
 
-    video_path = "/data/share/datasets/cmc_final_dataset_v3/training_data/"
-
-    statistics_summary_l = load_statistics(db_path=db_path)
-
-    pre_process_transform = transforms.Compose([
-        Resize3D((720, 960)),
-        #CenterCrop3D((720, 720)),
-        Resize3D((128, 128)),
-        #ToGrayScale3D(),
-        ToNormalizedTensor3D(statistics_summary_l),
-    ])
+    ###############################
+    # write memory usage to tensorboard
+    ###############################
+    #print(cutorch.get_device_capability())
+    #print(cutorch.memory_allocated(0))
+    #print(cutorch.max_memory_allocated(0))
+    writer.add_scalar("GPU memory_allocated", cutorch.memory_allocated(0), epoch)
+    writer.add_scalar("GPU max_memory_allocated", cutorch.max_memory_allocated(0), epoch)
 
 
-    db_path = video_path
-    test_data = CmcDataset(path=video_path,
-                            db_set="test",
-                            shuffle=False,
-                            subset=None,
-                            transform=pre_process_transform,
-                            target_transform=None)
+    ###############################
+    # write results to tensorboard
+    ###############################
+    writer.add_scalar('train_loss', tLoss_sum / len(trainloader), epoch)
+    writer.add_scalar('valid_loss', vLoss_sum / len(validloader), epoch)
+    writer.add_scalar('train_acc', tAcc_sum / len(trainloader), epoch)
+    writer.add_scalar('valid_acc', vAcc_sum / len(validloader), epoch)
 
-    num_workers = 4
-    inference_dataloader = DataLoader(test_data,
-                            batch_size=batch_size,
-                            shuffle=False,
-                            num_workers=num_workers
-                            )
-    print("test samples: " + str(len(test_data)))
+    ###############################
+    # Save checkpoint.
+    ###############################
+    acc_curr = 100. * (vAcc_sum / len(validloader))
+    vloss_curr = vLoss_sum / len(validloader)
+    if acc_curr > best_acc:
+        print('Saving...')
+        state = {
+            'net': model.state_dict(),
+            'acc': acc_curr,
+            'loss': vloss_curr,
+            'epoch': epoch,
+        }
+        # if not os.path.isdir('checkpoint'):
+        #    os.mkdir('checkpoint')
+        torch.save(state, "/home/dhelm/VHH_Develop/pycharm_vhh_cmc/runs/" +
+                   expFolder + "/" "best_model" + ".pth")  # + str(round(acc_curr, 4)) + "_" + str(round(vloss_curr, 4))
+        best_acc = acc_curr
+        # best_loss = vloss_cur
+        early_stopping_cnt = 0
+    # scheduler.step()
+
+    ###############################
+    # early stopping.
+    ###############################
+    if (acc_curr <= best_acc):
+        early_stopping_cnt = early_stopping_cnt + 1
+    if (early_stopping_cnt >= early_stopping_threshold):
+        print('Early stopping active --> stop training ...')
+        break
+''''''
+writer.close()
+
+###################
+# test the model #
+###################
+
+model.load_state_dict(torch.load("/home/dhelm/VHH_Develop/pycharm_vhh_cmc/runs/" +
+                   expFolder + "/best_model.pth")['net'])
+
+vLoss_sum = 0
+vAcc_sum = 0
+model.eval()
+for i, (inputs, labels) in enumerate(testloader):
+    # print("----")
+    # print(i)
+    # print(inputs.size())
+    # print(labels.size())
+    # Convert torch tensor to Variable
+    inputs = Variable(inputs)
+    labels = Variable(labels)
+
+    # If we have GPU, shift the data to GPU
+    CUDA = torch.cuda.is_available()
+    if CUDA:
+        inputs = inputs.cuda()
+        labels = labels.cuda()
+
+    # run forward pass
+    outputs = model(inputs)
+    # print(outputs)
+    # exit()
+    vLoss = criterion(outputs, labels)
+    vLoss_sum += vLoss.item()
+
+    preds = outputs.argmax(1, keepdim=True)
+    correct = preds.eq(labels.view_as(preds)).sum()
+    acc = correct.float() / preds.shape[0]
+    vAcc_sum += acc.item()
+
+print("test loss: " + str(vLoss_sum / len(testloader)))
+print("test accuracy: " + str(vAcc_sum / len(testloader)))
+''''''
 
 
-    model.load_state_dict(torch.load(exp_final_path + "/" "best_model" + ".pth")['net'])
+'''
+print(db_instance.__len__())
+sample, label = db_instance.__getitem__(0)
+print(sample.shape)
+print(label)
+'''
 
-    preds_l = []
-    vAcc_sum = 0
-    for i, (inputs, labels) in enumerate(inference_dataloader):
-        input_batch = inputs
-        input_batch = Variable(input_batch)
-        labels = Variable(labels)
 
-        # move the input and model to GPU for speed if available
-        if torch.cuda.is_available():
-            input_batch = input_batch.to('cuda')
-            labels = labels.to('cuda')
-            model.to('cuda')
-
-        model.eval()
-        with torch.no_grad():
-            output = model(input_batch)
-            preds = output.argmax(1, keepdim=True)
-            preds_l.extend(preds.detach().cpu().numpy().flatten())
-
-            correct = preds.eq(labels.view_as(preds)).sum()
-            acc = correct.float() / preds.shape[0]
-            vAcc_sum += acc.item()
-
-    print("test accuracy: " + str(vAcc_sum / len(inference_dataloader)))
-
-    print(np.array(preds_l))
-    print(np.unique(np.array(preds_l)))

@@ -1,7 +1,7 @@
-from vhh_cmc.CMC import CMC
+from cmc.CMC import CMC
 import os
 
-config_file = "/caa/Homes01/dhelm/working/vhh/develop/vhh_cmc/config/config_cmc.yaml"
+config_file = "/home/dhelm/VHH_Develop/pycharm_vhh_cmc/config/config_cmc.yaml"
 cmc_instance = CMC(config_file)
 
 results_path = "/data/share/maxrecall_vhh_mmsi/develop/videos/results/sbd/final_results/"
@@ -14,3 +14,5 @@ for file in results_file_list:
     print(shots_np)
     max_recall_id = int(file.split('.')[0])
     cmc_instance.runOnSingleVideo(shots_per_vid_np=shots_np, max_recall_id=max_recall_id)
+
+

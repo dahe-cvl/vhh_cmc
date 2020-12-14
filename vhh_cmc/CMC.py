@@ -1,9 +1,9 @@
 import cv2
 import numpy as np
-from vhh_cmc.Configuration import Configuration
-from vhh_cmc.PreProcessing import PreProcessing
+from cmc.Configuration import Configuration
+from cmc.PreProcessing import PreProcessing
 import os
-from vhh_cmc.OpticalFlow import OpticalFlow
+from cmc.OpticalFlow import OpticalFlow
 
 
 #import matplotlib
@@ -31,8 +31,7 @@ class CMC(object):
 
         if (self.config_instance.debug_flag == True):
             print("DEBUG MODE activated!")
-            self.debug_results = self.config_instance.path_debug_results
-            print("save debug results to: " + str(self.debug_results))
+            self.debug_results = "/data/share/maxrecall_vhh_mmsi/videos/results/cmc/develop/"
 
         self.pre_processing_instance = PreProcessing(config_instance=self.config_instance)
 
@@ -75,15 +74,13 @@ class CMC(object):
 
         if(self.config_instance.save_eval_results == 1):
             print("Evaluation mode is activated ...")
-            cap = cv2.VideoCapture(self.config_instance.path_videos + "/" + vid_name)
+            cap = cv2.VideoCapture(vid_name)
         else:
             print(self.config_instance.path_videos + "/" + vid_name)
             cap = cv2.VideoCapture(self.config_instance.path_videos + "/" + vid_name)
 
         frame_l = []
         cnt = 0
-
-        #print(vid_name)
 
         while(True):
             cnt = cnt + 1
@@ -102,94 +99,31 @@ class CMC(object):
                 break
 
         all_frames_np = np.array(frame_l)
+        print(all_frames_np.shape)
 
         #all_frames_np = all_frames_np[1240:1478,:,:,:]
-        shot_start_idx = 0  # used in debugging mode - to select specific shot
+        shot_start_idx = 0   # used in debugging mode - to select specific shot
         results_cmc_l = []
         for idx in range(shot_start_idx, shot_start_idx + num_shots):
-            #print(shots_np[idx])
+            print(shots_np[idx])
             shot_id = int(shots_np[idx][1])
-            vid_name = str(shots_np[idx][0])
+            vid_name = str(shots_np[idx][0].split('.')[0])
             start = int(shots_np[idx][2])
             stop = int(shots_np[idx][3])
             shot_frames_np = all_frames_np[start:stop + 1, :, :, :]
             shot_len = stop - start
-            
 
-            # normalize shot
-            #shot_frames_normalized_np = self.pre_processing_instance.normalizeGray(shot_frames_np)
-            #print(shot_frames_normalized_np.shape)
+            print(vid_name)
+            print(start)
+            print(stop)
 
             MIN_NUMBER_OF_FRAMES_PER_SHOT = 10
             if(shot_len <= MIN_NUMBER_OF_FRAMES_PER_SHOT ):
                 #print("shot length is too small!")
                 class_name = "NA"
             else:
-                 # add new optical flow version
-                optical_flow_instance = OpticalFlow(video_frames=shot_frames_np,
-                                                    algorithm="orb",
-                                                    config_instance=self.config_instance)
-                mag_l, angles_l, x_sum_l, y_sum_l = optical_flow_instance.run()
-                #mag_l, angles_l, x_sum_l, y_sum_l = optical_flow_instance.runDense()
-                class_name = optical_flow_instance.predict_final_result(mag_l,
-                                                                        angles_l,
-                                                                        x_sum_l,
-                                                                        y_sum_l,
-                                                                        self.config_instance.class_names)
-
-            '''
-            # run optical flow process
-            optical_flow_instance = OpticalFlow(video_frames=shot_frames_np,
-                                                fPath=self.config_instance.path_videos + "/" + vid_name,
-                                                debug_path=self.config_instance.path_raw_results,
-                                                sf=start,
-                                                ef=stop,
-                                                mode=self.config_instance.mode,
-                                                sensitivity=self.config_instance.sensitivity,
-                                                specificity=self.config_instance.specificity,
-                                                border=self.config_instance.border,
-                                                number_of_features=self.config_instance.number_of_features,
-                                                angle_diff_limit=self.config_instance.angle_diff_limit,
-                                                config=None)
-            pan_list, tilt_list = optical_flow_instance.run()
-
-            print(pan_list)
-            print(tilt_list)
-
-            number_of_all_frames = abs(start - stop)
-            if number_of_all_frames == 0:
-                number_of_all_frames = 0.000000000001
-
-            number_of_pan_frames = 0
-            for sf, ef in pan_list:
-                diff = abs(sf - ef)
-                number_of_pan_frames = number_of_pan_frames + diff
-            pans_score = int((number_of_pan_frames * 100) / number_of_all_frames)
-            print(pans_score)
-
-            number_of_tilt_frames = 0
-            for sf, ef in tilt_list:
-                diff = abs(sf - ef)
-                number_of_tilt_frames = number_of_tilt_frames + diff
-            tilts_score = int((number_of_tilt_frames * 100) / number_of_all_frames)
-            print(tilts_score)
-
-            #if(self.config_instance.save_eval_results == 1):
-            #    if (pans_score >= threshold):
-            #        class_name = self.config_instance.class_names[0]
-            #    else:
-            #        class_name = self.config_instance.class_names[1]
-            #else:
-            threshold = 60
-            if (pans_score >= threshold):
-                class_name = self.config_instance.class_names[0]
-            elif(tilts_score >= threshold):
-                class_name = self.config_instance.class_names[1]
-            elif (pans_score >= threshold) and (tilts_score >= threshold):
-                class_name = self.config_instance.class_names[2]
-            else:
-                class_name = self.config_instance.class_names[2]
-            '''
+                print("DL approach - NOT IMPLEMENTED YET")
+                exit()
 
             # prepare results
             print(str(vid_name) + ";" + str(shot_id) + ";" + str(start) + ";" + str(stop) + ";" + str(class_name))

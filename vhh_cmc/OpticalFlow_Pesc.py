@@ -672,6 +672,7 @@ class OpticalFlow_Pesc(object):
                   str(self.number_of_features - curr_feat.__len__()) +
                   " new features.")
 
+            '''
             # TODO: replace with meaningful feature extractor
             prev_feat = self.create_random_features(self.number_of_features, self.range_of_frame(curr_frame))
 
@@ -688,8 +689,8 @@ class OpticalFlow_Pesc(object):
             print(curr_frame.shape)
             curr_frame_gray = cv2.cvtColor(curr_frame, cv2.COLOR_BGR2GRAY)
             prev_feat = cv2.goodFeaturesToTrack(curr_frame_gray, mask=None, **feature_params)
-            print(type(prev_feat))
-            '''
+            #print(type(prev_feat))
+
             ''''''
 
             #if(prev_feat == None):

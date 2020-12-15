@@ -7,6 +7,9 @@ Development:
   # This parameter is used to specify a SBD results file for debugging mode.
   SBD_RESULTS_PATH: "/data/share/maxrecall_vhh_mmsi/videos/results/sbd/final_results/8.csv"
   ###
+  # This parameter is used to specify the results path in debug mode
+  PATH_DEBUG_RESULTS: "/data/share/maxrecall_vhh_mmsi/develop/videos/results/cmc/develop/"
+  ###
   # This parameter is used to save a debug package (e.g. including some visualizations, ... - not available yet).
   SAVE_DEBUG_PKG: 0
 
@@ -27,7 +30,7 @@ PreProcessing:
 OpticalFlow:
   ###
   # This parameter is used to specify a magnitude threshold to disinguish between no-movement and movement. (e.g. eval dataset: 2, 3, 5)
-  MIN_MAGNITUDE_THRESHOLD: 5.0
+  MIN_MAGNITUDE_THRESHOLD: 2.0
   ###
   # This parameter is used to specify a distance threshold for outlier detection of feature matches
   DISTANCE_THRESHOLD: 0.75
@@ -57,7 +60,7 @@ OpticalFlow:
 CmcCore:
   ###
   # This parameter is used to specify the class names.
-  CLASS_NAMES: ["pan","tilt", "track", "NA"]
+  CLASS_NAMES: ["pan","tilt", "track", "na"]
 
   ###
   # This parameter is used to save raw results (e.g. debug visualizations).
@@ -78,7 +81,7 @@ CmcCore:
   SAVE_FINAL_RESULTS: 1     # 1 ... yes 0 ... no
   ###
   # This parameter is used to specify the path for saving the final results.
-  PATH_FINAL_RESULTS: "/data/share/maxrecall_vhh_mmsi/videos/results/cmc/final_results/"
+  PATH_FINAL_RESULTS: "/caa/Projects02/vhh/private/Results/comparison_crop_uncrop_nobackup/results/cmc/final_results/cropped/"
   ###
   # This parameter is used to specify the prefix for the results file.
   PREFIX_FINAL_RESULTS: "results_"
@@ -88,7 +91,7 @@ CmcCore:
 
   ###
   # This parameter is used to specify the path to the videos.
-  PATH_VIDEOS: "/data/share/maxrecall_vhh_mmsi/videos/downloaded/"
+  PATH_VIDEOS: "/caa/Projects02/vhh/private/Results/comparison_crop_uncrop_nobackup/videos/cropped/"
 
 Evaluation:
   ###
@@ -99,10 +102,10 @@ Evaluation:
   PATH_RAW_RESULTS: "/data/share/maxrecall_vhh_mmsi/videos/results/cmc/raw_results/"
   ###
   # This parameter is used to specify the path to store the evaluation results path.
-  PATH_EVAL_RESULTS: "/data/share/maxrecall_vhh_mmsi/videos/results/cmc/develop/optical_flow_test/"
+  PATH_EVAL_RESULTS: "/caa/Projects02/vhh/private/Results/comparison_crop_uncrop_nobackup/results/cmc/final_results/cropped/"
   ###
   # This parameter is used to groundtruth annotations used for evaluation.
   PATH_GT_ANNOTATIONS: "/caa/Projects02/vhh/private/database_nobackup/VHH_datasets/annotations/ShotBoundaryDetection/imediacities/sbd_imc_annotations_20191231.csv"
   ###
   # This parameter is used to specify the path to the dataset used for the evaluation.
-  PATH_EVAL_DATASET: "/data/share/vhh_mmsi_test_db/"
+  PATH_EVAL_DATASET: "/data/share/datasets/vhh_mmsi_test_db_v3/"

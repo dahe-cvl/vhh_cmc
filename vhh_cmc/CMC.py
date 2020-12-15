@@ -4,7 +4,7 @@ from vhh_cmc.Configuration import Configuration
 from vhh_cmc.PreProcessing import PreProcessing
 import os
 from vhh_cmc.OpticalFlow import OpticalFlow
-
+from vhh_cmc.Video import Video
 
 #import matplotlib
 #matplotlib.use('Qt5Agg')
@@ -58,28 +58,34 @@ class CMC(object):
         if (self.config_instance.debug_flag == True):
             # load shot list from result file
             shots_np = self.loadSbdResults(self.config_instance.sbd_results_path)
+            debug_sid = 7
         else:
             shots_np = shots_per_vid_np
+            debug_sid = -1
 
         if (len(shots_np) == 0):
             print("ERROR: there must be at least one shot in the list!")
             exit()
-
-        if (self.config_instance.debug_flag == True):
-            num_shots = 1
-        else:
-            num_shots = len(shots_np)
 
         # read all frames of video
         vid_name = shots_np[0][0]
 
         if(self.config_instance.save_eval_results == 1):
             print("Evaluation mode is activated ...")
-            cap = cv2.VideoCapture(vid_name)
+            print(self.config_instance.path_videos + "/" + vid_name)
+            #cap = cv2.VideoCapture(self.config_instance.path_videos + "/" + vid_name)
+
+            vid_instance = Video()
+            vid_instance.load(self.config_instance.path_videos + "/" + vid_name)
         else:
             print(self.config_instance.path_videos + "/" + vid_name)
-            cap = cv2.VideoCapture(self.config_instance.path_videos + "/" + vid_name)
+            #cap = cv2.VideoCapture(self.config_instance.path_videos + "/" + vid_name)
 
+            vid_instance = Video()
+            vid_instance.load(self.config_instance.path_videos + "/" + vid_name)
+
+
+        '''
         frame_l = []
         cnt = 0
 
@@ -101,26 +107,31 @@ class CMC(object):
 
         all_frames_np = np.array(frame_l)
         #print(all_frames_np.shape)
+        '''
 
-        #all_frames_np = all_frames_np[1240:1478,:,:,:]
-        shot_start_idx = 0  # used in debugging mode - to select specific shot
+
+
         results_cmc_l = []
-        for idx in range(shot_start_idx, shot_start_idx + num_shots):
-            #print(shots_np[idx])
-            shot_id = int(shots_np[idx][1])
-            vid_name = str(shots_np[idx][0])
-            start = int(shots_np[idx][2])
-            stop = int(shots_np[idx][3])
-            shot_frames_np = all_frames_np[start:stop + 1, :, :, :]
-            shot_len = stop - start
+        print(shots_np.shape)
+        for data in vid_instance.getFramesByShots(shots_np, preprocess=self.pre_processing_instance.applyTransformOnImg):
+            frames_per_shots_np = data['Images']
+            shot_id = data['sid']
+            vid_name = data['video_name']
+            start = data['start']
+            stop = data['end']
 
+            if(shot_id != debug_sid and self.config_instance.debug_flag == True):
+                continue
+
+
+            shot_len = stop - start
             MIN_NUMBER_OF_FRAMES_PER_SHOT = 10
             if(shot_len <= MIN_NUMBER_OF_FRAMES_PER_SHOT ):
                 #print("shot length is too small!")
                 class_name = "NA"
             else:
                 # add new optical flow version
-                optical_flow_instance = OpticalFlow(video_frames=shot_frames_np,
+                optical_flow_instance = OpticalFlow(video_frames=frames_per_shots_np,
                                                     algorithm="orb",
                                                     config_instance=self.config_instance)
                 mag_l, angles_l, x_sum_l, y_sum_l = optical_flow_instance.run()
@@ -130,78 +141,16 @@ class CMC(object):
                                                                         y_sum_l,
                                                                         self.config_instance.class_names)
 
-            '''
-            # run optical flow process
-            optical_flow_instance = OpticalFlow(video_frames=shot_frames_np,
-                                                fPath=self.config_instance.path_videos + "/" + vid_name,
-                                                debug_path=self.config_instance.path_raw_results,
-                                                sf=start,
-                                                ef=stop,
-                                                mode=self.config_instance.mode,
-                                                sensitivity=self.config_instance.sensitivity,
-                                                specificity=self.config_instance.specificity,
-                                                border=self.config_instance.border,
-                                                number_of_features=self.config_instance.number_of_features,
-                                                angle_diff_limit=self.config_instance.angle_diff_limit,
-                                                config=None)
-            pan_list, tilt_list = optical_flow_instance.run()
-
-            print(pan_list)
-            print(tilt_list)
-
-            number_of_all_frames = abs(start - stop)
-            if number_of_all_frames == 0:
-                number_of_all_frames = 0.000000000001
-
-            number_of_pan_frames = 0
-            for sf, ef in pan_list:
-                diff = abs(sf - ef)
-                number_of_pan_frames = number_of_pan_frames + diff
-            pans_score = int((number_of_pan_frames * 100) / number_of_all_frames)
-            print(pans_score)
-
-            number_of_tilt_frames = 0
-            for sf, ef in tilt_list:
-                diff = abs(sf - ef)
-                number_of_tilt_frames = number_of_tilt_frames + diff
-            tilts_score = int((number_of_tilt_frames * 100) / number_of_all_frames)
-            print(tilts_score)
-
-            #if(self.config_instance.save_eval_results == 1):
-            #    if (pans_score >= threshold):
-            #        class_name = self.config_instance.class_names[0]
-            #    else:
-            #        class_name = self.config_instance.class_names[1]
-            #else:
-            threshold = 60
-            if (pans_score >= threshold):
-                class_name = self.config_instance.class_names[0]
-            elif(tilts_score >= threshold):
-                class_name = self.config_instance.class_names[1]
-            elif (pans_score >= threshold) and (tilts_score >= threshold):
-                class_name = self.config_instance.class_names[2]
-            else:
-                class_name = self.config_instance.class_names[2]
-            '''
-
             # prepare results
             print(str(vid_name) + ";" + str(shot_id) + ";" + str(start) + ";" + str(stop) + ";" + str(class_name))
             results_cmc_l.append([str(vid_name) + ";" + str(shot_id) + ";" + str(start) + ";" + str(stop) + ";" + str(class_name)])
-            #exit()
 
-            '''
-            # save raw results
-            if(self.config_instance.save_raw_results == 1):
-                optical_flow_instance.to_csv(
-                    "/".join([self.config_instance.path_raw_results, self.config_instance.path_prefix_raw_results + str(vid_name.split('/')[-1]) + ".csv"]))
-                optical_flow_instance.to_png(
-                    "/".join([self.config_instance.path_raw_results, self.config_instance.path_prefix_raw_results + str(vid_name) + ".png"]))
-                optical_flow_instance.to_avi(
-                    "/".join([self.config_instance.path_raw_results, self.config_instance.path_prefix_raw_results + str(vid_name) + ".avi"]))
-            '''
+            if (shot_id == debug_sid and self.config_instance.debug_flag == True):
+                break
+
         results_cmc_np = np.array(results_cmc_l)
         print(results_cmc_np)
-        #exit()
+        exit()
 
         # export results
         if (self.config_instance.save_eval_results == 1):

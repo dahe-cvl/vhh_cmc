@@ -51,7 +51,7 @@ class PreProcessing(object):
         :return: This method returns a grayscale image (WxHx1).
         """
         img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        img_gray = np.expand_dims(img_gray, axis=-1)
+        #img_gray = np.expand_dims(img_gray, axis=-1)
         return img_gray
 
     def crop(self, img: np.ndarray, dim: tuple):
@@ -100,6 +100,8 @@ class PreProcessing(object):
         :return: This method returns the resized image.
         """
         img_resized = cv2.resize(img, dim)
+        if(int(self.config_instance.flag_convert2Gray) == 1):
+            img_resized = np.expand_dims(img_resized, axis=-1)
         return img_resized
 
 

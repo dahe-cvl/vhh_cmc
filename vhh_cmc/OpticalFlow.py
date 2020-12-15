@@ -33,46 +33,38 @@ class OpticalFlow(object):
             exit()
 
     def run(self):
-
-        '''
-        frame_list = []
-        cap = cv2.VideoCapture(self.video_name)
-        while(1):
-            ret, old_frame = cap.read()
-            if(ret == False):
-                break
-            old_gray = cv2.cvtColor(old_frame, cv2.COLOR_BGR2GRAY)
-            old_gray = self.crop(old_gray, (500, 500))
-            frame_list.append(old_gray)
-        frames_np = np.array(frame_list)
-        print(frames_np.shape)
-        cap.release()
-        '''
-
         frames_np = self.video_frames
 
         filtered_mag_l_n = []
         filtered_angles_l_n = []
+        number_of_features_l = []
 
         vector_x_sum_l = []
         vector_y_sum_l = []
         angles_l_n = []
         mag_l_n = []
-        for i in range(1, len(frames_np)):
-            #print("##########")
 
-            prev_frame = frames_np[i - 1]
+        seed_idx = 0
+
+        MIN_NUM_FEATURES = 500
+        seed_idx = 0
+        for i in range(1, len(frames_np)):
+            # print("##########")
+
+            prev_frame = frames_np[seed_idx]
             curr_frame = frames_np[i]
 
             distance_threshold = self.config_instance.distance_threshold
             kp_prev_list, kp_curr_list = self.feature_detector.getMatches(prev_frame, curr_frame, distance_threshold)
 
-            #print("---")
-            #print("number of features")
-            #print(len(kp_curr_list))
-            #print(len(kp_prev_list))
+            # print("---")
+            # print("number of features")
+            # print(len(kp_curr_list))
+            # print(len(kp_prev_list))
 
             if (len(kp_prev_list) == 0 or len(kp_curr_list) == 0):
+                # mag_l_n.append([0, 0])
+                # angles_l_n.append([0, 0])
                 mag_l_n.append([0, 0])
                 angles_l_n.append([0, 0])
                 continue
@@ -81,40 +73,46 @@ class OpticalFlow(object):
             prev_points = np.array(kp_prev_list).astype('float').reshape(-1, 1, 2)
             mag_n, angle_n = self.compute_magnitude_angle(prev_points,
                                                           curr_points)
-            
-            #print(mag_n)
-            #print(angle_n)
+
+            number_of_features = len(curr_points)
+            number_of_features_l.append(number_of_features)
+
+            if (number_of_features <= MIN_NUM_FEATURES):
+                seed_idx = i
+
+            # print(mag_n)
+            # print(angle_n)
             # angle_raw.append(angle_n.tolist())
             # mag_raw.append(mag_n.tolist())
             ''''''
-            #mag_n = np.abs(mag_n)  # [:50])
+            # mag_n = np.abs(mag_n)  # [:50])
             mag_n, outlier_idx = self.filter1D(mag_n, alpha=2.5)
             angles_cleanup = []
             angles_orig_np = angle_n
             for s in range(0, len(angles_orig_np)):
-                if(outlier_idx == s):
-                    angle_mean = (angles_orig_np[s-1] + angles_orig_np[s+1]) / 2.0
+                if (outlier_idx == s):
+                    angle_mean = (angles_orig_np[s - 1] + angles_orig_np[s + 1]) / 2.0
                     angles_cleanup.append(angle_mean)
                 else:
                     angles_cleanup.append(angles_orig_np[s])
-            angle_n = np.array(angles_cleanup)  
-            
-            #print(mag_n)
-            #print(angle_n)
+            angle_n = np.array(angles_cleanup)
 
-            #mag_n = np.delete(mag_n, outliers_idx)
+            # print(mag_n)
+            # print(angle_n)
+
+            # mag_n = np.delete(mag_n, outliers_idx)
 
             vector_y = np.multiply(mag_n, np.sin(np.deg2rad(angle_n)))
             vector_x = np.multiply(mag_n, np.cos(np.deg2rad(angle_n)))
 
             vector_y_sum = vector_y.sum() / len(vector_y)
             vector_x_sum = vector_x.sum() / len(vector_x)
-            #print("vector_y_sum: " + str(vector_y_sum))
-            #print("vector_x_sum: " + str(vector_x_sum))
+            # print("vector_y_sum: " + str(vector_y_sum))
+            # print("vector_x_sum: " + str(vector_x_sum))
 
             vector_x_sum_l.append([0, vector_x_sum])
             vector_y_sum_l.append([0, vector_y_sum])
-            #exit()
+            # exit()
 
             mag_mean_n = np.mean(mag_n)
             mag_l_n.append([0, mag_mean_n])
@@ -126,144 +124,10 @@ class OpticalFlow(object):
             filtered_angle_n = angles_l_n
             filtered_angles_l_n.append(filtered_angle_n)
 
-            '''
-            data_std = np.std(mag_n)
-            data_mean = np.mean(mag_n)
-            anomaly_cut_off = data_std * 3
-
-            lower_limit = data_mean - anomaly_cut_off
-            upper_limit = data_mean + anomaly_cut_off
-            print(lower_limit)
-            # Generate outliers
-            outliers_idx = []
-            for o, outlier in enumerate(mag_n):
-                if outlier > upper_limit or outlier < lower_limit:
-                    outliers_idx.append(o)
-            filtered_mag_n = np.delete(mag_n, outliers_idx)
-            filtered_angle_n = np.delete(angle_n, outliers_idx)
-            filtered_curr_points = np.delete(curr_points, outliers_idx, axis=0)
-            filtered_prev_points = np.delete(prev_points, outliers_idx, axis=0)
-
-            filtered_mag_n = np.abs(filtered_mag_n)  # [:50])
-            filtered_mag_mean_n = np.median(filtered_mag_n)
-            filtered_mag_l_n.append([0, filtered_mag_mean_n])
-
-            filtered_angle_n = np.abs(filtered_angle_n)  # [:50])
-            filtered_angle_mean_n = np.median(filtered_angle_n)
-            '''
-
-            '''
-            # plot angles over time
-            #plt.figure(1)
-            fig, axs = plt.subplots(2)
-            fig.suptitle('mag and angles per feature point in one frame')
-            axs[0].plot(np.arange(len(mag_n)), mag_n)
-            axs[0].plot(outliers_idx, mag_n[outliers_idx])
-            axs[0].plot(np.arange(len(filtered_mag_n)), filtered_mag_n)
-            axs[1].plot(np.arange(len(angle_n)), angle_n)
-            #plt.ylim(ymax=190, ymin=-190)
-            plt.grid(True)
-            plt.show()
-            #plt.draw()
-            #plt.pause(0.02)
-            '''
-
-            '''
-            # draw the tracks
-            mask = np.zeros_like(frames_np[i])
-            for j, (new, old) in enumerate(zip(curr_points, prev_points)):
-                if(j > 10):
-                    break;
-                a, b = new.ravel().astype('int')
-                c, d = old.ravel().astype('int')
-                mask = cv2.line(mask, (a, b), (c, d), (255, 0, 0), 1)
-                frame_curr = cv2.circle(frames_np[i], (a, b), 5, (255, 0, 0), -1)
-            img = cv2.add(frame_curr, mask)
-            cv2.imshow('frame', img)
-            '''
-
-            '''
-            # draw orig with n feature points
-            n_feature_points = len(curr_points)
-            for j, (new, old) in enumerate(zip(curr_points, prev_points)):
-                if (j > n_feature_points):
-                    break
-                a, b = new.astype('int').ravel()
-                c, d = old.astype('int').ravel()
-                frame_curr = cv2.circle(frames_np[i], (a, b), 2, (255, 0, 0), -1)
-                frame_curr = cv2.line(frame_curr, (a, b), (a + 5, b + 5), (255, 0, 0), 1)
-            # img = cv2.add(frame_curr, mask)
-            cv2.imshow('frame', frame_curr)
-
-            k = cv2.waitKey(30) & 0xff
-            if k == 27:
-                break
-            '''
-
-            '''
-            #print(curr_points)
-            #print(curr_points.shape)
-            #print(filtered_curr_points)
-            #print(filtered_curr_points.shape)
-            # draw orig with n feature points
-            n_feature_points = len(filtered_curr_points)
-            for j, (new, old) in enumerate(zip(filtered_curr_points, filtered_prev_points)):
-                if (j > n_feature_points):
-                    break
-                a, b = new.astype('int').ravel()
-                c, d = old.astype('int').ravel()
-                frame_curr = cv2.circle(frames_np[i], (a, b), 3, (255, 0, 0), -1)
-                #frame_curr = cv2.line(frame_curr, (a, b), (a + int(vector_x[j]) * 1, b),
-                #                      (0, 0, 255), 2)
-                #frame_curr = cv2.line(frame_curr, (a, b), (a, b + int(vector_y[j]) * 1),
-                #                      (0, 255, 0), 2)
-
-            # img = cv2.add(frame_curr, mask)
-            cv2.imshow('frame', frame_curr)
-
-            k = cv2.waitKey(30) & 0xff
-            if k == 27:
-                break
-
-            '''
-
-            '''
-            # plot angles over time
-            #plt.figure(1)
-            fig, axs = plt.subplots(3)
-            fig.suptitle('mag and angles per feature point in one frame')
-            axs[0].plot(np.arange(len(mag_n)), mag_n)
-            axs[0].plot(outliers_idx, mag_n[outliers_idx])
-            axs[0].plot(np.arange(len(filtered_mag_n)), filtered_mag_n)
-            axs[1].plot(np.arange(len(angle_n)), angle_n)
-            axs[2].imshow(frame_curr)
-            #plt.ylim(ymax=190, ymin=-190)
-            plt.grid(True)
-            plt.show()
-            #plt.draw()
-            #plt.pause(0.02)
-            '''
-
-            '''
-            # plot angles over time
-            #plt.figure(1)
-            fig, axs = plt.subplots(2)
-            fig.suptitle('mag and angles per feature point in one frame')
-            axs[0].plot(np.arange(len(mag_n)), mag_n)
-            axs[0].plot(outliers_idx, mag_n[outliers_idx])
-            axs[0].plot(np.arange(len(filtered_mag_n)), filtered_mag_n)
-            axs[1].plot(np.arange(len(angle_n)), angle_n)
-            #plt.ylim(ymax=190, ymin=-190)
-            plt.grid(True)
-            plt.show()
-            #plt.draw()
-            #plt.pause(0.02)
-            '''
-
         # cv2.destroyAllWindows()
         return mag_l_n, angles_l_n, vector_x_sum_l, vector_y_sum_l
 
-       def predict_final_result(self, mag_l_n, angles_l_n, x_sum_l, y_sum_l, class_names):
+    def predict_final_result(self, mag_l_n, angles_l_n, x_sum_l, y_sum_l, class_names):
         # print(type(mag_l_n))
         # print(len(mag_l_n))
         # exit()
@@ -403,9 +267,9 @@ class OpticalFlow(object):
         
         return class_name
 
-    def filter1D(self, data_np, alpha=2):
-        #print(type(data_np))
-        #print(data_np.shape)
+    def filter1D(self, data_np, alpha=2.0):
+        # print(type(data_np))
+        # print(data_np.shape)
         data_std = np.std(data_np)
         data_mean = np.mean(data_np)
         anomaly_cut_off = data_std * alpha
@@ -416,14 +280,14 @@ class OpticalFlow(object):
         outliers_idx = []
         filtered_data = []
         for j in range(0, len(data_np)):
-            if(j < len(data_np) - 1):
-                nxt = data_np[j+1]
+            if (j < len(data_np) - 1):
+                nxt = data_np[j + 1]
                 curr = data_np[j]
-                prv = data_np[j-1]
+                prv = data_np[j - 1]
             else:
                 nxt = data_np[j]
                 curr = data_np[j]
-                prv = data_np[j-1]
+                prv = data_np[j - 1]
 
             if curr > upper_limit or curr < lower_limit:
                 data_mean = (prv + nxt) / 2.0
@@ -431,10 +295,10 @@ class OpticalFlow(object):
                 outliers_idx.append(j)
             else:
                 filtered_data.append(curr)
-        
+
         filtered_data_np = np.array(filtered_data)
         return filtered_data_np, outliers_idx
-        
+
     def crop(self, img: np.ndarray, dim: tuple):
         """
         This method is used to crop a specified region of interest from a given image.

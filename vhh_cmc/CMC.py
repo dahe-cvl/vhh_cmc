@@ -84,35 +84,7 @@ class CMC(object):
             vid_instance = Video()
             vid_instance.load(self.config_instance.path_videos + "/" + vid_name)
 
-
-        '''
-        frame_l = []
-        cnt = 0
-
-        while(True):
-            cnt = cnt + 1
-            ret, frame = cap.read()
-            # print(cnt)
-            # print(ret)
-            # print(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-            if (ret == True):
-                frame = self.pre_processing_instance.applyTransformOnImg(frame)
-                frame_l.append(frame)
-                #cv2.imshow("asd", frame)
-                #cv2.waitKey(1)
-                #if(cnt == 100):
-                #    exit()
-            else:
-                break
-
-        all_frames_np = np.array(frame_l)
-        #print(all_frames_np.shape)
-        '''
-
-
-
         results_cmc_l = []
-        print(shots_np.shape)
         for data in vid_instance.getFramesByShots(shots_np, preprocess=self.pre_processing_instance.applyTransformOnImg):
             frames_per_shots_np = data['Images']
             shot_id = data['sid']
@@ -149,8 +121,6 @@ class CMC(object):
                 break
 
         results_cmc_np = np.array(results_cmc_l)
-        print(results_cmc_np)
-        exit()
 
         # export results
         if (self.config_instance.save_eval_results == 1):

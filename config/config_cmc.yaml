@@ -1,7 +1,7 @@
 Development:
   ###
   # This parameter is used to activate or deactivate the debug mode.
-  DEBUG_FLAG: 1             # 1 ... activate 0 ... deactivate
+  DEBUG_FLAG: 0             # 1 ... activate 0 ... deactivate
   ###
   # This parameter is used to specify a SBD results file for debugging mode.
   SBD_RESULTS_PATH: "/data/share/datasets/vhh_mmsi_test_db_v3/annotations/sbd/58.csv"
@@ -29,7 +29,7 @@ PreProcessing:
 OpticalFlow:
   ###
   # This parameter is used to specify a magnitude threshold to disinguish between no-movement and movement. (e.g. eval dataset: 2, 3, 5)
-  MIN_MAGNITUDE_THRESHOLD: 2.0
+  MIN_MAGNITUDE_THRESHOLD: 0.5
   ###
   # This parameter is used to specify a distance threshold for outlier detection of feature matches
   DISTANCE_THRESHOLD: 0.75
@@ -80,7 +80,7 @@ CmcCore:
   SAVE_FINAL_RESULTS: 1     # 1 ... yes 0 ... no
   ###
   # This parameter is used to specify the path for saving the final results.
-  PATH_FINAL_RESULTS: "./"
+  PATH_FINAL_RESULTS: "./final_results/"
   ###
   # This parameter is used to specify the prefix for the results file.
   PREFIX_FINAL_RESULTS: "results_"
@@ -95,16 +95,16 @@ CmcCore:
 Evaluation:
   ###
   # This parameter is used to save evaluation results (e.g. visualizations, ... ).
-  SAVE_EVAL_RESULTS: 0
+  SAVE_EVAL_RESULTS: 1
   ###
   # This parameter is used the raw results path.
   PATH_RAW_RESULTS: "/data/share/maxrecall_vhh_mmsi/videos/results/cmc/raw_results/"
   ###
   # This parameter is used to specify the path to store the evaluation results path.
-  PATH_EVAL_RESULTS: "/data/share/maxrecall_vhh_mmsi/videos/results/cmc/develop/"
+  PATH_EVAL_RESULTS: "./final_results/"
   ###
   # This parameter is used to groundtruth annotations used for evaluation.
   PATH_GT_ANNOTATIONS: "/caa/Projects02/vhh/private/database_nobackup/VHH_datasets/annotations/ShotBoundaryDetection/imediacities/sbd_imc_annotations_20191231.csv"
   ###
   # This parameter is used to specify the path to the dataset used for the evaluation.
-  PATH_EVAL_DATASET: "/data/share/cmc_eval_dataset/"
+  PATH_EVAL_DATASET: "/data/share/datasets/vhh_mmsi_test_db_v3/"

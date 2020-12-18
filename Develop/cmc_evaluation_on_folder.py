@@ -26,10 +26,12 @@ exp_file_list = [#"./config/config_cmc_exp_1_cmc_final_db_v2.yaml",
                  #"./config/config_cmc_exp_5_cmc_final_db_v2.yaml",
                  #"./config/config_cmc_exp_7_cmc_final_db_v2.yaml",
                  #"./config/config_cmc_exp_8_cmc_final_db_v2.yaml",
-                 "./config/config_cmc_exp_9_cmc_final_db_v2.yaml",
-                 "./config/config_cmc_exp_10_cmc_final_db_v2.yaml",
+                 #"./config/config_cmc_exp_9_cmc_final_db_v2.yaml",
+                 #"./config/config_cmc_exp_10_cmc_final_db_v2.yaml",
+                 #"./config/config_cmc_evaluation.yaml",
                  #"./config/config_cmc.yaml",
-                 ] #vhh_mmsi_test_db_v2_final_results_mag_th_2
+                 "./config/config_cmc_efilms_db.yaml",
+                 ]
 
 for i, exp_file in enumerate(exp_file_list):
     cmc_instance = CMC(config_file=exp_file)

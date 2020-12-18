@@ -58,7 +58,7 @@ class CMC(object):
         if (self.config_instance.debug_flag == True):
             # load shot list from result file
             shots_np = self.loadSbdResults(self.config_instance.sbd_results_path)
-            debug_sid = 7
+            debug_sid = 7 #tilt ids: 86  #104 73 108  pan ids: 5 7 21 13 na ids: 3 24 77   28
         else:
             shots_np = shots_per_vid_np
             debug_sid = -1
@@ -95,6 +95,7 @@ class CMC(object):
             if(shot_id != debug_sid and self.config_instance.debug_flag == True):
                 continue
 
+            print(f'start: {start}, end: {stop}')
 
             shot_len = stop - start
             MIN_NUMBER_OF_FRAMES_PER_SHOT = 10
@@ -106,13 +107,22 @@ class CMC(object):
                 optical_flow_instance = OpticalFlow(video_frames=frames_per_shots_np,
                                                     algorithm="orb",
                                                     config_instance=self.config_instance)
-                mag_l, angles_l, x_sum_l, y_sum_l = optical_flow_instance.run()
+                #x_filtered_ang_np, filtered_u_np, filtered_v_np = optical_flow_instance.runDense()
+                class_name = optical_flow_instance.runDense()
+
+                '''
+                class_name = optical_flow_instance.predict_final_result_NEW(x_filtered_ang_np,
+                                                                            filtered_u_np,
+                                                                            filtered_v_np)
+                '''
+
+                '''
                 class_name = optical_flow_instance.predict_final_result(mag_l,
                                                                         angles_l,
                                                                         x_sum_l,
                                                                         y_sum_l,
                                                                         self.config_instance.class_names)
-
+                '''
             # prepare results
             print(str(vid_name) + ";" + str(shot_id) + ";" + str(start) + ";" + str(stop) + ";" + str(class_name))
             results_cmc_l.append([str(vid_name) + ";" + str(shot_id) + ";" + str(start) + ";" + str(stop) + ";" + str(class_name)])
@@ -121,6 +131,8 @@ class CMC(object):
                 break
 
         results_cmc_np = np.array(results_cmc_l)
+        print(results_cmc_np)
+        #exit()
 
         # export results
         if (self.config_instance.save_eval_results == 1):

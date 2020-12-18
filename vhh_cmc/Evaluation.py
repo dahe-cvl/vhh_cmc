@@ -116,7 +116,9 @@ class Evaluation(object):
         test_gt_labels_file = os.listdir(path_annotations)
         test_gt_labels_file.sort()
         print(test_gt_labels_file)
-        
+        #test_gt_labels_file = test_gt_labels_file[1:2]
+        #print(test_gt_labels_file)
+
         final_dataset = []
         gt_annotation_list = []
         for file in test_gt_labels_file:
@@ -156,6 +158,11 @@ class Evaluation(object):
             # load all predictions and merge
             results_file_list = [f for f in os.listdir(self.path_eval_results) if f.endswith('.csv')]
             results_file_list.sort()
+            print(results_file_list)
+
+            #print(self.path_eval_results)
+            #exit()
+
             final_gt_np = self.final_dataset_np
             print(self.final_dataset_np[:20])
             idx_track = np.where(self.final_dataset_np[:, 4:] == "track")[0]
@@ -181,13 +188,13 @@ class Evaluation(object):
         pred_np = np.array(pred_list)
 
         pred_np_without_track = np.delete(pred_np, idx_track, 0)
-        print(pred_np_without_track[:20])
+        print(pred_np_without_track)
         print(pred_np_without_track.shape)
 
         gt_np_prep_without_track = np.delete(self.final_dataset_np, idx_track, 0)
-        print(gt_np_prep_without_track[:20])
+        print(gt_np_prep_without_track)
         print(gt_np_prep_without_track.shape)
-       
+
         # calculate metrics
         #pred_np_prep = np.squeeze(pred_np[:, 4:])
         #gt_np_prep = np.squeeze(final_gt_np[:, 4:])

@@ -1,7 +1,7 @@
 Development:
   ###
   # This parameter is used to activate or deactivate the debug mode.
-  DEBUG_FLAG: 0             # 1 ... activate 0 ... deactivate
+  DEBUG_FLAG: 0           # 1 ... activate 0 ... deactivate
   ###
   # This parameter is used to specify a SBD results file for debugging mode.
   SBD_RESULTS_PATH: "/data/share/datasets/vhh_mmsi_test_db_v3/annotations/sbd/58.csv"

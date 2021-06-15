@@ -8,6 +8,10 @@ class OpticalFlow_ORB(object):
     def __init__(self, video_frames=None):
         self.video_frames = video_frames
 
+        print(self.video_frames[0].shape)
+        frame_size = (self.video_frames[0].shape[1]*2, self.video_frames[0].shape[0])
+        self.video_writer = cv2.VideoWriter("/data/share/output.avi", cv2.VideoWriter_fourcc(*"MJPG"), 12, frame_size)
+
     def getMatches(self, frame1, frame2, distance_threshold=0.75):
         kp_curr_list = []
         kp_prev_list = []
@@ -17,7 +21,7 @@ class OpticalFlow_ORB(object):
                              #nlevels=2,
                              edgeThreshold=5,
                              #firstLevel=None,
-                             #WTA_K=None,
+                             WTA_K=3,
                              #scoreType=None,
                              #patchSize=None,
                              #fastThreshold=None
@@ -60,6 +64,28 @@ class OpticalFlow_ORB(object):
         good_matches = sorted(matches, key=lambda x: x.distance)
         #print(good_matches)
 
+        if (len(good_matches) <= 1):
+            return kp_prev_list, kp_curr_list
+
+        dist_l = [x.distance for x in good_matches]
+        #dist_l.sort()
+        #print(dist_l)
+
+        x = np.array(dist_l)
+        nom = (x - np.min(x)) / ((np.max(x) - np.min(x)) + 0.000000000001)
+        dist_l_norm = np.nan_to_num(nom)
+        #print(np.max(dist_l_norm))
+        #print(np.min(dist_l_norm))
+
+        idx = np.where(dist_l_norm < 0.15)[0]
+
+        '''
+        plt.plot(np.arange(len(dist_l_norm)), dist_l_norm)
+        plt.draw()
+        plt.pause(0.01)
+        plt.cla()
+        '''
+
 
         '''
         # Apply ratio test
@@ -80,10 +106,9 @@ class OpticalFlow_ORB(object):
 
         # print(matches)
         # print(type(good_matches))
-        if (len(good_matches) == 0):
-            return kp_prev_list, kp_curr_list
 
-        for match in good_matches:
+
+        for match in good_matches[:np.max(idx)]:
             #kp_curr_list.append(kp_curr[match[0].trainIdx].pt)
             #kp_prev_list.append(kp_prev[match[0].queryIdx].pt)
             kp_curr_list.append(kp_curr[match.trainIdx].pt)
@@ -92,14 +117,16 @@ class OpticalFlow_ORB(object):
         #print(frame1.shape)
         #print(frame2.shape)
 
-        result = cv2.drawMatches(frame1, kp_prev, frame2, kp_curr, matches, outImg=None, flags=2)
+        print(len(good_matches))
+        result = cv2.drawMatches(frame1, kp_prev, frame2, kp_curr, good_matches[:np.max(idx)], outImg=None, flags=2)
         #result = cv2.drawMatches(out_img_prev, kp_prev, out_img_curr, kp_prev, good_matches, None, flags=2)
         # Display the best matching points
-        plt.title('Best Matching Points')
-        plt.imshow(result)
-        plt.draw()
-        plt.pause(0.05)
-        ''''''
+        #plt.title('Best Matching Points')
+        #plt.imshow(result)
+        #plt.draw()
+        #plt.pause(0.05)
+        #self.video_writer.write(result)
+        ''' '''
 
         # Draw first 10 matches.
         #img3 = cv2.drawMatches(img1, kp1, img2, kp2, matches[:10], flags=2)

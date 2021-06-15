@@ -58,7 +58,7 @@ class CMC(object):
         if (self.config_instance.debug_flag == True):
             # load shot list from result file
             shots_np = self.loadSbdResults(self.config_instance.sbd_results_path)
-            debug_sid = 7 #tilt ids: 86  #104 73 108  pan ids: 5 7 21 13 na ids: 3 24 77   28
+            debug_sid = 104 #tilt ids: 86  #104 73 108  pan ids: 5 7 21 13 28 na ids: 3 24 77
         else:
             shots_np = shots_per_vid_np
             debug_sid = -1
@@ -84,6 +84,11 @@ class CMC(object):
             vid_instance = Video()
             vid_instance.load(self.config_instance.path_videos + "/" + vid_name)
 
+            #vid_name = "20_3776.mp4"  #training_data/pan/69_24604.mp4;0;0;142  training_data/pan/77_66460.mp4;0;0;124 training_data/tilt/20_3776.mp4;1;0;125
+            #vid_instance.load("/data/share/datasets/cmc_final_dataset_v2/training_data/tilt" + "/" + vid_name)
+            #shots_np = np.array([["999", "1", "0", "125"]])
+
+        print(shots_np)
         results_cmc_l = []
         for data in vid_instance.getFramesByShots(shots_np, preprocess=self.pre_processing_instance.applyTransformOnImg):
             frames_per_shots_np = data['Images']
@@ -96,6 +101,7 @@ class CMC(object):
                 continue
 
             print(f'start: {start}, end: {stop}')
+            #continue
 
             shot_len = stop - start
             MIN_NUMBER_OF_FRAMES_PER_SHOT = 10
@@ -107,21 +113,25 @@ class CMC(object):
                 optical_flow_instance = OpticalFlow(video_frames=frames_per_shots_np,
                                                     algorithm="orb",
                                                     config_instance=self.config_instance)
-                #x_filtered_ang_np, filtered_u_np, filtered_v_np = optical_flow_instance.runDense()
-                class_name = optical_flow_instance.runDense()
 
-                '''
-                class_name = optical_flow_instance.predict_final_result_NEW(x_filtered_ang_np,
+                x_filtered_mag_np, x_filtered_ang_np, filtered_u_np, filtered_v_np = optical_flow_instance.runDense()
+                #class_name = optical_flow_instance.runDense()
+                class_name = optical_flow_instance.predict_final_result_NEW(x_filtered_mag_np,
+                                                                            x_filtered_ang_np,
                                                                             filtered_u_np,
                                                                             filtered_v_np)
-                '''
+                ''''''
 
                 '''
+                mag_l, angles_l, x_sum_l, y_sum_l = optical_flow_instance.run()                
                 class_name = optical_flow_instance.predict_final_result(mag_l,
                                                                         angles_l,
                                                                         x_sum_l,
                                                                         y_sum_l,
                                                                         self.config_instance.class_names)
+                
+
+                class_name = optical_flow_instance.run()
                 '''
             # prepare results
             print(str(vid_name) + ";" + str(shot_id) + ";" + str(start) + ";" + str(stop) + ";" + str(class_name))
@@ -131,9 +141,10 @@ class CMC(object):
                 break
 
         results_cmc_np = np.array(results_cmc_l)
-        print(results_cmc_np)
-        #exit()
 
+        if(self.config_instance.debug_flag == True):
+            print(results_cmc_np)
+            exit()
         # export results
         if (self.config_instance.save_eval_results == 1):
             self.exportCmcResults(vid_name, results_cmc_np)

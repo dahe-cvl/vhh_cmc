@@ -29,8 +29,8 @@ exp_file_list = [#"./config/config_cmc_exp_1_cmc_final_db_v2.yaml",
                  #"./config/config_cmc_exp_9_cmc_final_db_v2.yaml",
                  #"./config/config_cmc_exp_10_cmc_final_db_v2.yaml",
                  #"./config/config_cmc_evaluation.yaml",
-                 #"./config/config_cmc.yaml",
-                 "./config/config_cmc_efilms_db.yaml",
+                 "./config/config_cmc_evaluation_cmc_v2.yaml",
+                 #"./config/config_cmc_efilms_db.yaml",
                  ]
 
 for i, exp_file in enumerate(exp_file_list):

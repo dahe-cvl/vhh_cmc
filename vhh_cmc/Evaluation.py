@@ -60,11 +60,11 @@ class Evaluation(object):
         self.all_shot_file_list = tilt_shot_file_list + pan_shot_file_list + na_shot_file_list
         self.all_shot_file_list.sort()
         all_shot_file_np = np.array(self.all_shot_file_list)
-        print(len(self.all_shot_file_list))
+        #print(len(self.all_shot_file_list))
 
         # load groundtruth labels
         test_gt_labels_file = path_annotations + "/test_shots_without_track.csv"
-        print(test_gt_labels_file)
+        #print(test_gt_labels_file)
       
         fp = open(test_gt_labels_file, 'r')
         lines = fp.readlines()
@@ -72,12 +72,12 @@ class Evaluation(object):
 
         gt_annotation_list = []
         for line in lines:
-            print(line)
+            #print(line)
             line = line.replace('\n', '')
             line = line.replace('\\', '/')
             line = line.replace('\ufeff', '')
             line_split = line.split(';')
-            print(line_split)
+            #print(line_split)
 
             gt_annotation_list.append([line_split[0], line_split[2], line_split[3]])
         gt_annotation_np = np.array(gt_annotation_list)       

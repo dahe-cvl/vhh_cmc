@@ -43,6 +43,8 @@ class Video(object):
             print("ERROR: you must add a video file path!");
             exit(1);
         self.vidName = self.vidFile.split('/')[-1]
+
+        print(self.vidFile)
         self.vid = cv2.VideoCapture(self.vidFile);
 
         if (self.vid.isOpened() == False):

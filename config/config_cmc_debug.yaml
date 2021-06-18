@@ -16,7 +16,7 @@ Development:
 PreProcessing:
   ###
   # This flag is used to convert a input frame into a grayscale frame (0... deactivate, 1 ... activate).
-  CONVERT2GRAY_FLAG: 0
+  CONVERT2GRAY_FLAG: 1
   ###
   # This flag is used to center crop a input frame (0... deactivate, 1 ... activate).
   CENTER_CROP_FLAG: 1       # crop image (origin: image center) with maximum width or height
@@ -30,7 +30,7 @@ PreProcessing:
 OpticalFlow:
   ###
   # This parameter is used to specify a magnitude threshold to disinguish between no-movement and movement. (e.g. eval dataset: 2, 3, 5)
-  MIN_MAGNITUDE_THRESHOLD: 5.0
+  MIN_MAGNITUDE_THRESHOLD: 3.0
   ###
   # This parameter is used to specify a distance threshold for outlier detection of feature matches
   DISTANCE_THRESHOLD: 0.75

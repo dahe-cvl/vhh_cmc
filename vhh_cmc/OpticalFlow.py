@@ -1157,7 +1157,7 @@ class OpticalFlow(object):
             #plt.draw()
             #plt.pause(0.01)
 
-
+            '''
             for s in range(0, len(all_u_block_center_x)):
                 cv2.circle(frames_np[i], center=(all_u_block_center_x[s], all_u_block_center_y[s]), radius=1, thickness=1,
                            color=(0, 255, 0))
@@ -1168,7 +1168,7 @@ class OpticalFlow(object):
 
             cv2.imshow("orig", frames_np[i])
             s = cv2.waitKey(10)
-            ''''''
+            '''
 
             '''
             #plt.figure()
@@ -1178,14 +1178,13 @@ class OpticalFlow(object):
             #plt.cla()
             '''
 
-        exit()
-
-
         print(all_frames_blocks_u_np.shape) # Nx32x32
         print(all_frames_blocks_v_np.shape)
         n = 5
 
 
+        x_l = []
+        y_l = []
         for i in range(0, len(all_frames_blocks_u_np) - n):
             tmp_sum_mvi_u = 0
             tmp_sum_mv_u = 0
@@ -1205,6 +1204,17 @@ class OpticalFlow(object):
 
             print(tmp_sum_mv_u)
             print(tmp_sum_mv_v)
+
+            x_l.append(tmp_sum_mvi_u)
+            y_l.append(tmp_sum_mvi_v)
+
+            plt.plot(np.arange(0, len(x_l)), np.array(x_l))
+            plt.plot(np.arange(0, len(y_l)), np.array(y_l))
+            plt.draw()
+            plt.pause(0.01)
+            plt.cla()
+
+
 
 
         exit()
@@ -1253,6 +1263,408 @@ class OpticalFlow(object):
         print(np.mean(x_filtered_ang_np))
 
         return x_filtered_mag_np, x_filtered_ang_np, filtered_u_np, filtered_v_np
+
+    def runDense_v3(self):
+        frames_np = np.squeeze(self.video_frames)
+
+        of_dense_instance = OpticalFlow_Dense()
+        hsv = np.zeros_like(frames_np[0])
+        hsv[..., 1] = 255
+
+        # calcuate optical flow for all frames in the shot
+        frm_u_l = []
+        frm_v_l = []
+        frm_mag_l = []
+        frm_ang_l = []
+        for i in range(0, len(frames_np)-1):
+            curr_frame = frames_np[i]
+            nxt_frame = frames_np[i + 1]
+
+            curr_frame = cv2.equalizeHist(curr_frame)
+            nxt_frame = cv2.equalizeHist(nxt_frame)
+
+            kernel = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]])
+            curr_frame = cv2.filter2D(curr_frame, -1, kernel)
+            nxt_frame = cv2.filter2D(nxt_frame, -1, kernel)
+
+            # prev_frame = cv2.boxFilter(prev_frame, -1, (5, 5))
+            # curr_frame = cv2.boxFilter(curr_frame, -1, (5, 5))
+
+            # prev_frame = cv2.bilateralFilter(prev_frame, 9, 75, 75)
+            # curr_frame = cv2.bilateralFilter(curr_frame, 9, 75, 75)
+
+            # prev_frame = cv2.GaussianBlur(prev_frame,(15,15),0)
+            # curr_frame =  cv2.GaussianBlur(curr_frame,(15,15),0)
+
+
+            frm_mag, frm_ang, frm_u, frm_v = of_dense_instance.getFlow(curr_frame, nxt_frame)
+            frm_u_l.append(frm_u)
+            frm_v_l.append(frm_v)
+            frm_mag_l.append(frm_mag)
+            frm_ang_l.append(frm_ang)
+
+            '''
+            frame_low_res = cv2.resize(nxt_frame, (128, 128))
+            cv2.imshow("orig", frame_low_res)
+            s = cv2.waitKey(10)
+            '''
+        frm_u_np = np.array(frm_u_l)
+        frm_v_np = np.array(frm_v_l)
+        frm_mag_np = np.array(frm_mag_l)
+        frm_ang_np = np.array(frm_ang_l)
+        print(frm_u_np.shape)
+        print(frm_v_np.shape)
+        print(frm_mag_np.shape)
+        print(frm_ang_np.shape)
+
+        # split into blocks
+        all_mb_u_l = []
+        all_mb_v_l = []
+        all_mb_mag_l = []
+        all_mb_ang_l = []
+        all_mb_x_l = []
+        all_mb_y_l = []
+        for i in range(0, len(frm_u_np)):
+            frm_u = frm_u_np[i]
+            frm_v = frm_v_np[i]
+            frm_mag = frm_mag_np[i]
+            frm_ang = frm_ang_np[i]
+
+            frm_mb_u_l = []
+            frm_mb_v_l = []
+            frm_mb_mag_l = []
+            frm_mb_ang_l = []
+            mb_x_l = []
+            mb_y_l = []
+            for r in range(0, self.number_of_blocks):
+                for c in range(0, self.number_of_blocks):
+                    # block
+                    mb_u, (mb_center_x, mb_center_y) = self.getBlock(
+                        frame=frm_u,
+                        row=r,
+                        col=c,
+                        number_of_blocks=self.number_of_blocks)
+                    mb_v, (mb_center_x, mb_center_y) = self.getBlock(
+                        frame=frm_v,
+                        row=r,
+                        col=c,
+                        number_of_blocks=self.number_of_blocks)
+                    mb_mag, (mb_center_x, mb_center_y) = self.getBlock(
+                        frame=frm_mag,
+                        row=r,
+                        col=c,
+                        number_of_blocks=self.number_of_blocks)
+                    mb_ang, (mb_center_x, mb_center_y) = self.getBlock(
+                        frame=frm_ang,
+                        row=r,
+                        col=c,
+                        number_of_blocks=self.number_of_blocks)
+
+                    frm_mb_u_l.append(np.mean(mb_u))
+                    frm_mb_v_l.append(np.mean(mb_v))
+                    frm_mb_mag_l.append(np.mean(mb_mag))
+                    frm_mb_ang_l.append(np.mean(mb_ang))
+                    mb_x_l.append(mb_center_x)
+                    mb_y_l.append(mb_center_y)
+
+            all_mb_u_l.append(np.array(frm_mb_u_l))
+            all_mb_v_l.append(np.array(frm_mb_v_l))
+            all_mb_mag_l.append(np.array(frm_mb_mag_l))
+            all_mb_ang_l.append(np.array(frm_mb_ang_l))
+            all_mb_x_l.append(np.array(mb_x_l))
+            all_mb_y_l.append(np.array(mb_y_l))
+
+        all_mb_u_np = np.array(all_mb_u_l)
+        all_mb_v_np = np.array(all_mb_v_l)
+        all_mb_mag_np = np.array(all_mb_mag_l)
+        all_mb_ang_np = np.array(all_mb_ang_l)
+        all_mb_x_np = np.array(all_mb_x_l)
+        all_mb_y_np = np.array(all_mb_y_l)
+        print(all_mb_u_np.shape)
+        print(all_mb_v_np.shape)
+        print(all_mb_mag_np.shape)
+        print(all_mb_ang_np.shape)
+        print(all_mb_x_np.shape)
+        print(all_mb_y_np.shape)
+
+        '''
+        # visualize vectors and frames
+        for i in range(0, len(all_mb_x_np)):
+            frame_rgb = cv2.cvtColor(frames_np[i], cv2.COLOR_GRAY2RGB)
+            for s in range(0, len(all_mb_u_np[i])):
+                cv2.circle(frame_rgb, center=(all_mb_x_np[i][s], all_mb_y_np[i][s]), radius=1, thickness=1,
+                           color=(0, 255, 0))
+                cv2.line(frame_rgb, pt1=(all_mb_x_np[i][s], all_mb_y_np[i][s]),
+                         pt2=(int(all_mb_x_np[i][s] + all_mb_u_np[i][s]), int(all_mb_y_np[i][s] + all_mb_v_np[i][s])),
+                         thickness=1,
+                         color=(0, 0, 255))
+            
+            win_name = "orig+vectors"  # 1. use var to specify window name everywhere
+            cv2.namedWindow(win_name, cv2.WINDOW_NORMAL)  # 2. use 'normal' flag
+            cv2.imshow(win_name, frame_rgb)
+            cv2.resizeWindow(win_name, frame_rgb.shape[0], frame_rgb.shape[1])
+            s = cv2.waitKey(10)
+        '''
+
+        '''
+        plt.scatter(np.array(seq_mb_u_l)[:, :], np.array(seq_mb_v_l)[:, :], s=1)
+        plt.draw()
+        plt.pause(0.01)
+        plt.cla()
+        '''
+
+        k = 10
+        n = 5
+
+        t1 = 1.8
+        t2 = 8.0
+        mvi_mv_ratio = 0.15
+
+        all_filter_masks_l = []
+        for i in range(0, len(all_mb_u_np) - k):
+
+            # calculate delta_u and delta_v - horizontal and vertical displacements
+            seq_mb_delta_u = []
+            seq_mb_delta_v = []
+            for j in range(0, k-1):
+                u_curr = all_mb_u_np[j]
+                u_next = all_mb_u_np[j + 1]
+
+                v_curr = all_mb_v_np[j]
+                v_next = all_mb_v_np[j + 1]
+
+                delta_u = u_next - u_curr
+                delta_v = v_next - v_curr
+                seq_mb_delta_u.append(delta_u)
+                seq_mb_delta_v.append(delta_v)
+            seq_mb_delta_u_np = np.array(seq_mb_delta_u)
+            seq_mb_delta_v_np = np.array(seq_mb_delta_v)
+
+            #print("####### DELTA U-V #########")
+            #print(i)
+            #print(seq_mb_delta_u_np)
+            #print(seq_mb_delta_v_np.shape)
+
+            # check significance and consistency
+            seq_mb_mu_delta_u = np.mean(seq_mb_delta_u_np, axis=0)
+            seq_mb_mu_delta_v = np.mean(seq_mb_delta_v_np, axis=0)
+            #print(seq_mb_mu_delta_u)
+            #print(seq_mb_mu_delta_v.shape)
+
+            sum_seq_mb_sigma_delta_u = np.square(all_mb_u_np[i] - seq_mb_mu_delta_u)
+            sum_seq_mb_sigma_delta_v = np.square(all_mb_v_np[i] - seq_mb_mu_delta_v)
+            for j in range(1, k-1):
+                sum_seq_mb_sigma_delta_u = sum_seq_mb_sigma_delta_u + np.square(all_mb_u_np[i+j] - seq_mb_mu_delta_u)
+                sum_seq_mb_sigma_delta_v = sum_seq_mb_sigma_delta_v + np.square(all_mb_v_np[i+j] - seq_mb_mu_delta_v)
+            seq_mb_sigma_delta_u = np.sqrt((1 / (k - 1)) * sum_seq_mb_sigma_delta_u)
+            seq_mb_sigma_delta_v = np.sqrt((1 / (k - 1)) * sum_seq_mb_sigma_delta_v)
+            #print(seq_mb_sigma_delta_u)
+            #print(seq_mb_sigma_delta_v.shape)
+
+            '''
+            mu = 0
+            sigma = seq_mb_sigma_delta_u[0]
+            x = np.arange(-5.12, 5.12, 0.01)
+            f = np.exp(-np.square(x - mu) / 2 * sigma) / (np.sqrt(2 * np.pi * sigma))
+            plt.plot(x, f)
+            plt.ylim(0, 1)
+            plt.ylabel('gaussian distribution')
+            plt.draw()
+            plt.pause(0.02)
+            plt.cla()
+            '''
+
+            sum_seq_mb_mu_dist = np.sqrt((np.square(all_mb_u_np[i]) + np.square(all_mb_v_np[i])))
+            for j in range(1, k-1):
+                sum_seq_mb_mu_dist = sum_seq_mb_mu_dist + np.sqrt((np.square(all_mb_u_np[i+j]) + np.square(all_mb_v_np[i+j])))
+            seq_mb_mu_dist = (1 / k) * sum_seq_mb_mu_dist
+
+            #print(seq_mb_mu_dist)
+            #print(seq_mb_mu_dist.shape)
+
+            print(np.min(seq_mb_mu_dist))
+            print(np.max(seq_mb_mu_dist))
+            print(np.min(np.sqrt(np.square(seq_mb_sigma_delta_u) + np.square(seq_mb_sigma_delta_v))))
+            print(np.max(np.sqrt(np.square(seq_mb_sigma_delta_u) + np.square(seq_mb_sigma_delta_v))))
+
+            significance_condition1 = seq_mb_mu_dist > t1
+            consistency_condition2 = np.sqrt(np.square(seq_mb_sigma_delta_u) + np.square(seq_mb_sigma_delta_v)) < t2
+            final_condition = np.logical_and(significance_condition1, consistency_condition2)
+
+            #print(condition1)
+            #print(condition1.shape)
+            #print(np.unique(condition1, return_counts=True))
+            #print(condition2)
+            #print(condition2.shape)
+            #print(np.unique(condition2, return_counts=True))
+            print(final_condition)
+            print(final_condition.shape)
+            print(np.unique(final_condition, return_counts=True))
+
+            all_filter_masks_l.append(final_condition)
+
+        all_filter_masks_np = np.array(all_filter_masks_l)
+        print(all_filter_masks_np.shape)
+
+        motion_l = []
+        for i in range(0, len(all_filter_masks_np)-n):
+            regions_mvi_u_l = []
+            regions_mvi_v_l = []
+            regions_mvi_ang_l = []
+            for j in range(0, n):
+                filter_mask = all_filter_masks_np[i+n]
+                mvi_u = all_mb_u_np[i + n][filter_mask == True]
+                mvi_v = all_mb_v_np[i + n][filter_mask == True]
+                mvi_ang = all_mb_ang_np[i + n][filter_mask == True]
+                regions_mvi_u_l.append(mvi_u)
+                regions_mvi_v_l.append(mvi_v)
+                regions_mvi_ang_l.append(mvi_ang)
+
+            regions_mvi_u_np = np.array(regions_mvi_u_l)
+            regions_mvi_v_np = np.array(regions_mvi_v_l)
+            regions_mvi_ang_np = np.array(regions_mvi_ang_l)
+            mvi_u_sum = np.sum(np.abs(regions_mvi_u_np))
+            mvi_v_sum = np.sum(np.abs(regions_mvi_v_np))
+
+            regions_mv_u_l = []
+            regions_mv_v_l = []
+            for j in range(0, n):
+                filter_mask = all_filter_masks_np[i + n]
+                mv_u = all_mb_u_np[i+n][filter_mask == False]
+                mv_v = all_mb_v_np[i + n][filter_mask == False]
+                regions_mv_u_l.append(mv_u)
+                regions_mv_v_l.append(mv_v)
+
+            regions_mv_u_np = np.array(regions_mv_u_l)
+            regions_mv_v_np = np.array(regions_mv_v_l)
+            mv_u_sum = np.sum(np.abs(regions_mv_u_np))
+            mv_v_sum = np.sum(np.abs(regions_mv_v_np))
+
+            print("#############")
+            print(mvi_u_sum)
+            print(mv_u_sum)
+            print(mvi_v_sum)
+            print(mv_v_sum)
+
+            if (mvi_u_sum < mv_u_sum * mvi_mv_ratio) and (mvi_v_sum < mv_v_sum * mvi_mv_ratio):
+                print("STATIC")
+                motion_l.append("NA")
+            else:
+                print("OTHERS")
+                # calculate angle for region with n frames
+                mean_ang = np.mean(regions_mvi_ang_np)
+                if ((mean_ang > 45 and mean_ang < 135) or (mean_ang > 225 and mean_ang < 315)):
+                    class_name = "TILT"
+                elif ((mean_ang > 135 and mean_ang < 225) or
+                      (mean_ang > 315 and mean_ang < 360) or
+                      (mean_ang > 0 and mean_ang < 45)):
+                    class_name = "PAN"
+                else:
+                    class_name = "OTHERS"
+                motion_l.append(class_name)
+
+        if (len(motion_l) <= 0):
+            motion_l.append("NA")
+        motion_np = np.array(motion_l)
+
+        class_names, class_dist = np.unique(motion_np, return_counts=True)
+        print(class_names)
+        print(class_dist)
+
+        idx = np.argmax(class_dist, axis=0)
+        print(class_names[idx])
+        final_class_prediction = class_names[idx]
+
+        '''
+        tmp_ang = all_mb_ang_np[:len(all_mb_ang_np) - k]
+        tmp_mag = all_mb_mag_np[:len(all_mb_mag_np) - k]
+        tmp_u = all_mb_u_np[:len(all_mb_u_np) - k]
+        tmp_v = all_mb_v_np[:len(all_mb_v_np) - k]
+
+        filtered_mag = tmp_mag[all_filter_masks_np == True].flatten()
+        filtered_ang = tmp_ang[all_filter_masks_np == True].flatten()
+        filtered_u = tmp_u[all_filter_masks_np == True].flatten()
+        filtered_v = tmp_v[all_filter_masks_np == True].flatten()
+
+        print(filtered_u.shape)
+        
+        # debug visualizations
+        plt.figure()
+        plt.hist(filtered_mag)
+        plt.figure()
+        plt.hist(filtered_ang)
+
+        plt.figure()
+        plt.hist(filtered_u)
+        plt.figure()
+        plt.hist(filtered_v)
+
+        plt.figure()
+        plt.scatter(filtered_u, filtered_v)
+
+        plt.figure()
+        #plt.polar(np.deg2rad(all_mb_ang_np.flatten()), all_mb_mag_np.flatten(), '.r')
+        plt.polar(np.deg2rad(filtered_ang), filtered_mag, '.g')
+        plt.show()
+        '''
+        #exit()
+
+
+        # visualize vectors and frames
+        for i in range(0, len(all_filter_masks_np)):
+            frame_rgb = cv2.cvtColor(frames_np[i], cv2.COLOR_GRAY2RGB)
+            for s in range(0, len(all_mb_u_np[i])):
+                # switch color
+                if (all_filter_masks_np[i][s]):
+                    point_color = (0, 0, 0)
+                    line_color = (0, 255, 0)
+                else:
+                    point_color = (0, 0, 255)
+                    line_color = (0, 0, 255)
+
+                cv2.circle(frame_rgb, center=(all_mb_x_np[i][s], all_mb_y_np[i][s]), radius=1, thickness=1,
+                           color=point_color)
+                cv2.line(frame_rgb, pt1=(all_mb_x_np[i][s], all_mb_y_np[i][s]),
+                         pt2=(int(all_mb_x_np[i][s] + all_mb_u_np[i][s]), int(all_mb_y_np[i][s] + all_mb_v_np[i][s])),
+                         thickness=1,
+                         color=line_color)
+
+            win_name = "orig+vectors"  # 1. use var to specify window name everywhere
+            cv2.namedWindow(win_name, cv2.WINDOW_NORMAL)  # 2. use 'normal' flag
+            cv2.imshow(win_name, frame_rgb)
+            cv2.resizeWindow(win_name, frame_rgb.shape[0], frame_rgb.shape[1])
+            s = cv2.waitKey(100)
+        ''''''
+
+        return final_class_prediction
+
+    def predict_final_result_v3(self, mag_np, ang_np, u_np, v_np):
+        # print(type(mag_l_n))
+        # print(len(mag_l_n))
+        # exit()
+
+        print(ang_np.shape)
+        print(mag_np.shape)
+        print(u_np.shape)
+        print(v_np.shape)
+
+        mean_mag = np.mean(mag_np)
+        mean_ang = np.mean(ang_np)
+
+        th = self.config_instance.min_magnitude_threshold  # 2.0  # manual set threshold for magnitude
+        if ((mean_ang > 45 and mean_ang < 135) or (mean_ang > 225 and mean_ang < 315)) and (mean_mag > th):
+            class_name = "TILT"
+        elif ((mean_ang > 135 and mean_ang < 225) or
+              (mean_ang > 315 and mean_ang < 360) or
+              (mean_ang > 0 and mean_ang < 45)) and (mean_mag > th):
+            class_name = "PAN"
+        else:
+            class_name = "NA"
+
+        print("mean mag: " + str(mean_mag))
+        print("mean angle: " + str(mean_ang))
+        print("predicted class_name (angles): " + str(class_name))
+        return class_name
 
     def predict_final_result_NEW(self, mag_np, ang_np, u_np, v_np):
         # print(type(mag_l_n))
@@ -1408,22 +1820,20 @@ class OpticalFlow(object):
             prev_frame = frames_np[i-1]
             curr_frame = frames_np[i]
 
-            prev_frame = cv2.medianBlur(prev_frame, 5)
-            curr_frame = cv2.medianBlur(curr_frame, 5)
+            #prev_frame = cv2.medianBlur(prev_frame, 5)
+            #curr_frame = cv2.medianBlur(curr_frame, 5)
 
             #prev_frame_equ = cv2.equalizeHist(prev_frame)
             #curr_frame_equ = cv2.equalizeHist(curr_frame)
 
-            kernel = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]])
-            prev_frame = cv2.filter2D(prev_frame, -1, kernel)
-            curr_frame = cv2.filter2D(curr_frame, -1, kernel)
+            #kernel = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]])
+            #prev_frame = cv2.filter2D(prev_frame, -1, kernel)
+            #curr_frame = cv2.filter2D(curr_frame, -1, kernel)
 
-            '''
+            ''''''
             cv2.imshow("orig", curr_frame)
             k = cv2.waitKey(10)
             #continue
-            '''
-
 
             distance_threshold = self.config_instance.distance_threshold
             kp_prev_list, kp_curr_list = self.feature_detector.getMatches(prev_frame, curr_frame, distance_threshold)
@@ -1450,11 +1860,12 @@ class OpticalFlow(object):
             prev_points = np.array(kp_prev_list).astype('float')
             mag_n, angle_n = self.compute_mag_ang(prev_points, curr_points)
 
+
             number_of_features = len(curr_points)
             number_of_features_l.append(number_of_features)
 
-            filtered_mag_n, outlier_idx = self.outlier_filter(mag_n, alpha=1)
-            filtered_angle_n, outlier_idx = self.outlier_filter(angle_n, alpha=1)
+            #filtered_mag_n, outlier_idx = self.outlier_filter(mag_n, alpha=1)
+            #filtered_angle_n, outlier_idx = self.outlier_filter(angle_n, alpha=1)
             #filtered_mag_n1, outlier_idx = self.outlier_filter(mag_n, alpha=3)
             #filtered_angle_n = self.window_filter(data_np=filtered_angle_n, window_size=10)
 
@@ -1469,13 +1880,7 @@ class OpticalFlow(object):
             plt.pause(0.01)
             plt.cla()
             '''
-
-
-
             #print(np.std(filtered_angle_n))
-
-
-
             if (number_of_features <= MIN_NUM_FEATURES):
                 seed_idx = i
 
@@ -1513,19 +1918,34 @@ class OpticalFlow(object):
             vector_y_sum_l.append([0, vector_y_sum])
             # exit()
             '''
-            mag_mean_n = np.median(filtered_mag_n)
-            mag_l_n.append([0, mag_mean_n])
+            mag_mean_n = np.median(mag_n)
+            mag_l_n.append(mag_mean_n)
 
             #angle_n = np.abs(angle_n)  # [:50])
-            angle_mean_n = np.median(filtered_angle_n)
-            angles_l_n.append([0, angle_mean_n])
+            angle_mean_n = np.median(angle_n)
+            angles_l_n.append(angle_mean_n)
 
+            #print(mag_n)
+            #print(angle_n)
+
+
+            print(mag_mean_n)
+            print(angle_mean_n)
+            '''
+            plt.plot(np.arange(0, len(mag_l_n)), np.array(mag_l_n))
+            plt.draw()
+            plt.pause(0.01)
+            plt.cla()
+            '''
             #filtered_angle_n = angles_l_n  #
             #filtered_angles_l_n.append(filtered_angle_n)
 
         # cv2.destroyAllWindows()
         #print(angles_l_n)
 
+        #exit()
+
+        '''
         data_np = np.array(angles_l_n)[:, 1:]
         window_size = 10
         data_mean_l = []
@@ -1547,7 +1967,11 @@ class OpticalFlow(object):
 
         filt_angle_np = data_mean_np
         std_angle_np = data_std_np
+        '''
 
+        #print(mag_l_n)
+        #print(angles_l_n)
+        exit()
         mag_np = np.array(mag_l_n)[:, 1:]
 
         th_std = 0.05

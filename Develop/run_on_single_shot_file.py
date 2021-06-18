@@ -7,20 +7,48 @@ from vhh_cmc.OpticalFlow import OpticalFlow
 from vhh_cmc.Video import Video
 
 db_path = "/data/share/datasets/cmc_final_dataset_v2/"
+
+'''
 path_videos = db_path + "training_data/"
 class_name = "pan"
 final_video_path = path_videos + class_name + "/"
 
 all_shot_files = os.listdir(final_video_path)
 print(all_shot_files)
+'''
 
+# na
+path_shot_file = db_path + "training_data/na/EF-NS_063_OeFM_2.mp4"
+#path_shot_file = db_path + "training_data/na/EF-NS_063_OeFM_3.mp4"
+#path_shot_file = db_path + "training_data/na/EF-NS_063_OeFM_4.mp4"
+#path_shot_file = db_path + "training_data/na/EF-NS_063_OeFM_5.mp4"
+
+# tilt
+#path_shot_file = db_path + "training_data/tilt/eb0d74d4-7e4b-4d1c-9539-89402ebc1334_27.mp4"  # --> fp
+#path_shot_file = db_path + "training_data/tilt/eb0d74d4-7e4b-4d1c-9539-89402ebc1334_1.mp4" # --> tp
+#path_shot_file = db_path + "training_data/tilt/d984c426-428d-4e04-adcd-33ea2514ff00_102.mp4" # --> fp  sehr schwierig mix tilt/pan
+#path_shot_file = db_path + "training_data/tilt/tilt_30_21196.mp4" # --> fp  sehr sehr langsam
+
+# pan
+#path_shot_file = db_path + "training_data/pan/1371a561-6b19-4d69-8210-1347ca75eb90_12.mp4"  # --> fp  sehr langsam
+#path_shot_file = db_path + "training_data/pan/1371a561-6b19-4d69-8210-1347ca75eb90_17.mp4"  # --> fp  sehr langsam
+#path_shot_file = db_path + "training_data/pan/pan_a1dc1433-b00e-4b62-a5ec-75db765ad34d_70.mp4"  # --> fp  moving objects
+#path_shot_file = db_path + "training_data/pan/ae9bb5fe-5da9-49cb-97ec-3b0b54e50816_15.mp4"  # --> tp aber sehr knapp moving objects
+
+
+'''
 path_shot_file = final_video_path + "/" + all_shot_files[25]  ## pan with moving objects
 #path_shot_file = final_video_path + "/" + all_shot_files[15]  ## pan right
-#path_shot_file = final_video_path + "/" + all_shot_files[12]  ## na
+#path_shot_file = final_video_path + "/" + all_shot_files[45]  ##
 
-path_shot_file = "./WIN_20210614_20_57_41_Pro.mp4"
+#path_shot_file = final_video_path + "/" + all_shot_files[4]  ## na with moving objects
+#path_shot_file = final_video_path + "/" + all_shot_files[1]  ## na
+#path_shot_file = final_video_path + "/" +"3ab4dd5e-1323-4535-a023-b6c6cedbee53_17.mp4"
+
+#path_shot_file = "./WIN_20210614_20_57_41_Pro.mp4"
 #path_shot_file = "./WIN_20210614_20_58_15_Pro.mp4"
 #path_shot_file = "./WIN_20210615_13_37_57_Pro.mp4"
+'''
 
 # load video
 vid_instance = Video()
@@ -53,13 +81,7 @@ for data in vid_instance.getFramesByShots(shots_np, preprocess=pre_processing_in
                                         algorithm="orb",
                                         config_instance=config_instance)
 
-    x_filtered_mag_np, x_filtered_ang_np, filtered_u_np, filtered_v_np = optical_flow_instance.runDense_NEW()
-    # class_name = optical_flow_instance.runDense()
-    class_name = optical_flow_instance.predict_final_result_NEW(x_filtered_mag_np,
-                                                                x_filtered_ang_np,
-                                                                filtered_u_np,
-                                                                filtered_v_np)
-
+    class_name = optical_flow_instance.runDense_v3()
     print(class_name)
 
     exit()

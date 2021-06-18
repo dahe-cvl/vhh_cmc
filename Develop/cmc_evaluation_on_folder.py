@@ -49,7 +49,7 @@ for i, exp_file in enumerate(exp_file_list):
     # max_recall_id can be ignored in eval mode
     # shots_per_vid_np must be a numpy with the follwoing shape (Nx4 --> N >= 1)
     #
-    ACTIVE_FLAG = True
+    ACTIVE_FLAG = False
     if(ACTIVE_FLAG == True):
         all_shots_np = eval_instance.final_dataset_np
         vids_idx = np.unique(all_shots_np[:, :1])   
@@ -58,6 +58,7 @@ for i, exp_file in enumerate(exp_file_list):
             shot_idx = np.where(all_shots_np[:, :1] == idx)[0]
             shot_np = all_shots_np[shot_idx]
             shots_final = shot_np[:, :4]
+
             cmc_instance.runOnSingleVideo(shots_per_vid_np=shots_final, max_recall_id=s+1)
 
     # run evaluation process

@@ -18,7 +18,7 @@ class OpticalFlow_ORB(object):
 
         orb = cv2.ORB_create(nfeatures=2000,
                              #scaleFactor=0.5,
-                             #nlevels=2,
+                             #nlevels=3,
                              edgeThreshold=5,
                              #firstLevel=None,
                              WTA_K=3,
@@ -122,11 +122,13 @@ class OpticalFlow_ORB(object):
         #result = cv2.drawMatches(out_img_prev, kp_prev, out_img_curr, kp_prev, good_matches, None, flags=2)
         # Display the best matching points
         #plt.title('Best Matching Points')
-        #plt.imshow(result)
-        #plt.draw()
-        #plt.pause(0.05)
+        '''
+        plt.imshow(result)
+        plt.draw()
+        plt.pause(0.01)
+        plt.cla()
         #self.video_writer.write(result)
-        ''' '''
+        '''
 
         # Draw first 10 matches.
         #img3 = cv2.drawMatches(img1, kp1, img2, kp2, matches[:10], flags=2)

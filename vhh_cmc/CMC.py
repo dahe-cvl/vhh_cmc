@@ -100,11 +100,14 @@ class CMC(object):
             if(shot_id != debug_sid and self.config_instance.debug_flag == True):
                 continue
 
+            print(f'sid: {shot_id}')
+            print(f'vid_name: {vid_name}')
+            print(f'frames_per_shot: {frames_per_shots_np.shape}')
             print(f'start: {start}, end: {stop}')
             #continue
 
             shot_len = stop - start
-            MIN_NUMBER_OF_FRAMES_PER_SHOT = 10
+            MIN_NUMBER_OF_FRAMES_PER_SHOT = 40
             if(shot_len <= MIN_NUMBER_OF_FRAMES_PER_SHOT ):
                 #print("shot length is too small!")
                 class_name = "NA"
@@ -114,13 +117,15 @@ class CMC(object):
                                                     algorithm="orb",
                                                     config_instance=self.config_instance)
 
+                '''
                 x_filtered_mag_np, x_filtered_ang_np, filtered_u_np, filtered_v_np = optical_flow_instance.runDense()
                 #class_name = optical_flow_instance.runDense()
                 class_name = optical_flow_instance.predict_final_result_NEW(x_filtered_mag_np,
                                                                             x_filtered_ang_np,
                                                                             filtered_u_np,
                                                                             filtered_v_np)
-                ''''''
+                '''
+                class_name = optical_flow_instance.runDense_v3()
 
                 '''
                 mag_l, angles_l, x_sum_l, y_sum_l = optical_flow_instance.run()                

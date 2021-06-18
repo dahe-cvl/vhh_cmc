@@ -63,7 +63,7 @@ class Evaluation(object):
         #print(len(self.all_shot_file_list))
 
         # load groundtruth labels
-        test_gt_labels_file = path_annotations + "/test_shots_without_track.csv"
+        test_gt_labels_file = path_annotations + "/annotations_tiny.csv"
         #print(test_gt_labels_file)
       
         fp = open(test_gt_labels_file, 'r')

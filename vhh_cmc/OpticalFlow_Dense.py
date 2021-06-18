@@ -12,18 +12,24 @@ class OpticalFlow_Dense(object):
         kp_curr_list = []
         kp_prev_list = []
 
+        '''
+        flow = cv2.optflow.calcOpticalFlowDenseRLOF(frame1, frame2, None, forwardBackwardThreshold=-1,
+                                                    gridStep=(16, 16))
+        '''
+
         flow = cv2.calcOpticalFlowFarneback(frame1,
                                             frame2,
                                             None,
                                             pyr_scale=0.5,
                                             levels=3,
-                                            winsize=5,
-                                            iterations=3,
-                                            poly_n=5,
+                                            winsize=15,
+                                            iterations=3,  # 3
+                                            poly_n=5,  # 5
                                             poly_sigma=1.2,
                                             flags=0)
-
+        ''''''
         mag, ang = cv2.cartToPolar(flow[...,0], flow[...,1], angleInDegrees=True)
+
         '''
         hsv = np.zeros((frame1.shape[0],frame1.shape[1], 3), dtype=np.uint8)
         print(hsv.shape)
@@ -37,5 +43,4 @@ class OpticalFlow_Dense(object):
         cv2.imshow("orig", frame1)
         cv2.waitKey(10)
         '''
-
         return mag, ang, flow[...,0], flow[...,1]

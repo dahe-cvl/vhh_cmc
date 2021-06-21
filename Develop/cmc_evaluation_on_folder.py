@@ -49,7 +49,7 @@ for i, exp_file in enumerate(exp_file_list):
     # max_recall_id can be ignored in eval mode
     # shots_per_vid_np must be a numpy with the follwoing shape (Nx4 --> N >= 1)
     #
-    ACTIVE_FLAG = False
+    ACTIVE_FLAG = True
     if(ACTIVE_FLAG == True):
         all_shots_np = eval_instance.final_dataset_np
         vids_idx = np.unique(all_shots_np[:, :1])   

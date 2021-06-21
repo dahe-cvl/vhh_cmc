@@ -1387,6 +1387,7 @@ class OpticalFlow(object):
         print(all_mb_x_np.shape)
         print(all_mb_y_np.shape)
 
+
         '''
         # visualize vectors and frames
         for i in range(0, len(all_mb_x_np)):
@@ -1413,25 +1414,29 @@ class OpticalFlow(object):
         plt.cla()
         '''
 
-        k = 10
+        k = 3
         n = 5
 
-        t1 = 1.8
-        t2 = 8.0
-        mvi_mv_ratio = 0.15
+        t1 = 1.1
+        t2 = 3.6
+        mvi_mv_ratio = 0.10
 
         all_filter_masks_l = []
-        for i in range(0, len(all_mb_u_np) - k):
+        all_seq_mb_delta_u_l = []
+        all_seq_mb_delta_v_l = []
+        last_conditions = np.zeros((self.number_of_blocks*self.number_of_blocks)).astype('bool')
+        last_conditions.fill(False)
 
+        for i in range(0, len(all_mb_u_np) - k):
             # calculate delta_u and delta_v - horizontal and vertical displacements
             seq_mb_delta_u = []
             seq_mb_delta_v = []
-            for j in range(0, k-1):
-                u_curr = all_mb_u_np[j]
-                u_next = all_mb_u_np[j + 1]
+            for j in range(0, k):
+                u_curr = all_mb_u_np[i + j]
+                u_next = all_mb_u_np[i + j + 1]
 
-                v_curr = all_mb_v_np[j]
-                v_next = all_mb_v_np[j + 1]
+                v_curr = all_mb_v_np[i + j]
+                v_next = all_mb_v_np[i + j + 1]
 
                 delta_u = u_next - u_curr
                 delta_v = v_next - v_curr
@@ -1440,27 +1445,37 @@ class OpticalFlow(object):
             seq_mb_delta_u_np = np.array(seq_mb_delta_u)
             seq_mb_delta_v_np = np.array(seq_mb_delta_v)
 
-            #print("####### DELTA U-V #########")
-            #print(i)
-            #print(seq_mb_delta_u_np)
-            #print(seq_mb_delta_v_np.shape)
+            print("####### DELTA U-V #########")
+            print(i)
+            print(seq_mb_delta_u_np)
+            print(seq_mb_delta_u_np.shape)
+            print(seq_mb_delta_v_np)
+            print(seq_mb_delta_v_np.shape)
+            #exit()
+            #continue
 
             # check significance and consistency
             seq_mb_mu_delta_u = np.mean(seq_mb_delta_u_np, axis=0)
             seq_mb_mu_delta_v = np.mean(seq_mb_delta_v_np, axis=0)
             #print(seq_mb_mu_delta_u)
             #print(seq_mb_mu_delta_v.shape)
+            all_seq_mb_delta_u_l.append(seq_mb_mu_delta_u)
+            all_seq_mb_delta_v_l.append(seq_mb_mu_delta_v)
 
             sum_seq_mb_sigma_delta_u = np.square(all_mb_u_np[i] - seq_mb_mu_delta_u)
             sum_seq_mb_sigma_delta_v = np.square(all_mb_v_np[i] - seq_mb_mu_delta_v)
-            for j in range(1, k-1):
-                sum_seq_mb_sigma_delta_u = sum_seq_mb_sigma_delta_u + np.square(all_mb_u_np[i+j] - seq_mb_mu_delta_u)
-                sum_seq_mb_sigma_delta_v = sum_seq_mb_sigma_delta_v + np.square(all_mb_v_np[i+j] - seq_mb_mu_delta_v)
+            for j in range(1, k):
+                sum_seq_mb_sigma_delta_u = sum_seq_mb_sigma_delta_u + np.square(all_mb_u_np[i + j] - seq_mb_mu_delta_u)
+                sum_seq_mb_sigma_delta_v = sum_seq_mb_sigma_delta_v + np.square(all_mb_v_np[i + j] - seq_mb_mu_delta_v)
             seq_mb_sigma_delta_u = np.sqrt((1 / (k - 1)) * sum_seq_mb_sigma_delta_u)
             seq_mb_sigma_delta_v = np.sqrt((1 / (k - 1)) * sum_seq_mb_sigma_delta_v)
-            #print(seq_mb_sigma_delta_u)
-            #print(seq_mb_sigma_delta_v.shape)
-
+            print("####### SIGMA U-V #########")
+            print(i)
+            print(seq_mb_sigma_delta_u)
+            print(seq_mb_sigma_delta_u.shape)
+            print(seq_mb_sigma_delta_v)
+            print(seq_mb_sigma_delta_v.shape)
+            #continue
             '''
             mu = 0
             sigma = seq_mb_sigma_delta_u[0]
@@ -1478,10 +1493,13 @@ class OpticalFlow(object):
             for j in range(1, k-1):
                 sum_seq_mb_mu_dist = sum_seq_mb_mu_dist + np.sqrt((np.square(all_mb_u_np[i+j]) + np.square(all_mb_v_np[i+j])))
             seq_mb_mu_dist = (1 / k) * sum_seq_mb_mu_dist
+            print("####### Mean Magnitude #########")
+            print(i)
+            print(seq_mb_mu_dist)
+            print(seq_mb_mu_dist.shape)
+            #continue
 
-            #print(seq_mb_mu_dist)
-            #print(seq_mb_mu_dist.shape)
-
+            print("####### MIN/MAX values #########")
             print(np.min(seq_mb_mu_dist))
             print(np.max(seq_mb_mu_dist))
             print(np.min(np.sqrt(np.square(seq_mb_sigma_delta_u) + np.square(seq_mb_sigma_delta_v))))
@@ -1491,54 +1509,121 @@ class OpticalFlow(object):
             consistency_condition2 = np.sqrt(np.square(seq_mb_sigma_delta_u) + np.square(seq_mb_sigma_delta_v)) < t2
             final_condition = np.logical_and(significance_condition1, consistency_condition2)
 
-            #print(condition1)
-            #print(condition1.shape)
-            #print(np.unique(condition1, return_counts=True))
-            #print(condition2)
-            #print(condition2.shape)
-            #print(np.unique(condition2, return_counts=True))
-            print(final_condition)
-            print(final_condition.shape)
-            print(np.unique(final_condition, return_counts=True))
 
+            print("####### Conditions #########")
+            print(significance_condition1)
+            #print(significance_condition1.shape)
+            #print(np.unique(significance_condition1, return_counts=True))
+            print(consistency_condition2)
+            #print(consistency_condition2.shape)
+            #print(np.unique(consistency_condition2, return_counts=True))
+            print(final_condition)
+            #print(final_condition.shape)
+            #print(np.unique(final_condition, return_counts=True))
+            ''''''
             all_filter_masks_l.append(final_condition)
 
         all_filter_masks_np = np.array(all_filter_masks_l)
         print(all_filter_masks_np.shape)
+        all_seq_mb_delta_u_np = np.array(all_seq_mb_delta_u_l)
+        print(all_seq_mb_delta_u_np.shape)
+        all_seq_mb_delta_v_np = np.array(all_seq_mb_delta_v_l)
+        print(all_seq_mb_delta_v_np.shape)
 
         motion_l = []
         for i in range(0, len(all_filter_masks_np)-n):
             regions_mvi_u_l = []
             regions_mvi_v_l = []
+            regions_mvi_mag_l = []
             regions_mvi_ang_l = []
+            regions_mvi_u_cnt_l = []
+            regions_mvi_v_cnt_l = []
             for j in range(0, n):
                 filter_mask = all_filter_masks_np[i+n]
                 mvi_u = all_mb_u_np[i + n][filter_mask == True]
                 mvi_v = all_mb_v_np[i + n][filter_mask == True]
-                mvi_ang = all_mb_ang_np[i + n][filter_mask == True]
+                #mvi_ang = all_mb_ang_np[i + n][filter_mask == True]
+                #mvi_u = all_seq_mb_delta_u_np[i + n][filter_mask == True]
+                #mvi_v = all_seq_mb_delta_v_np[i + n][filter_mask == True]
+
+                y = mvi_v # np.array([1, 1, 0, 0, -1, 0]) #
+                x = mvi_u # np.array([1, 0, 1, 0, -1, -1]) #
+                mvi_mag = np.sqrt(x ** 2 + y ** 2)
+                ang_2 = np.arctan2(y, (x + 0.0000000001))
+                mvi_ang = np.degrees(ang_2)
+                mvi_ang[mvi_ang < 0] = 360 + mvi_ang[mvi_ang < 0]
+
+                '''
+                print(x)
+                print(y)
+                print(mvi_mag)
+                print(ang_2)
+                print(mvi_ang)
+                print(mvi_ang.shape)
+                #print(mvi_ang_old)
+                #print(mvi_ang_old.shape)
+                exit()
+                '''
                 regions_mvi_u_l.append(mvi_u)
                 regions_mvi_v_l.append(mvi_v)
+                regions_mvi_mag_l.append(mvi_mag)
                 regions_mvi_ang_l.append(mvi_ang)
+                regions_mvi_u_cnt_l.append(len(mvi_u))
+                regions_mvi_v_cnt_l.append(len(mvi_v))
 
             regions_mvi_u_np = np.array(regions_mvi_u_l)
             regions_mvi_v_np = np.array(regions_mvi_v_l)
+            regions_mvi_mag_np = np.array(regions_mvi_mag_l)
             regions_mvi_ang_np = np.array(regions_mvi_ang_l)
             mvi_u_sum = np.sum(np.abs(regions_mvi_u_np))
             mvi_v_sum = np.sum(np.abs(regions_mvi_v_np))
+            regions_mvi_u_cnt_np = np.array(regions_mvi_u_cnt_l)
+            regions_mvi_v_cnt_np = np.array(regions_mvi_v_cnt_l)
 
             regions_mv_u_l = []
             regions_mv_v_l = []
+            regions_mv_u_cnt_l = []
+            regions_mv_v_cnt_l = []
             for j in range(0, n):
                 filter_mask = all_filter_masks_np[i + n]
                 mv_u = all_mb_u_np[i+n][filter_mask == False]
                 mv_v = all_mb_v_np[i + n][filter_mask == False]
+
+                y = mv_v  # np.array([1, 1, 0, 0, -1, 0]) #
+                x = mv_u  # np.array([1, 0, 1, 0, -1, -1]) #
+                mv_mag = np.sqrt(x ** 2 + y ** 2)
+                ang_2 = np.arctan2(y, (x + 0.0000000001))
+                mv_ang = np.degrees(ang_2)
+                mv_ang[mv_ang < 0] = 360 + mv_ang[mv_ang < 0]
+
+                '''
+                print(x)
+                print(y)
+                print(mv_mag)
+                print(ang_2)
+                print(mv_ang)
+                print(mv_ang.shape)
+                #print(mv_ang_old)
+                #print(mv_ang_old.shape)
+                exit()
+                '''
+
                 regions_mv_u_l.append(mv_u)
                 regions_mv_v_l.append(mv_v)
+                regions_mv_u_cnt_l.append(len(mv_u))
+                regions_mv_v_cnt_l.append(len(mv_v))
 
             regions_mv_u_np = np.array(regions_mv_u_l)
             regions_mv_v_np = np.array(regions_mv_v_l)
             mv_u_sum = np.sum(np.abs(regions_mv_u_np))
             mv_v_sum = np.sum(np.abs(regions_mv_v_np))
+            regions_mv_u_cnt_np = np.array(regions_mv_u_cnt_l)
+            regions_mv_v_cnt_np = np.array(regions_mv_v_cnt_l)
+
+            mvi_u_cnt = np.sum(regions_mvi_u_cnt_np)
+            mvi_v_cnt = np.sum(regions_mvi_v_cnt_np)
+            mv_u_cnt = np.sum(regions_mv_u_cnt_np)
+            mv_v_cnt = np.sum(regions_mv_v_cnt_np)
 
             print("#############")
             print(mvi_u_sum)
@@ -1546,7 +1631,13 @@ class OpticalFlow(object):
             print(mvi_v_sum)
             print(mv_v_sum)
 
-            if (mvi_u_sum < mv_u_sum * mvi_mv_ratio) and (mvi_v_sum < mv_v_sum * mvi_mv_ratio):
+            print(np.sum(regions_mvi_u_cnt_np))
+            print(np.sum(regions_mvi_v_cnt_np))
+            print(np.sum(regions_mv_u_cnt_np))
+            print(np.sum(regions_mv_v_cnt_np))
+
+            if (mvi_u_sum < mv_u_sum * mvi_mv_ratio) and (mvi_v_sum < mv_v_sum * mvi_mv_ratio) or \
+               (mvi_u_cnt < mv_u_cnt) and (mvi_v_cnt < mv_v_cnt):
                 print("STATIC")
                 motion_l.append("NA")
             else:

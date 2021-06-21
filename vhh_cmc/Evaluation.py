@@ -58,12 +58,14 @@ class Evaluation(object):
         na_shot_file_list = os.listdir(na_samples_path)
 
         self.all_shot_file_list = tilt_shot_file_list + pan_shot_file_list + na_shot_file_list
+        #self.all_shot_file_list = tilt_shot_file_list + pan_shot_file_list
         self.all_shot_file_list.sort()
         all_shot_file_np = np.array(self.all_shot_file_list)
         #print(len(self.all_shot_file_list))
 
         # load groundtruth labels
         test_gt_labels_file = path_annotations + "/annotations_tiny.csv"
+        #test_gt_labels_file = path_annotations + "/annotations_tiny_without_na.csv"
         #print(test_gt_labels_file)
       
         fp = open(test_gt_labels_file, 'r')

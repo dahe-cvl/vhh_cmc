@@ -9,14 +9,6 @@ class OpticalFlow_Dense(object):
         print("dense of")
 
     def getFlow(self, frame1, frame2):
-        kp_curr_list = []
-        kp_prev_list = []
-
-        '''
-        flow = cv2.optflow.calcOpticalFlowDenseRLOF(frame1, frame2, None, forwardBackwardThreshold=-1,
-                                                    gridStep=(16, 16))
-        '''
-
         flow = cv2.calcOpticalFlowFarneback(frame1,
                                             frame2,
                                             None,
@@ -27,7 +19,7 @@ class OpticalFlow_Dense(object):
                                             poly_n=5,  # 5
                                             poly_sigma=1.2,
                                             flags=0)
-        ''''''
+
         mag, ang = cv2.cartToPolar(flow[...,0], flow[...,1], angleInDegrees=True)
 
         '''

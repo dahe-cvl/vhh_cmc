@@ -114,30 +114,10 @@ class CMC(object):
             else:
                 # add new optical flow version
                 optical_flow_instance = OpticalFlow(video_frames=frames_per_shots_np,
-                                                    algorithm="orb",
+                                                    algorithm=None,
                                                     config_instance=self.config_instance)
+                class_name = optical_flow_instance.runDense()
 
-                '''
-                x_filtered_mag_np, x_filtered_ang_np, filtered_u_np, filtered_v_np = optical_flow_instance.runDense()
-                #class_name = optical_flow_instance.runDense()
-                class_name = optical_flow_instance.predict_final_result_NEW(x_filtered_mag_np,
-                                                                            x_filtered_ang_np,
-                                                                            filtered_u_np,
-                                                                            filtered_v_np)
-                '''
-                class_name = optical_flow_instance.runDense_v3()
-
-                '''
-                mag_l, angles_l, x_sum_l, y_sum_l = optical_flow_instance.run()                
-                class_name = optical_flow_instance.predict_final_result(mag_l,
-                                                                        angles_l,
-                                                                        x_sum_l,
-                                                                        y_sum_l,
-                                                                        self.config_instance.class_names)
-                
-
-                class_name = optical_flow_instance.run()
-                '''
             # prepare results
             print(str(vid_name) + ";" + str(shot_id) + ";" + str(start) + ";" + str(stop) + ";" + str(class_name))
             results_cmc_l.append([str(vid_name) + ";" + str(shot_id) + ";" + str(start) + ";" + str(stop) + ";" + str(class_name)])

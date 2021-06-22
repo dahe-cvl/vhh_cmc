@@ -162,6 +162,32 @@ class CMC(object):
 
         return lines_np
 
+    def loadCmcResults(self, cmc_results_path):
+        """
+        Method for loading camera movments results as numpy array
+
+        .. note::
+            Only used in debug_mode.
+
+        :param cmc_results_path: [required] path to results file of shot boundary detection module (vhh_sbd)
+        :return: numpy array holding list of detected shots.
+        """
+
+        # open sbd results
+        fp = open(cmc_results_path, 'r')
+        lines = fp.readlines()
+        lines = lines[1:]
+
+        lines_n = []
+        for i in range(0, len(lines)):
+            line = lines[i].replace('\n', '')
+            line_split = line.split(';')
+            lines_n.append([line_split[0], os.path.join(line_split[1]), line_split[2], line_split[3], line_split[4]])
+        lines_np = np.array(lines_n)
+        # print(lines_np.shape)
+
+        return lines_np
+
     def exportCmcResults(self, fName, cmc_results_np: np.ndarray):
         """
         Method to export cmc results as csv file.
@@ -198,3 +224,54 @@ class CMC(object):
             fp.write(tmp_line + "\n")
 
         fp.close()
+
+    def export_shots_as_file(self, shots_np, dst_path="./vhh_mmsi_eval_db_tiny/shots/"):
+        print("export shot as video")
+
+        print(shots_np.shape)
+
+        vid_name = shots_np[0][0]
+        vid_instance = Video()
+        vid_instance.load(self.config_instance.path_videos + "/" + vid_name)
+
+        h = int(vid_instance.height)
+        w = int(vid_instance.width)
+        fps = int(vid_instance.frame_rate)
+
+        print(h)
+        print(w)
+        print(fps)
+
+        for i, data in enumerate(vid_instance.getFramesByShots(shots_np, preprocess=None)):
+            frames_per_shots_np = data['Images']
+            shot_id = data['sid']
+            vid_name = data['video_name']
+            start = data['start']
+            stop = data['end']
+            camera_movement_class = data["cmc_class"]
+
+            print("######################")
+            print(i)
+            print(i % 32 == 0)
+            print(f'sid: {shot_id}')
+            print(f'vid_name: {vid_name}')
+            print(f'frames_per_shot: {frames_per_shots_np.shape}')
+            print(f'start: {start}, end: {stop}')
+            print(f'camera_movement_class: {camera_movement_class}')
+
+            #if (camera_movement_class == "PAN" or camera_movement_class == "TILT" or camera_movement_class == "pan" or camera_movement_class == "tilt"):
+            if (camera_movement_class == "NA" or camera_movement_class == "na"):
+                print("save video! ")
+
+                fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+                out = cv2.VideoWriter(dst_path + "/" + camera_movement_class + "_" + str(i) + ".avi", fourcc, 12, (w, h))
+
+                for j in range(0, len(frames_per_shots_np)):
+                    frame = frames_per_shots_np[j]
+                    out.write(frame)
+
+                out.release()
+
+
+
+

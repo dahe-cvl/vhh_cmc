@@ -16,7 +16,7 @@ Development:
 PreProcessing:
   ###
   # This flag is used to convert a input frame into a grayscale frame (0... deactivate, 1 ... activate).
-  CONVERT2GRAY_FLAG: 0
+  CONVERT2GRAY_FLAG: 1
   ###
   # This flag is used to center crop a input frame (0... deactivate, 1 ... activate).
   CENTER_CROP_FLAG: 1       # crop image (origin: image center) with maximum width or height
@@ -29,33 +29,20 @@ PreProcessing:
 
 OpticalFlow:
   ###
-  # This parameter is used to specify a magnitude threshold to disinguish between no-movement and movement. (e.g. eval dataset: 2, 3, 5)
-  MIN_MAGNITUDE_THRESHOLD: 2.0
+  # This parameter is used to specify the ratio between available motion-vectors-of-interest to the all motion-vectors.
+  MVI_MV_RATIO: 0.1
   ###
-  # This parameter is used to specify a distance threshold for outlier detection of feature matches
-  DISTANCE_THRESHOLD: 0.75
+  # This parameter is used to specify the threshold (t1) for the significance check.
+  THRESHOLD_SIGNIFICANCE: 1.8
   ###
-  # This parameter is used to specify the number of consecutive frames which are needed to register a camera movement.
-  SENSITIVITY: 10
+  # This parameter is used to specify the threshold (t2) for the consistency check.
+  THRESHOLD_CONSISTENCY: 2.9
   ###
-  # This parameter is used to specify the number of outliers (miss detections).
-  SPECIFICITY: 20
+  # This parameter is used to specify the temporal window_size (k) for the significance/consistency check.
+  MVI_WINDOW_SIZE: 10
   ###
-  # This parameter is used to specify the frame border inside which random features are created
-  BORDER: 10
-  ###
-  # This parameter is used to specify the number of features number of features to be tracked for optical flow
-  NUMBER_OF_FEATURES: 500
-  ###
-  # This parameter is used to specify the difference limit to most common angle such that still considered as background movement
-  ANGLE_DIFF_LIMIT: 30
-
-  ### This parameter is used to select a special mode for optical flow debugging.
-  # NORMAL_MODE = 0
-  # DEBUG_MODE = 1
-  # SAVE_MODE = 2
-  # DEBUG_AND_SAVE_MODE = 3
-  MODE: 0
+  # This parameter is used to specify the temporal window_size (n) for the final movements classification over one shot.
+  REGION_WINDOW_SIZE: 5
 
 CmcCore:
   ###
@@ -102,7 +89,7 @@ Evaluation:
   PATH_RAW_RESULTS: "/data/share/maxrecall_vhh_mmsi/videos/results/cmc/raw_results/"
   ###
   # This parameter is used to specify the path to store the evaluation results path.
-  PATH_EVAL_RESULTS: "/caa/Projects02/vhh/private/Results/comparison_crop_uncrop_nobackup/results/cmc/final_results/cropped/"
+  PATH_EVAL_RESULTS: "/data/share/cmc_eval_20210614/vhhmmsi_eval_db_1/"
   ###
   # This parameter is used to groundtruth annotations used for evaluation.
   PATH_GT_ANNOTATIONS: "/caa/Projects02/vhh/private/database_nobackup/VHH_datasets/annotations/ShotBoundaryDetection/imediacities/sbd_imc_annotations_20191231.csv"

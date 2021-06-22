@@ -124,11 +124,11 @@ class OpticalFlow(object):
         print(all_mb_x_np.shape)
         print(all_mb_y_np.shape)
 
-        k = 10
-        n = 5
-        t1 = 1.8
-        t2 = 2.9
-        mvi_mv_ratio = 0.10
+        k = self.config_instance.mvi_window_size
+        n = self.config_instance.region_window_size
+        t1 = self.config_instance.threshold_significance
+        t2 = self.config_instance.threshold_consistency
+        mvi_mv_ratio = self.config_instance.mvi_mv_ratio
 
         all_filter_masks_l = []
         all_seq_mb_delta_u_l = []

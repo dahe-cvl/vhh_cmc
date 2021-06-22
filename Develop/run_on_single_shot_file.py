@@ -8,20 +8,11 @@ from vhh_cmc.Video import Video
 
 db_path = "/data/share/datasets/cmc_final_dataset_v2/"
 
-'''
-path_videos = db_path + "training_data/"
-class_name = "pan"
-final_video_path = path_videos + class_name + "/"
-
-all_shot_files = os.listdir(final_video_path)
-print(all_shot_files)
-'''
-
 # na
-#path_shot_file = db_path + "training_data/na/EF-NS_063_OeFM_2.mp4"
+path_shot_file = db_path + "training_data/na/EF-NS_063_OeFM_2.mp4"
 #path_shot_file = db_path + "training_data/na/EF-NS_063_OeFM_3.mp4"
 #path_shot_file = db_path + "training_data/na/EF-NS_063_OeFM_4.mp4"
-path_shot_file = db_path + "training_data/na/EF-NS_063_OeFM_5.mp4"
+#path_shot_file = db_path + "training_data/na/EF-NS_063_OeFM_5.mp4"
 
 # tilt
 #path_shot_file = db_path + "training_data/tilt/eb0d74d4-7e4b-4d1c-9539-89402ebc1334_27.mp4"  # --> fp --> KOMISCH
@@ -38,39 +29,18 @@ path_shot_file = db_path + "training_data/na/EF-NS_063_OeFM_5.mp4"
 #path_shot_file = db_path + "training_data/pan/ae9bb5fe-5da9-49cb-97ec-3b0b54e50816_15.mp4"  # --> tp aber sehr knapp moving objects
 #path_shot_file = "./WIN_20210621_08_23_51_Pro.mp4"
 
-#path_shot_file = "./WIN_20210614_20_57_41_Pro.mp4"
-#path_shot_file = "./WIN_20210614_20_58_15_Pro.mp4"
-#path_shot_file = "./WIN_20210615_13_37_57_Pro.mp4"
-
-
-
-'''
-path_shot_file = final_video_path + "/" + all_shot_files[25]  ## pan with moving objects
-#path_shot_file = final_video_path + "/" + all_shot_files[15]  ## pan right
-#path_shot_file = final_video_path + "/" + all_shot_files[45]  ##
-
-#path_shot_file = final_video_path + "/" + all_shot_files[4]  ## na with moving objects
-#path_shot_file = final_video_path + "/" + all_shot_files[1]  ## na
-#path_shot_file = final_video_path + "/" +"3ab4dd5e-1323-4535-a023-b6c6cedbee53_17.mp4"
-
-
-'''
-
 # load video
 vid_instance = Video()
 vid_instance.load(vidFile=path_shot_file)
-
 vid_instance.printVIDInfo()
 
 shots_np = np.array([[0, 0, 0, vid_instance.number_of_frames]])
-
 
 config_file = "./config/config_cmc_debug.yaml"
 config_instance = Configuration(config_file)
 config_instance.loadConfig()
 
 pre_processing_instance = PreProcessing(config_instance=config_instance)
-
 
 for data in vid_instance.getFramesByShots(shots_np, preprocess=pre_processing_instance.applyTransformOnImg):
     frames_per_shots_np = data['Images']
@@ -89,5 +59,3 @@ for data in vid_instance.getFramesByShots(shots_np, preprocess=pre_processing_in
 
     class_name = optical_flow_instance.runDense_v3()
     print(class_name)
-
-    exit()

@@ -1,0 +1,98 @@
+
+Development:
+  ###
+  # This parameter is used to activate or deactivate the debug mode.
+  DEBUG_FLAG: 0             # 1 ... activate 0 ... deactivate
+  ###
+  # This parameter is used to specify a SBD results file for debugging mode.
+  SBD_RESULTS_PATH: "/data/share/maxrecall_vhh_mmsi/videos/results/sbd/final_results/8.csv"
+  ###
+  # This parameter is used to specify the results path in debug mode
+  PATH_DEBUG_RESULTS: "/data/share/maxrecall_vhh_mmsi/develop/videos/results/cmc/develop/"
+  ###
+  # This parameter is used to save a debug package (e.g. including some visualizations, ... - not available yet).
+  SAVE_DEBUG_PKG: 0
+
+PreProcessing:
+  ###
+  # This flag is used to convert a input frame into a grayscale frame (0... deactivate, 1 ... activate).
+  CONVERT2GRAY_FLAG: 1
+  ###
+  # This flag is used to center crop a input frame (0... deactivate, 1 ... activate).
+  CENTER_CROP_FLAG: 1       # crop image (origin: image center) with maximum width or height
+  ###
+  # This flag is used to scale a input frame into the specified dimension (0... deactivate, 1 ... activate).
+  DOWNSCALE_FLAG: 1
+  ###
+  # This flag is used to to specify the resize dimension. (only usable if DOWNSCALE_FLAG is active).
+  RESIZE_DIM: 512, 512      # resize dimension -> height, width
+
+OpticalFlow:
+  ###
+  # This parameter is used to specify the ratio between available motion-vectors-of-interest to the all motion-vectors.
+  MVI_MV_RATIO: 0.1
+  ###
+  # This parameter is used to specify the threshold (t1) for the significance check.
+  THRESHOLD_SIGNIFICANCE: 1.5
+  ###
+  # This parameter is used to specify the threshold (t2) for the consistency check.
+  THRESHOLD_CONSISTENCY: 1.9
+  ###
+  # This parameter is used to specify the temporal window_size (k) for the significance/consistency check.
+  MVI_WINDOW_SIZE: 10
+  ###
+  # This parameter is used to specify the temporal window_size (n) for the final movements classification over one shot.
+  REGION_WINDOW_SIZE: 5
+
+CmcCore:
+  ###
+  # This parameter is used to specify the class names.
+  CLASS_NAMES: ["pan","tilt", "na"]
+
+  ###
+  # This parameter is used to save raw results (e.g. debug visualizations).
+  SAVE_RAW_RESULTS: 0       # 1 ... yes 0 ... no
+  ###
+  # This parameter is used to specify the path for saving the raw results.
+  PATH_RAW_RESULTS: "/data/share/maxrecall_vhh_mmsi/videos/results/cmc/raw_results/"
+  NUMBER_OF_FRAMES_PER_SHOT: 5  # save x frames per shot
+  ###
+  # This parameter is used to specify the prefix for the results file.
+  PREFIX_RAW_RESULTS: "results_raw_"
+  ###
+  # This parameter is used to specify the postfix for the results file.
+  POSTFIX_RAW_RESULTS: "csv"
+
+  ###
+  # This parameter is used to save final results (e.g. csv list).
+  SAVE_FINAL_RESULTS: 1     # 1 ... yes 0 ... no
+  ###
+  # This parameter is used to specify the path for saving the final results.
+  PATH_FINAL_RESULTS: "/caa/Projects02/vhh/private/Results/comparison_crop_uncrop_nobackup/results/cmc/final_results/cropped/"
+  ###
+  # This parameter is used to specify the prefix for the results file.
+  PREFIX_FINAL_RESULTS: "results_"
+  ###
+  # This parameter is used to specify the postfix for the results file.
+  POSTFIX_FINAL_RESULTS: "csv"
+
+  ###
+  # This parameter is used to specify the path to the videos.
+  PATH_VIDEOS: "/data/share/datasets/vhh_mmsi_eval_db_tiny/"
+
+Evaluation:
+  ###
+  # This parameter is used to save evaluation results (e.g. visualizations, ... ).
+  SAVE_EVAL_RESULTS: 1
+  ###
+  # This parameter is used the raw results path.
+  PATH_RAW_RESULTS: "/data/share/maxrecall_vhh_mmsi/videos/results/cmc/raw_results/"
+  ###
+  # This parameter is used to specify the path to store the evaluation results path.
+  PATH_EVAL_RESULTS: "/data/share/cmc_eval_20210614/vhhmmsi_eval_db_1/"
+  ###
+  # This parameter is used to groundtruth annotations used for evaluation.
+  PATH_GT_ANNOTATIONS: "/caa/Projects02/vhh/private/database_nobackup/VHH_datasets/annotations/ShotBoundaryDetection/imediacities/sbd_imc_annotations_20191231.csv"
+  ###
+  # This parameter is used to specify the path to the dataset used for the evaluation.
+  PATH_EVAL_DATASET: "/data/share/datasets/vhh_mmsi_eval_db_tiny/"

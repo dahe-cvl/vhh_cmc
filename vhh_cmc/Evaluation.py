@@ -58,14 +58,13 @@ class Evaluation(object):
         na_shot_file_list = os.listdir(na_samples_path)
 
         self.all_shot_file_list = tilt_shot_file_list + pan_shot_file_list + na_shot_file_list
-        #self.all_shot_file_list = tilt_shot_file_list + pan_shot_file_list
         self.all_shot_file_list.sort()
         all_shot_file_np = np.array(self.all_shot_file_list)
         #print(len(self.all_shot_file_list))
 
         # load groundtruth labels
         test_gt_labels_file = path_annotations + "/annotations_tiny.csv"
-        #test_gt_labels_file = path_annotations + "/annotations_tiny_without_na.csv"
+        #test_gt_labels_file = path_annotations + "/test_shots_without_track.csv"
         #print(test_gt_labels_file)
       
         fp = open(test_gt_labels_file, 'r')
@@ -96,7 +95,7 @@ class Evaluation(object):
             #print(video_name)
             idx = np.squeeze(np.where(video_name == all_shot_file_np)[0])
             sample_path = all_shot_file_np[idx]
-            final_dataset.append([video_name, i, start, stop, class_name])
+            final_dataset.append([path, i, start, stop, class_name])
 
         #final_dataset.sort()
         self.final_dataset_np = np.array(final_dataset)
@@ -191,8 +190,11 @@ class Evaluation(object):
         # add sorting part
         pred_sort_np = pred_np[pred_np[:, 1].argsort()]
         final_dataset_sort_np = self.final_dataset_np[self.final_dataset_np[:, 1].argsort()]
-        print(pred_sort_np[:10])
-        print(final_dataset_sort_np[:10])
+
+        # remove paths
+        for i in range(0, len(final_dataset_sort_np)):
+            name = final_dataset_sort_np[i][0].split('/')[-1]
+            final_dataset_sort_np[i][0] = name
 
         pred_np_prep = np.squeeze(pred_sort_np[:, 4:])
         gt_np_prep = np.squeeze(final_dataset_sort_np[:, 4:])
@@ -322,7 +324,7 @@ class Evaluation(object):
         print(self.config_instance.path_eval_results)
         fp = open(self.config_instance.path_eval_results + "/" + fName.split('/')[-1].split('.')[0] + ".csv", 'w')
 
-        header = "exp_name;magnitude_th;distance_th;acc;prec;rec;f1_score"
+        header = "exp_name;mvi_mv_ratio;threshold_significance;threshold_consistency;mvi_window_size;region_window_size;acc;prec;rec;f1_score"
         fp.write(header + "\n")
 
         for i in range(0, len(cmc_results_np)):

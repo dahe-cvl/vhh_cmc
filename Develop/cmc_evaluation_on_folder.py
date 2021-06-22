@@ -6,17 +6,14 @@ import numpy as np
 eval_instance = None
 exp_results = []
 
-'''
-exp_file_list = [#"./config/config_cmc_exp_1_vhh_mmsi_test_db_v2.yaml",
-                 #"./config/config_cmc_exp_2_vhh_mmsi_test_db_v2.yaml",
-                 #"./config/config_cmc_exp_3_vhh_mmsi_test_db_v2.yaml",
-                 #"./config/config_cmc_exp_4_vhh_mmsi_test_db_v2.yaml",
-                 #"./config/config_cmc_exp_6_vhh_mmsi_test_db_v2.yaml",
-                 #"./config/config_cmc_exp_5_vhh_mmsi_test_db_v2.yaml",
-                 "./config/config_cmc.yaml",
-                 #"./config/config_cmc_exp_7_vhh_mmsi_test_db_v2.yaml",
-                 #"./config/config_cmc_exp_8_vhh_mmsi_test_db_v2.yaml"
-                 ] #vhh_mmsi_test_db_v2_final_results_mag_th_2
+
+exp_file_list = [
+                 "./config/config_cmc_evaluation_vhh_mmsi_eval_db_tiny_1.yaml",
+                 "./config/config_cmc_evaluation_vhh_mmsi_eval_db_tiny_2.yaml",
+                 "./config/config_cmc_evaluation_vhh_mmsi_eval_db_tiny_3.yaml",
+                 "./config/config_cmc_evaluation_vhh_mmsi_eval_db_tiny_4.yaml",
+                 "./config/config_cmc_evaluation_vhh_mmsi_eval_db_tiny_5.yaml",
+                 ]
 '''
 exp_file_list = [#"./config/config_cmc_exp_1_cmc_final_db_v2.yaml",
                  #"./config/config_cmc_exp_2_cmc_final_db_v2.yaml",
@@ -28,11 +25,11 @@ exp_file_list = [#"./config/config_cmc_exp_1_cmc_final_db_v2.yaml",
                  #"./config/config_cmc_exp_8_cmc_final_db_v2.yaml",
                  #"./config/config_cmc_exp_9_cmc_final_db_v2.yaml",
                  #"./config/config_cmc_exp_10_cmc_final_db_v2.yaml",
-                 #"./config/config_cmc_evaluation.yaml",
+                 #"./config/config_cmc_evaluation_vhh_mmsi_eval_db_tiny_1.yaml",
                  "./config/config_cmc_evaluation_cmc_v2.yaml",
                  #"./config/config_cmc_efilms_db.yaml",
                  ]
-
+'''
 for i, exp_file in enumerate(exp_file_list):
     cmc_instance = CMC(config_file=exp_file)
 
@@ -58,7 +55,6 @@ for i, exp_file in enumerate(exp_file_list):
             shot_idx = np.where(all_shots_np[:, :1] == idx)[0]
             shot_np = all_shots_np[shot_idx]
             shots_final = shot_np[:, :4]
-
             cmc_instance.runOnSingleVideo(shots_per_vid_np=shots_final, max_recall_id=s+1)
 
     # run evaluation process
@@ -66,8 +62,11 @@ for i, exp_file in enumerate(exp_file_list):
 
     # add exp results to list
     exp_results.append(["exp_" + str(i+1),
-                        config_instance.min_magnitude_threshold,
-                        config_instance.distance_threshold,
+                        config_instance.mvi_mv_ratio,
+                        config_instance.threshold_significance,
+                        config_instance.threshold_consistency,
+                        config_instance.mvi_window_size,
+                        config_instance.region_window_size,
                         accuracy,
                         precision,
                         recall,

@@ -96,9 +96,9 @@ class Evaluation(object):
             #print(video_name)
             idx = np.squeeze(np.where(video_name == all_shot_file_np)[0])
             sample_path = all_shot_file_np[idx]
-            final_dataset.append([path, i, start, stop, class_name])
+            final_dataset.append([video_name, i, start, stop, class_name])
 
-        final_dataset.sort()
+        #final_dataset.sort()
         self.final_dataset_np = np.array(final_dataset)
 
     def load_vhhmmsi_GT_V2_db(self):
@@ -186,26 +186,16 @@ class Evaluation(object):
                 line = line.replace('\n', '')
                 line_split = line.split(';')
                 pred_list.append([line_split[0], int(line_split[1]), int(line_split[2]), int(line_split[3]), line_split[4]])
-        pred_list.sort()
         pred_np = np.array(pred_list)
 
-        pred_np_without_track = np.delete(pred_np, idx_track, 0)
-        print(pred_np_without_track)
-        print(pred_np_without_track.shape)
+        # add sorting part
+        pred_sort_np = pred_np[pred_np[:, 1].argsort()]
+        final_dataset_sort_np = self.final_dataset_np[self.final_dataset_np[:, 1].argsort()]
+        print(pred_sort_np[:10])
+        print(final_dataset_sort_np[:10])
 
-        gt_np_prep_without_track = np.delete(self.final_dataset_np, idx_track, 0)
-        print(gt_np_prep_without_track)
-        print(gt_np_prep_without_track.shape)
-
-        # calculate metrics
-        #pred_np_prep = np.squeeze(pred_np[:, 4:])
-        #gt_np_prep = np.squeeze(final_gt_np[:, 4:])
-
-        pred_np_prep = np.squeeze(pred_np_without_track[:, 4:])
-        gt_np_prep = np.squeeze(gt_np_prep_without_track[:, 4:])
-
-        #print(pred_np)
-        #print(final_gt_np)
+        pred_np_prep = np.squeeze(pred_sort_np[:, 4:])
+        gt_np_prep = np.squeeze(final_dataset_sort_np[:, 4:])
 
         accuracy, precision, recall, f1_score = self.calculate_metrics(y_score=pred_np_prep, y_test=gt_np_prep)
         return accuracy, precision, recall, f1_score

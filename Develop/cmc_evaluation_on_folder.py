@@ -13,23 +13,39 @@ exp_file_list = [
                  "./config/config_cmc_evaluation_vhh_mmsi_eval_db_tiny_3.yaml",
                  "./config/config_cmc_evaluation_vhh_mmsi_eval_db_tiny_4.yaml",
                  "./config/config_cmc_evaluation_vhh_mmsi_eval_db_tiny_5.yaml",
+                 "./config/config_cmc_evaluation_vhh_mmsi_eval_db_tiny_6.yaml",
+                 "./config/config_cmc_evaluation_vhh_mmsi_eval_db_tiny_7.yaml",
+                 "./config/config_cmc_evaluation_vhh_mmsi_eval_db_tiny_8.yaml",
+                 ]
+
+''''''
+
+'''
+exp_file_list = [
+                 "./config/config_cmc_evaluation_cmc_v2_1.yaml",
+                 "./config/config_cmc_evaluation_cmc_v2_2.yaml",
+                 "./config/config_cmc_evaluation_cmc_v2_3.yaml",
+                 "./config/config_cmc_evaluation_cmc_v2_4.yaml",
+                 "./config/config_cmc_evaluation_cmc_v2_5.yaml",
+                 "./config/config_cmc_evaluation_cmc_v2_6.yaml",
+                 "./config/config_cmc_evaluation_cmc_v2_7.yaml",
+                 "./config/config_cmc_evaluation_cmc_v2_8.yaml",
+                 ]              
+'''
+
+'''
+exp_file_list = [
+                 "./config/config_cmc_evaluation_cmc_v3_1.yaml",
+                 #"./config/config_cmc_evaluation_cmc_v3_2.yaml",
+                 #"./config/config_cmc_evaluation_cmc_v3_3.yaml",
+                 #"./config/config_cmc_evaluation_cmc_v3_4.yaml",
+                 #"./config/config_cmc_evaluation_cmc_v3_5.yaml",
+                 #"./config/config_cmc_evaluation_cmc_v3_6.yaml",
+                 #"./config/config_cmc_evaluation_cmc_v3_7.yaml",
+                 #"./config/config_cmc_evaluation_cmc_v3_8.yaml",
                  ]
 '''
-exp_file_list = [#"./config/config_cmc_exp_1_cmc_final_db_v2.yaml",
-                 #"./config/config_cmc_exp_2_cmc_final_db_v2.yaml",
-                 #"./config/config_cmc_exp_3_cmc_final_db_v2.yaml",
-                 #"./config/config_cmc_exp_4_cmc_final_db_v2.yaml",
-                 #"./config/config_cmc_exp_6_cmc_final_db_v2.yaml",
-                 #"./config/config_cmc_exp_5_cmc_final_db_v2.yaml",
-                 #"./config/config_cmc_exp_7_cmc_final_db_v2.yaml",
-                 #"./config/config_cmc_exp_8_cmc_final_db_v2.yaml",
-                 #"./config/config_cmc_exp_9_cmc_final_db_v2.yaml",
-                 #"./config/config_cmc_exp_10_cmc_final_db_v2.yaml",
-                 #"./config/config_cmc_evaluation_vhh_mmsi_eval_db_tiny_1.yaml",
-                 "./config/config_cmc_evaluation_cmc_v2.yaml",
-                 #"./config/config_cmc_efilms_db.yaml",
-                 ]
-'''
+
 for i, exp_file in enumerate(exp_file_list):
     cmc_instance = CMC(config_file=exp_file)
 

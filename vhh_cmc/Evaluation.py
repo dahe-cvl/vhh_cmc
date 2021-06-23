@@ -64,7 +64,7 @@ class Evaluation(object):
 
         # load groundtruth labels
         test_gt_labels_file = path_annotations + "/annotations_tiny.csv"
-        #test_gt_labels_file = path_annotations + "/test_shots_without_track.csv"
+        #test_gt_labels_file = path_annotations + "/annotations.csv"
         #print(test_gt_labels_file)
       
         fp = open(test_gt_labels_file, 'r')
@@ -78,10 +78,8 @@ class Evaluation(object):
             line = line.replace('\\', '/')
             line = line.replace('\ufeff', '')
             line_split = line.split(';')
-            #print(line_split)
-
             gt_annotation_list.append([line_split[0], line_split[2], line_split[3]])
-        gt_annotation_np = np.array(gt_annotation_list)       
+        gt_annotation_np = np.array(gt_annotation_list)
 
         final_dataset = []
         for i in range(0, len(gt_annotation_np)):
@@ -99,6 +97,7 @@ class Evaluation(object):
 
         #final_dataset.sort()
         self.final_dataset_np = np.array(final_dataset)
+        print(self.final_dataset_np)
 
     def load_vhhmmsi_GT_V2_db(self):
         """

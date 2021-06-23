@@ -6,10 +6,10 @@ import os
 from vhh_cmc.OpticalFlow import OpticalFlow
 from vhh_cmc.Video import Video
 
-db_path = "/data/share/datasets/cmc_final_dataset_v2/"
+#db_path = "/data/share/datasets/cmc_final_dataset_v2/"
 
 # na
-path_shot_file = db_path + "training_data/na/EF-NS_063_OeFM_2.mp4"
+#path_shot_file = db_path + "training_data/na/EF-NS_063_OeFM_2.mp4"
 #path_shot_file = db_path + "training_data/na/EF-NS_063_OeFM_3.mp4"
 #path_shot_file = db_path + "training_data/na/EF-NS_063_OeFM_4.mp4"
 #path_shot_file = db_path + "training_data/na/EF-NS_063_OeFM_5.mp4"
@@ -28,6 +28,12 @@ path_shot_file = db_path + "training_data/na/EF-NS_063_OeFM_2.mp4"
 #path_shot_file = db_path + "training_data/pan/pan_a1dc1433-b00e-4b62-a5ec-75db765ad34d_70.mp4"  # --> fp  moving objects
 #path_shot_file = db_path + "training_data/pan/ae9bb5fe-5da9-49cb-97ec-3b0b54e50816_15.mp4"  # --> tp aber sehr knapp moving objects
 #path_shot_file = "./WIN_20210621_08_23_51_Pro.mp4"
+
+
+db_path = "/data/share/datasets/vhh_mmsi_eval_db_tiny/"
+path_shot_file = db_path + "training_data/pan/pan_147.avi"
+
+print(path_shot_file)
 
 # load video
 vid_instance = Video()
@@ -57,5 +63,5 @@ for data in vid_instance.getFramesByShots(shots_np, preprocess=pre_processing_in
                                         algorithm="orb",
                                         config_instance=config_instance)
 
-    class_name = optical_flow_instance.runDense_v3()
+    class_name = optical_flow_instance.runDense()
     print(class_name)

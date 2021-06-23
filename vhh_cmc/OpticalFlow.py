@@ -223,12 +223,14 @@ class OpticalFlow(object):
         all_seq_mb_delta_v_np = np.array(all_seq_mb_delta_v_l)
         print(all_seq_mb_delta_v_np.shape)
 
-        motion_l = []
+        all_motion_l = []
         for i in range(0, len(all_mb_u_np) - n - k):
-            filter_mask = all_filter_masks_np[i + 0]
-            mvi_u = all_mb_u_np[i + 0][filter_mask == True]
-            mvi_v = all_mb_v_np[i + 0][filter_mask == True]
-            mvi_ang = all_mb_ang_np[i + n][filter_mask == True]
+            motion_l = []
+
+            filter_mask = all_filter_masks_np[i]
+            mvi_u = all_mb_u_np[i][filter_mask == True]
+            mvi_v = all_mb_v_np[i][filter_mask == True]
+            mvi_ang = all_mb_ang_np[i][filter_mask == True]
             mvi_u_sum = np.sum(np.abs(mvi_u))
             mvi_v_sum = np.sum(np.abs(mvi_v))
 
@@ -309,11 +311,22 @@ class OpticalFlow(object):
                         class_name = "NA"
                     motion_l.append(class_name)
 
-        if (len(motion_l) <= 0):
-            motion_l.append("NA")
-        motion_np = np.array(motion_l)
+            if (len(motion_l) <= 0):
+                motion_l.append("NA")
+            motion_np = np.array(motion_l)
 
-        class_names, class_dist = np.unique(motion_np, return_counts=True)
+            region_motion_names, region_motion_dist = np.unique(motion_np, return_counts=True)
+            idx = np.argmax(region_motion_dist, axis=0)
+            region_class_prediction = region_motion_names[idx]
+            all_motion_l.append(region_class_prediction)
+
+        all_motion_np = np.array(all_motion_l)
+
+        #plt.figure()
+        #plt.plot(np.arange(len(all_motion_np)), all_motion_np)
+        #plt.show()
+
+        class_names, class_dist = np.unique(all_motion_np, return_counts=True)
         print(class_names)
         print(class_dist)
 

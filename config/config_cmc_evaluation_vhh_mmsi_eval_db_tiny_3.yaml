@@ -33,10 +33,10 @@ OpticalFlow:
   MVI_MV_RATIO: 0.1
   ###
   # This parameter is used to specify the threshold (t1) for the significance check.
-  THRESHOLD_SIGNIFICANCE: 1.5
+  THRESHOLD_SIGNIFICANCE: 2.0
   ###
   # This parameter is used to specify the threshold (t2) for the consistency check.
-  THRESHOLD_CONSISTENCY: 3.9
+  THRESHOLD_CONSISTENCY: 2.9
   ###
   # This parameter is used to specify the temporal window_size (k) for the significance/consistency check.
   MVI_WINDOW_SIZE: 10

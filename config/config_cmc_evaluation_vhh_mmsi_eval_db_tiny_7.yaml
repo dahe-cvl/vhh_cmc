@@ -36,7 +36,7 @@ OpticalFlow:
   THRESHOLD_SIGNIFICANCE: 2.0
   ###
   # This parameter is used to specify the threshold (t2) for the consistency check.
-  THRESHOLD_CONSISTENCY: 3.3
+  THRESHOLD_CONSISTENCY: 2.1
   ###
   # This parameter is used to specify the temporal window_size (k) for the significance/consistency check.
   MVI_WINDOW_SIZE: 10
@@ -89,7 +89,7 @@ Evaluation:
   PATH_RAW_RESULTS: "/data/share/maxrecall_vhh_mmsi/videos/results/cmc/raw_results/"
   ###
   # This parameter is used to specify the path to store the evaluation results path.
-  PATH_EVAL_RESULTS: "/data/share/cmc_eval_20210614/vhhmmsi_eval_db_1/"
+  PATH_EVAL_RESULTS: "/data/share/cmc_eval_20210614/vhhmmsi_eval_db_7/"
   ###
   # This parameter is used to groundtruth annotations used for evaluation.
   PATH_GT_ANNOTATIONS: "/caa/Projects02/vhh/private/database_nobackup/VHH_datasets/annotations/ShotBoundaryDetection/imediacities/sbd_imc_annotations_20191231.csv"

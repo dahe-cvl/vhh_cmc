@@ -1,5 +1,6 @@
 import os
 import numpy as np
+from vhh_cmc.Video import Video
 
 def csvWriter(dst_folder="", name="metrics_history.log", entries_list=None):
     if (entries_list == None):
@@ -16,18 +17,18 @@ def csvWriter(dst_folder="", name="metrics_history.log", entries_list=None):
     fp.close()
 
 
-video_path = "/data/share/datasets/cmc_final_dataset_v2_NEW/training_data/"
+video_path = "/data/share/datasets/vhh_mmsi_eval_db_tiny/training_data/"
 
 class_name_list = os.listdir(video_path)
 
 print(class_name_list)
-class_name_list.remove("track")
+#class_name_list.remove("track")
 print(class_name_list)
 
 samples_l = []
 for i, class_name in enumerate(class_name_list):
     samples_list = os.listdir(video_path + class_name)
-    #print(samples_list)
+    print(samples_list)
 
     if("pan" == class_name): label = 0
     if ("tilt" == class_name): label = 1
@@ -36,12 +37,14 @@ for i, class_name in enumerate(class_name_list):
 
     for sample in samples_list:
         path = os.path.join(video_path, class_name, sample)
+        vid_instance = Video()
+        vid_instance.load(vidFile=path)
         path_split = path.split('/')[-3:]
         final_path = os.path.join(path_split[0], path_split[1], path_split[2])
-        samples_l.append([final_path, label, 0, 100])
+        samples_l.append([final_path, label, 0, int(vid_instance.number_of_frames)])
 samples_np = np.array(samples_l)
 
 print(samples_np)
 
 for entry in samples_l:
-    csvWriter(dst_folder="./", name="annotation.csv", entries_list=entry)
+    csvWriter(dst_folder="./", name="annotation_tiny.csv", entries_list=entry)

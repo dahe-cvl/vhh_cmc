@@ -31,7 +31,44 @@ from vhh_cmc.Video import Video
 
 
 db_path = "/data/share/datasets/vhh_mmsi_eval_db_tiny/"
-path_shot_file = db_path + "training_data/pan/pan_147.avi"
+path_shot_file = db_path + "training_data/pan/pan_3.avi"
+path_shot_file = db_path + "training_data/pan/pan_4.avi"
+path_shot_file = db_path + "training_data/pan/pan_9.avi"
+path_shot_file = db_path + "training_data/pan/PAN_12.avi"
+path_shot_file = db_path + "training_data/pan/pan_17.avi"
+path_shot_file = db_path + "training_data/pan/pan_18.avi"
+path_shot_file = db_path + "training_data/pan/PAN_27.avi"
+path_shot_file = db_path + "training_data/pan/PAN_31.avi"
+path_shot_file = db_path + "training_data/pan/pan_39.avi"
+path_shot_file = db_path + "training_data/pan/pan_51.avi"
+path_shot_file = db_path + "training_data/pan/pan_52.avi"
+path_shot_file = db_path + "training_data/pan/pan_88.avi"
+path_shot_file = db_path + "training_data/pan/pan_108.avi"
+path_shot_file = db_path + "training_data/pan/pan_110.avi"
+path_shot_file = db_path + "training_data/pan/pan_112.avi"
+path_shot_file = db_path + "training_data/pan/pan_114.avi"
+path_shot_file = db_path + "training_data/pan/PAN_121.avi"
+path_shot_file = db_path + "training_data/pan/PAN_146.avi"
+#path_shot_file = db_path + "training_data/pan/pan_147.avi"
+
+
+#path_shot_file = db_path + "training_data/tilt/tilt_73.avi"  # lange static scene
+#path_shot_file = db_path + "training_data/tilt/tilt_69.avi"  # lange static scene
+#path_shot_file = db_path + "training_data/tilt/tilt_42.avi"    # lange static scene
+#path_shot_file = db_path + "training_data/tilt/tilt_34.avi"  # lange static scene
+#path_shot_file = db_path + "training_data/tilt/tilt_24.avi"
+#path_shot_file = db_path + "training_data/tilt/tilt_22.avi"
+#path_shot_file = db_path + "training_data/tilt/tilt_13.avi"
+#path_shot_file = db_path + "training_data/tilt/tilt_11.avi"
+#path_shot_file = db_path + "training_data/tilt/TILT_85.avi"
+
+#path_shot_file = db_path + "training_data/na/NA_9.avi" # tilt
+#path_shot_file = db_path + "training_data/na/NA_4.avi" # tilt
+#path_shot_file = db_path + "training_data/na/NA_29.avi" # pan
+#path_shot_file = db_path + "training_data/na/NA_17.avi" # pan
+#path_shot_file = db_path + "training_data/na/NA_23.avi" # yes
+#path_shot_file = db_path + "training_data/na/NA_10.avi" # pan
+#path_shot_file = db_path + "training_data/na/NA_19.avi"  # tilt --> problem
 
 print(path_shot_file)
 
@@ -57,6 +94,8 @@ for data in vid_instance.getFramesByShots(shots_np, preprocess=pre_processing_in
 
     print(f'start: {start}, end: {stop}')
     print(frames_per_shots_np.shape)
+
+    exit()
 
     # add new optical flow version
     optical_flow_instance = OpticalFlow(video_frames=frames_per_shots_np,

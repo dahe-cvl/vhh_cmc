@@ -30,13 +30,13 @@ PreProcessing:
 OpticalFlow:
   ###
   # This parameter is used to specify the ratio between available motion-vectors-of-interest to the all motion-vectors.
-  MVI_MV_RATIO: 0.1
+  MVI_MV_RATIO: 0.4
   ###
   # This parameter is used to specify the threshold (t1) for the significance check.
-  THRESHOLD_SIGNIFICANCE: 2.0
+  THRESHOLD_SIGNIFICANCE: 1.5
   ###
   # This parameter is used to specify the threshold (t2) for the consistency check.
-  THRESHOLD_CONSISTENCY: 1.9
+  THRESHOLD_CONSISTENCY: 2.3
   ###
   # This parameter is used to specify the temporal window_size (k) for the significance/consistency check.
   MVI_WINDOW_SIZE: 10

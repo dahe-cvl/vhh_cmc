@@ -224,13 +224,19 @@ class OpticalFlow(object):
         print(all_seq_mb_delta_v_np.shape)
 
         all_motion_l = []
+        all_mag_l = []
+        all_ang_l = []
+
         for i in range(0, len(all_mb_u_np) - n - k):
             motion_l = []
+            mag_l = []
+            ang_l = []
 
             filter_mask = all_filter_masks_np[i]
             mvi_u = all_mb_u_np[i][filter_mask == True]
             mvi_v = all_mb_v_np[i][filter_mask == True]
             mvi_ang = all_mb_ang_np[i][filter_mask == True]
+            mvi_mag = all_mb_mag_np[i][filter_mask == True]
             mvi_u_sum = np.sum(np.abs(mvi_u))
             mvi_v_sum = np.sum(np.abs(mvi_v))
 
@@ -260,9 +266,10 @@ class OpticalFlow(object):
             else:
                 print("OTHERS")
                 # calculate angle for region with n frames
-                print(f'DEBUG: {np.mean(mvi_ang)}')
-                #print(f'DEBUG: {np.mean(mvi_mag)}')
+                print(f'DEBUG 1: {np.mean(mvi_ang)}')
+                print(f'DEBUG 2: {np.mean(mvi_mag)}')
                 mean_ang = np.mean(mvi_ang)
+                mean_mag = np.mean(mvi_mag)
                 if ((mean_ang > 45 and mean_ang < 135) or (mean_ang > 225 and mean_ang < 315)):
                     class_name = "TILT"
                 elif ((mean_ang > 135 and mean_ang < 225) or
@@ -272,13 +279,16 @@ class OpticalFlow(object):
                 else:
                     class_name = "NA"
                 motion_l.append(class_name)
+                mag_l.append(mean_mag)
+                ang_l.append(mean_ang)
 
             for j in range(1, n):
                 filter_mask = all_filter_masks_np[i + j]
 
                 mvi_u = all_mb_u_np[i + j][filter_mask == True]
                 mvi_v = all_mb_v_np[i + j][filter_mask == True]
-                mvi_ang = all_mb_ang_np[i + n][filter_mask == True]
+                mvi_ang = all_mb_ang_np[i + j][filter_mask == True]
+                mvi_mag = all_mb_mag_np[i + j][filter_mask == True]
                 mvi_u_sum = mvi_u_sum + np.sum(np.abs(mvi_u))
                 mvi_v_sum = mvi_v_sum + np.sum(np.abs(mvi_v))
 
@@ -299,8 +309,10 @@ class OpticalFlow(object):
                 else:
                     print("OTHERS")
                     print(f'DEBUG: {np.mean(mvi_ang)}')
-                    #print(f'DEBUG: {np.mean(mvi_mag)}')
+                    print(f'DEBUG: {np.mean(mvi_mag)}')
                     mean_ang = np.mean(mvi_ang)
+                    mean_mag = np.mean(mvi_mag)
+
                     if ((mean_ang > 45 and mean_ang < 135) or (mean_ang > 225 and mean_ang < 315)):
                         class_name = "TILT"
                     elif ((mean_ang > 135 and mean_ang < 225) or
@@ -310,29 +322,100 @@ class OpticalFlow(object):
                     else:
                         class_name = "NA"
                     motion_l.append(class_name)
+                    mag_l.append(mean_mag)
+                    ang_l.append(mean_ang)
 
             if (len(motion_l) <= 0):
                 motion_l.append("NA")
             motion_np = np.array(motion_l)
+            region_mag_np = np.array(mag_l)
+            region_ang_np = np.array(ang_l)
+            print(region_mag_np)
+            print(np.mean(region_mag_np))
+
 
             region_motion_names, region_motion_dist = np.unique(motion_np, return_counts=True)
             idx = np.argmax(region_motion_dist, axis=0)
             region_class_prediction = region_motion_names[idx]
             all_motion_l.append(region_class_prediction)
+            all_mag_l.append(np.mean(region_mag_np))
+            all_ang_l.append(np.mean(region_ang_np))
 
         all_motion_np = np.array(all_motion_l)
+        all_mag_np = np.array(all_mag_l)
+        all_ang_np = np.array(all_ang_l)
+
+        #print(all_mag_np)
+        #print(all_ang_np)
 
         #plt.figure()
-        #plt.plot(np.arange(len(all_motion_np)), all_motion_np)
+        #plt.scatter(np.arange(len(all_mag_np)), all_mag_np)
+        #plt.figure()
+        #plt.scatter(np.arange(len(all_ang_np)), all_ang_np)
+        #plt.show()
+
+
+        #plt.figure()
+        #plt.scatter(np.arange(len(all_motion_np)), all_motion_np)
         #plt.show()
 
         class_names, class_dist = np.unique(all_motion_np, return_counts=True)
         print(class_names)
         print(class_dist)
 
-        idx = np.argmax(class_dist, axis=0)
-        print(class_names[idx])
-        final_class_prediction = class_names[idx]
+        # ratio check
+
+        all_detections = np.sum(class_dist)
+        print(all_detections)
+
+        class_dist_percentage = class_dist / all_detections
+        print(class_dist_percentage)
+
+        threshold = 0.10
+        conditions = class_dist_percentage > threshold
+        print(conditions)
+
+        idx = np.where(conditions == True)[0]
+        print(idx)
+        class_names = class_names[idx]
+        class_dist = class_dist[idx]
+        print(class_names)
+        print(class_dist)
+
+        na_idx = np.where(class_names == "NA")[0]
+        pan_idx = np.where(class_names == "PAN")[0]
+        tilt_idx = np.where(class_names == "TILT")[0]
+        print(na_idx)
+        print(pan_idx)
+        print(tilt_idx)
+        print(len(na_idx))
+        print(len(pan_idx))
+        print(len(tilt_idx))
+
+        if(len(na_idx) == 1 and len(pan_idx) == 0 and len(tilt_idx) == 0):
+            print("only na")
+            final_class_prediction = "NA"
+        elif(len(na_idx) == 1 and len(pan_idx) == 1 and len(tilt_idx) == 0):
+            print("only na and pans")
+            final_class_prediction = "PAN"
+        elif (len(na_idx) == 1 and len(pan_idx) == 0 and len(tilt_idx) == 1):
+            print("only na and tilts")
+            final_class_prediction = "TILT"
+        elif(len(na_idx) == 0 and len(pan_idx) == 1 and len(tilt_idx) == 1):
+            print("only pans and tilts")
+            idx = np.argmax(class_dist, axis=0)
+            print(class_names[idx])
+            final_class_prediction = class_names[idx]
+        elif(len(na_idx) == 1 and len(pan_idx) == 1 and len(tilt_idx) == 1):
+            print("na, pans and tilts")
+            idx = np.argmax(class_dist, axis=0)
+            print(class_names[idx])
+            final_class_prediction = class_names[idx]
+        else:
+            print("na")
+            final_class_prediction = "NA"
+
+        print(final_class_prediction)
 
         '''
         # visualize vectors and frames

@@ -265,7 +265,10 @@ class Evaluation(object):
         import matplotlib.pyplot as plt
         import numpy as np
         import itertools
+        import matplotlib
+        matplotlib.use('Agg')
         from matplotlib import pyplot as plt
+
         plt.rc('pdf', fonttype=42)
 
 

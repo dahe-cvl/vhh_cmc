@@ -104,7 +104,6 @@ class CMC(object):
             print(f'vid_name: {vid_name}')
             print(f'frames_per_shot: {frames_per_shots_np.shape}')
             print(f'start: {start}, end: {stop}')
-            #continue
 
             shot_len = stop - start
             MIN_NUMBER_OF_FRAMES_PER_SHOT = 40

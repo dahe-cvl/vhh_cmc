@@ -4,9 +4,8 @@
 \contentsline {chapter}{\numberline {3}API Description}{5}{chapter.3}% 
 \contentsline {section}{\numberline {3.1}Configuration class}{5}{section.3.1}% 
 \contentsline {section}{\numberline {3.2}CMC class}{5}{section.3.2}% 
-\contentsline {section}{\numberline {3.3}OpticalFlow class}{6}{section.3.3}% 
-\contentsline {section}{\numberline {3.4}PreProcessing class}{7}{section.3.4}% 
-\contentsline {section}{\numberline {3.5}Evaluation class}{8}{section.3.5}% 
-\contentsline {chapter}{\numberline {4}Indices and tables}{10}{chapter.4}% 
-\contentsline {section}{\numberline {4.1}References}{10}{section.4.1}% 
-\contentsline {chapter}{Index}{11}{section*.25}% 
+\contentsline {section}{\numberline {3.3}OpticalFlow class}{5}{section.3.3}% 
+\contentsline {section}{\numberline {3.4}PreProcessing class}{5}{section.3.4}% 
+\contentsline {section}{\numberline {3.5}Evaluation class}{5}{section.3.5}% 
+\contentsline {chapter}{\numberline {4}Indices and tables}{6}{chapter.4}% 
+\contentsline {section}{\numberline {4.1}References}{6}{section.4.1}% 

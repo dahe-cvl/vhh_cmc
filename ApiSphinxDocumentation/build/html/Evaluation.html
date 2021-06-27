@@ -4,7 +4,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Evaluation class &#8212; VHH Plugin Package: Camera Movements Classification (vhh_cmc) 1.0.0 documentation</title>
+    <title>Evaluation class &#8212; VHH Plugin Package: Camera Movements Classification (vhh_cmc) 1.2.1 documentation</title>
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -25,7 +25,7 @@
         <li class="right" >
           <a href="PreProcessing.html" title="PreProcessing class"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">VHH Plugin Package: Camera Movements Classification (vhh_cmc) 1.0.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">VHH Plugin Package: Camera Movements Classification (vhh_cmc) 1.2.1 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -36,80 +36,6 @@
             
   <div class="section" id="evaluation-class">
 <h1>Evaluation class<a class="headerlink" href="#evaluation-class" title="Permalink to this headline">¶</a></h1>
-<dl class="py class">
-<dt id="cmc.Evaluation.Evaluation">
-<em class="property">class </em><code class="sig-prename descclassname">cmc.Evaluation.</code><code class="sig-name descname">Evaluation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config_instance</span><span class="p">:</span> <span class="n"><a class="reference internal" href="Configuration.html#cmc.Configuration.Configuration" title="cmc.Configuration.Configuration">cmc.Configuration.Configuration</a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cmc/Evaluation.html#Evaluation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cmc.Evaluation.Evaluation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Evaluation class includes all methods to evaluate the implemented algorithms.</p>
-<dl class="py method">
-<dt id="cmc.Evaluation.Evaluation.calculate_metrics">
-<code class="sig-name descname">calculate_metrics</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">y_score</span></em>, <em class="sig-param"><span class="n">y_test</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cmc/Evaluation.html#Evaluation.calculate_metrics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cmc.Evaluation.Evaluation.calculate_metrics" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method is used to calculate the metrics: precision, recall, f1score.
-Furthermore, the confusion matrix is generated and stored as figure on a specified location.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>y_score</strong> – This parameter must hold a valid numpy array with the class prediction per shot .</p></li>
-<li><p><strong>y_test</strong> – This parameter must hold a valid numpy array with the groundtruth labels per shot.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="cmc.Evaluation.Evaluation.load_dataset">
-<code class="sig-name descname">load_dataset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cmc/Evaluation.html#Evaluation.load_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cmc.Evaluation.Evaluation.load_dataset" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method is used to load the dataset used to evaluate the algorithm.
-The dataset must have the following structure:
-dataset_root_dir/training_data/
-dataset_root_dir/training_data/tilt/
-dataset_root_dir/training_data/pan/
-dataset_root_dir/training_data/annotation/xxx.flist</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="cmc.Evaluation.Evaluation.plot_confusion_matrix">
-<code class="sig-name descname">plot_confusion_matrix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cm</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">target_names</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">title</span><span class="o">=</span><span class="default_value">'Confusion matrix'</span></em>, <em class="sig-param"><span class="n">cmap</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">normalize</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">path</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cmc/Evaluation.html#Evaluation.plot_confusion_matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cmc.Evaluation.Evaluation.plot_confusion_matrix" title="Permalink to this definition">¶</a></dt>
-<dd><p>given a sklearn confusion matrix (cm), make a nice plot</p>
-<p>cm:           confusion matrix from sklearn.metrics.confusion_matrix</p>
-<dl class="simple">
-<dt>target_names: given classification classes such as [0, 1, 2]</dt><dd><p>the class names, for example: [‘high’, ‘medium’, ‘low’]</p>
-</dd>
-</dl>
-<p>title:        the text to display at the top of the matrix</p>
-<dl class="simple">
-<dt>cmap:         the gradient of the values displayed from matplotlib.pyplot.cm</dt><dd><p>see <a class="reference external" href="http://matplotlib.org/examples/color/colormaps_reference.html">http://matplotlib.org/examples/color/colormaps_reference.html</a>
-plt.get_cmap(‘jet’) or plt.cm.Blues</p>
-</dd>
-<dt>normalize:    If False, plot the raw numbers</dt><dd><p>If True, plot the proportions</p>
-</dd>
-</dl>
-<dl>
-<dt>plot_confusion_matrix(cm           = cm,                  # confusion matrix created by</dt><dd><blockquote>
-<div><p># sklearn.metrics.confusion_matrix</p>
-</div></blockquote>
-<p>normalize    = True,                # show proportions
-target_names = y_labels_vals,       # list of names of the classes
-title        = best_estimator_name) # title of graph</p>
-</dd>
-</dl>
-<p><a class="reference external" href="http://scikit-learn.org/stable/auto_examples/model_selection/plot_confusion_matrix.html">http://scikit-learn.org/stable/auto_examples/model_selection/plot_confusion_matrix.html</a>
-:param cm:
-:param target_names:
-:param title:
-:param cmap:
-:param normalize:
-:param path:</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="cmc.Evaluation.Evaluation.run_evaluation">
-<code class="sig-name descname">run_evaluation</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cmc/Evaluation.html#Evaluation.run_evaluation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cmc.Evaluation.Evaluation.run_evaluation" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method is used to start and run the evaluation process.</p>
-</dd></dl>
-
-</dd></dl>
-
 </div>
 
 
@@ -151,7 +77,7 @@ title        = best_estimator_name) # title of graph</p>
         <li class="right" >
           <a href="PreProcessing.html" title="PreProcessing class"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">VHH Plugin Package: Camera Movements Classification (vhh_cmc) 1.0.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">VHH Plugin Package: Camera Movements Classification (vhh_cmc) 1.2.1 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

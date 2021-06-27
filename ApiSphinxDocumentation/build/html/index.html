@@ -4,7 +4,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Package Overview &#8212; VHH Plugin Package: Camera Movements Classification (vhh_cmc) 1.0.0 documentation</title>
+    <title>Package Overview &#8212; VHH Plugin Package: Camera Movements Classification (vhh_cmc) 1.2.1 documentation</title>
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -25,7 +25,7 @@
         <li class="right" >
           <a href="Configuration.html" title="Configuration class"
              accesskey="N">next</a> |</li>
-        <li class="nav-item nav-item-0"><a href="#">VHH Plugin Package: Camera Movements Classification (vhh_cmc) 1.0.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="#">VHH Plugin Package: Camera Movements Classification (vhh_cmc) 1.2.1 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -121,6 +121,9 @@ with all installed python packages and it should include <em>vhh_cmc</em>.</p>
 <p>SBD_RESULTS_PATH<dd><p>This parameter is used to specify a SBD results file for debugging mode.</p>
 </dd>
 </p>
+<p>PATH_DEBUG_RESULTS<dd><p>This parameter is used to specify the results path in debug mode</p>
+</dd>
+</p>
 <p>SAVE_DEBUG_PKG<dd><p>This parameter is used to save a debug package (e.g. including some visualizations, … - not available yet).</p>
 </dd>
 </p>
@@ -136,25 +139,22 @@ with all installed python packages and it should include <em>vhh_cmc</em>.</p>
 <p>RESIZE_DIM<dd><p>This flag is used to to specify the resize dimension. (only usable if DOWNSCALE_FLAG is active).</p>
 </dd>
 </p>
-<p>SENSITIVITY<dd><p>This parameter is used to specify the number of consecutive frames which are needed to register a camera movement.</p>
+<p>MVI_MV_RATIO<dd><p>This parameter is used to specify the ratio between available motion-vectors-of-interest to the all motion-vectors.</p>
 </dd>
 </p>
-<p>SPECIFICITY<dd><p>This parameter is used to specify the number of outliers (miss detections).</p>
+<p>THRESHOLD_SIGNIFICANCE<dd><p>This parameter is used to specify the threshold (t1) for the significance check.</p>
 </dd>
 </p>
-<p>BORDER<dd><p>This parameter is used to specify the frame border inside which random features are created</p>
+<p>THRESHOLD_CONSISTENCY<dd><p>This parameter is used to specify the threshold (t2) for the consistency check.</p>
 </dd>
 </p>
-<p>NUMBER_OF_FEATURES<dd><p>This parameter is used to specify the number of features number of features to be tracked for optical flow</p>
+<p>MVI_WINDOW_SIZE<dd><p>This parameter is used to specify the temporal window_size (k) for the significance/consistency check.</p>
 </dd>
 </p>
-<p>ANGLE_DIFF_LIMIT<dd><p>This parameter is used to specify the difference limit to most common angle such that still considered as background movement</p>
+<p>REGION_WINDOW_SIZE<dd><p>This parameter is used to specify the temporal window_size (n) for the final movements classification over one shot.</p>
 </dd>
 </p>
-<p>MODE<dd><p>NORMAL_MODE = 0
-DEBUG_MODE = 1
-SAVE_MODE = 2
-DEBUG_AND_SAVE_MODE = 3</p>
+<p>ACTIVE_THRESHOLD<dd><p>This parameter is used to specify the percentage threshold to identify movement activities.</p>
 </dd>
 </p>
 <p>CLASS_NAMES<dd><p>This parameter is used to specify the class names.</p>
@@ -279,7 +279,7 @@ DEBUG_AND_SAVE_MODE = 3</p>
         <li class="right" >
           <a href="Configuration.html" title="Configuration class"
              >next</a> |</li>
-        <li class="nav-item nav-item-0"><a href="#">VHH Plugin Package: Camera Movements Classification (vhh_cmc) 1.0.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="#">VHH Plugin Package: Camera Movements Classification (vhh_cmc) 1.2.1 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

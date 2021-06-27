@@ -17,12 +17,12 @@ def csvWriter(dst_folder="", name="metrics_history.log", entries_list=None):
     fp.close()
 
 
-video_path = "/data/share/datasets/vhh_mmsi_eval_db_tiny/training_data/"
+video_path = "/data/share/datasets/cmc_final_dataset_v3/training_data/"
 
 class_name_list = os.listdir(video_path)
 
 print(class_name_list)
-#class_name_list.remove("track")
+class_name_list.remove("track")
 print(class_name_list)
 
 samples_l = []
@@ -47,4 +47,4 @@ samples_np = np.array(samples_l)
 print(samples_np)
 
 for entry in samples_l:
-    csvWriter(dst_folder="./", name="annotation_tiny.csv", entries_list=entry)
+    csvWriter(dst_folder="./", name="annotations.csv", entries_list=entry)

@@ -6,7 +6,7 @@ import numpy as np
 eval_instance = None
 exp_results = []
 
-
+'''
 exp_file_list = [
                  "./config/config_cmc_evaluation_vhh_mmsi_eval_db_tiny_test.yaml",
                  #"./config/config_cmc_evaluation_vhh_mmsi_eval_db_tiny_1.yaml",
@@ -19,9 +19,9 @@ exp_file_list = [
                  #"./config/config_cmc_evaluation_vhh_mmsi_eval_db_tiny_8.yaml",
                  ]
 
-''''''
-
 '''
+
+''''''
 exp_file_list = [
                  "./config/config_cmc_evaluation_cmc_v2_1.yaml",
                  "./config/config_cmc_evaluation_cmc_v2_2.yaml",
@@ -32,11 +32,12 @@ exp_file_list = [
                  "./config/config_cmc_evaluation_cmc_v2_7.yaml",
                  "./config/config_cmc_evaluation_cmc_v2_8.yaml",
                  ]              
-'''
+
 
 '''
 exp_file_list = [
-                 "./config/config_cmc_evaluation_cmc_v3_1.yaml",
+                 "./config/config_cmc_evaluation_cmc_v3_test.yaml",
+                 #"./config/config_cmc_evaluation_cmc_v3_1.yaml",
                  #"./config/config_cmc_evaluation_cmc_v3_2.yaml",
                  #"./config/config_cmc_evaluation_cmc_v3_3.yaml",
                  #"./config/config_cmc_evaluation_cmc_v3_4.yaml",

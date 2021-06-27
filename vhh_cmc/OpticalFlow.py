@@ -371,7 +371,7 @@ class OpticalFlow(object):
         class_dist_percentage = class_dist / all_detections
         print(class_dist_percentage)
 
-        threshold = 0.10
+        threshold = self.config_instance.active_threshold
         conditions = class_dist_percentage > threshold
         print(conditions)
 

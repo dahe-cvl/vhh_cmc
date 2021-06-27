@@ -105,6 +105,7 @@ class Configuration:
         self.threshold_consistency = float(optical_flow_config['THRESHOLD_CONSISTENCY'])
         self.mvi_window_size = int(optical_flow_config['MVI_WINDOW_SIZE'])
         self.region_window_size = int(optical_flow_config['REGION_WINDOW_SIZE'])
+        self.active_threshold = int(optical_flow_config['ACTIVE_THRESHOLD'])
 
         # cmc_core_config section
         self.class_names = cmc_core_config['CLASS_NAMES']

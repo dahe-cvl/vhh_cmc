@@ -42,6 +42,9 @@ OpticalFlow:
   ###
   # This parameter is used to specify the temporal window_size (n) for the final movements classification over one shot.
   REGION_WINDOW_SIZE: 5
+  ###
+  # This parameter is used to specify the percentage threshold to identify movement activities.
+  ACTIVE_THRESHOLD: 0.2
 
 CmcCore:
   ###

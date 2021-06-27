@@ -77,172 +77,19 @@ with all installed python packages and it should include *vhh-cmc*.
 
 ## Evaluation & Results
 
-Experiment 1:
-Most Common Angle + Random Features + LK Optical Flow (pescoller)
+Experiment: "../cmc_eval_20210614/vhhmmsi_eval_db_part4/vhhmmsi_eval_db_2"
 
-|      | precision  | recall  | f1-score  | support  |
+|  parameters    | values  | 
+|----------------|------------|
+| mvi_mv_ratio   |    0.2  |   
+| threshold_significance  |    2.0  |  
+| threshold_consistency  |    2.3  |  
+| mvi_window_size  |    10  |  
+| region_window_size  |    5  |  
+
+
+|      | precision  | recall  | f1-score  | accuracy  |
 |------|------------|---------|-----------|----------|
-| na   |    0.00    |   0.00  |    0.00   |     0    |
-| pan  |    0.91    |   0.51  |    0.65   |   182    |
-| tilt |    0.50    |   0.79  |    0.61   |    78    |
+| exp02   |    0.7293    |   0.7244  |    0.7181   |     0.7093    |
 
 
-|     accuracy   |      |      | 0.60   |    260 |
-|----------------|------|------|--------|--------|
-|    macro avg   | 0.47 | 0.44 | 0.42   |    260 |
-| weighted avg   | 0.79 | 0.60 | 0.64   |    260 |
-
-
-Experiment 2:
-Most Common Angle + GoodFeatures(Shi Tomasi Corner) + LK Optical Flow (pescoller)
-
-|      | precision  | recall  | f1-score  | support  |
-|------|------------|---------|-----------|----------|
-| na   |    0.00    |   0.00  |    0.00   |     0    |
-| pan  |    0.93    |   0.64  |    0.76   |   182    |
-| tilt |    0.69    |   0.77  |    0.73   |    78    |
-
-
-|     accuracy   |      |      | 0.68   |    260 |
-|----------------|------|------|--------|--------|
-|    macro avg   | 0.54 | 0.47 | 0.50   |    260 |
-| weighted avg   | 0.86 | 0.68 | 0.75   |    260 |
-
-
-
-Experiment 3: 
-ORB Features + BFmatcher 
-
-|      | precision  | recall  | f1-score  | support  |
-|------|------------|---------|-----------|----------|
-| na   |    0.00    |   0.00  |    0.00   |     0    |
-| pan  |    1.00    |   0.75  |    0.86   |   182    |
-| tilt |    0.73    |   0.99  |    0.84   |    78    |
-
-
-|     accuracy   |      |      | 0.82   |    260 |
-|----------------|------|------|--------|--------|
-|    macro avg   | 0.58 | 0.58 | 0.56   |    260 |
-| weighted avg   | 0.92 | 0.82 | 0.85   |    260 |
-
-
-Experiment 4:
-SIFT Features + knnMatcher
-
-|      | precision  | recall  | f1-score  | support  |
-|------|------------|---------|-----------|----------|
-| na   |    0.00    |   0.00  |    0.00   |     0    |
-| pan  |    1.00    |   0.75  |    0.86   |   182    |
-| tilt |    0.79    |   1.00  |    0.88   |    78    |
-
-
-|     accuracy   |      |      | 0.82   |    260 |
-|----------------|------|------|--------|--------|
-|    macro avg   | 0.60 | 0.59 | 0.58   |    260 |
-| weighted avg   | 0.94 | 0.83 | 0.87   |    260 |
-
-
-Experiment 5:
-SURF features + knn matcher
-
-|      | precision  | recall  | f1-score  | support  |
-|------|------------|---------|-----------|----------|
-| na   |    0.00    |   0.00  |    0.00   |     0    |
-| pan  |    1.00    |   0.74  |    0.85   |   182    |
-| tilt |    0.80    |   1.00  |    0.89   |    78    |
-
-
-|     accuracy   |      |      | 0.82   |    260 |
-|----------------|------|------|--------|--------|
-|    macro avg   | 0.60 | 0.58 | 0.58   |    260 |
-| weighted avg   | 0.94 | 0.82 | 0.86   |    260 |
-
-Experiment 5:
-BRIEF features + knn matcher
-
-|      | precision  | recall  | f1-score  | support  |
-|------|------------|---------|-----------|----------|
-| na   |    0.00    |   0.00  |    0.00   |     0    |
-| pan  |    0.97    |   0.73  |    0.83   |   182    |
-| tilt |    0.75    |   0.94  |    0.83   |    78    |
-
-
-|     accuracy   |      |      | 0.82   |    260 |
-|----------------|------|------|--------|--------|
-|    macro avg   | 0.57 | 0.55 | 0.55   |    260 |
-| weighted avg   | 0.91 | 0.79 | 0.83   |    260 |
-
-
-### Experiments 10.7.2020
-
-all experiments with sift features + magnitude optimization
-
-#################
-TH = 5
-
-NOT DONE YET
-
-#################
-TH = 3
-
-|      | precision  | recall  | f1-score  | support  |
-|------|------------|---------|-----------|----------|
-| na   |    0.00    |   0.00  |    0.00   |     0    |
-| pan  |    0.99    |   0.85  |    0.91   |   182    |
-| tilt |    0.98    |   0.69  |    0.81   |    78    |
-
-
-|     accuracy   |      |      | 0.80   |    260 |
-|----------------|------|------|--------|--------|
-|    macro avg   | 0.66 | 0.51 | 0.58   |    260 |
-| weighted avg   | 0.99 | 0.80 | 0.88   |    260 |
-
-
-#################
-TH = 2
-
-|      | precision  | recall  | f1-score  | support  |
-|------|------------|---------|-----------|----------|
-| na   |    0.00    |   0.00  |    0.00   |     0    |
-| pan  |    0.98    |   0.97  |    0.98   |   182    |
-| tilt |    0.99    |   0.86  |    0.92   |    78    |
-
-
-|     accuracy   |      |      | 0.93   |    260 |
-|----------------|------|------|--------|--------|
-|    macro avg   | 0.66 | 0.61 | 0.63   |    260 |
-| weighted avg   | 0.98 | 0.93 | 0.96   |    260 |
-
-
-
-#################
-TH = 1
-
-|      | precision  | recall  | f1-score  | support  |
-|------|------------|---------|-----------|----------|
-| na   |    0.00    |   0.00  |    0.00   |     0    |
-| pan  |    0.98    |   0.99  |    0.99   |   182    |
-| tilt |    0.99    |   0.90  |    0.94   |    78    |
-
-
-|     accuracy   |      |      | 0.96   |    260 |
-|----------------|------|------|--------|--------|
-|    macro avg   | 0.66 | 0.63 | 0.64   |    260 |
-| weighted avg   | 0.98 | 0.96 | 0.97   |    260 |
-
-
-**complete dataset 1213 samples (pan and tilt)**
-
-ORB features and TH=2
-
-|      | precision  | recall  | f1-score  | support  |
-|------|------------|---------|-----------|----------|
-| na   |    0.00    |   0.00  |    0.00   |     0    |
-| pan  |    0.99    |   0.94  |    0.96   |   859    |
-| tilt |    0.87    |   0.96  |    0.91   |   354    |
-
-
-|     accuracy   |      |      | 0.94   |    1213 |
-|----------------|------|------|--------|--------|
-|    macro avg   | 0.62 | 0.63 | 0.63   |    1213 |
-| weighted avg   | 0.95 | 0.94 | 0.95   |    1213 |

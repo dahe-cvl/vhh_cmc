@@ -4,7 +4,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>OpticalFlow class &#8212; VHH Plugin Package: Camera Movements Classification (vhh_cmc) 1.0.0 documentation</title>
+    <title>OpticalFlow class &#8212; VHH Plugin Package: Camera Movements Classification (vhh_cmc) 1.2.2 documentation</title>
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -29,7 +29,7 @@
         <li class="right" >
           <a href="CMC.html" title="CMC class"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">VHH Plugin Package: Camera Movements Classification (vhh_cmc) 1.0.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">VHH Plugin Package: Camera Movements Classification (vhh_cmc) 1.2.2 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -40,80 +40,6 @@
             
   <div class="section" id="opticalflow-class">
 <h1>OpticalFlow class<a class="headerlink" href="#opticalflow-class" title="Permalink to this headline">¶</a></h1>
-<dl class="py class">
-<dt id="cmc.OpticalFlow.OpticalFlow">
-<em class="property">class </em><code class="sig-prename descclassname">cmc.OpticalFlow.</code><code class="sig-name descname">OpticalFlow</code><span class="sig-paren">(</span><em class="sig-param">video_frames=None</em>, <em class="sig-param">fPath=''</em>, <em class="sig-param">debug_path=''</em>, <em class="sig-param">sf=0</em>, <em class="sig-param">ef=1</em>, <em class="sig-param">mode=0</em>, <em class="sig-param">pan_classifier=&lt;cmc.OpticalFlow.AngleClassifier object&gt;</em>, <em class="sig-param">tilt_classifier=&lt;cmc.OpticalFlow.AngleClassifier object&gt;</em>, <em class="sig-param">sensitivity=20</em>, <em class="sig-param">specificity=3</em>, <em class="sig-param">border=50</em>, <em class="sig-param">number_of_features=100</em>, <em class="sig-param">angle_diff_limit=20</em>, <em class="sig-param">config=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cmc/OpticalFlow.html#OpticalFlow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cmc.OpticalFlow.OpticalFlow" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>This class is used for optical flow calculation.</p>
-<dl class="py method">
-<dt id="cmc.OpticalFlow.OpticalFlow.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">video_frames=None</em>, <em class="sig-param">fPath=''</em>, <em class="sig-param">debug_path=''</em>, <em class="sig-param">sf=0</em>, <em class="sig-param">ef=1</em>, <em class="sig-param">mode=0</em>, <em class="sig-param">pan_classifier=&lt;cmc.OpticalFlow.AngleClassifier object&gt;</em>, <em class="sig-param">tilt_classifier=&lt;cmc.OpticalFlow.AngleClassifier object&gt;</em>, <em class="sig-param">sensitivity=20</em>, <em class="sig-param">specificity=3</em>, <em class="sig-param">border=50</em>, <em class="sig-param">number_of_features=100</em>, <em class="sig-param">angle_diff_limit=20</em>, <em class="sig-param">config=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cmc/OpticalFlow.html#OpticalFlow.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cmc.OpticalFlow.OpticalFlow.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Constructor.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>video_frames</strong> – This parameter holds a valid numpy array representing a range of frames (e.g. NxWxHxchannels).</p></li>
-<li><p><strong>fPath</strong> – This parameter holds a valid path consisting of the absolute path and the correct video name.</p></li>
-<li><p><strong>debug_path</strong> – This parameter specifies a valid path to store results in debug mode.</p></li>
-<li><p><strong>sf</strong> – This parameter represents the starting frame index.</p></li>
-<li><p><strong>ef</strong> – This parameter represents the ending frame index.</p></li>
-<li><p><strong>mode</strong> – This parameter represents runtime mode (e.g. DEBUG_MODE=1 or SAVE_MODE=2).</p></li>
-<li><p><strong>pan_classifier</strong> – This parameter holds a valid object of class type AngleClassifier.</p></li>
-<li><p><strong>tilt_classifier</strong> – This parameter holds a valid object of class type AngleClassifier.</p></li>
-<li><p><strong>sensitivity</strong> – This parameter is used to configure the optical flow algorithm.</p></li>
-<li><p><strong>specificity</strong> – This parameter is used to configure the optical flow algorithm.</p></li>
-<li><p><strong>border</strong> – This parameter is used to configure the optical flow algorithm.</p></li>
-<li><p><strong>number_of_features</strong> – This parameter is used to configure the optical flow algorithm.</p></li>
-<li><p><strong>angle_diff_limit</strong> – This parameter is used to configure the optical flow algorithm.</p></li>
-<li><p><strong>config</strong> – </p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="cmc.OpticalFlow.OpticalFlow.optical_flow">
-<code class="sig-name descname">optical_flow</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">prev_frame</span></em>, <em class="sig-param"><span class="n">prev_feat</span></em>, <em class="sig-param"><span class="n">curr_frame</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cmc/OpticalFlow.html#OpticalFlow.optical_flow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cmc.OpticalFlow.OpticalFlow.optical_flow" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method is used to calculate the optical flow between two consecutive frames.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>prev_frame</strong> – This parameter must hold a valid numpy frame (previous).</p></li>
-<li><p><strong>prev_feat</strong> – This parameter must hold valid features of the previous frame.</p></li>
-<li><p><strong>curr_frame</strong> – This parameter must hold a valid numpy frame (current).</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>This method returns two arrays including the features of the previous frame as well as of the current frame.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="cmc.OpticalFlow.OpticalFlow.run">
-<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cmc/OpticalFlow.html#OpticalFlow.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cmc.OpticalFlow.OpticalFlow.run" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method is used to run the optical flow calculation process.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>This method returns a separate list for each movement class and holds the predicted frame ranges of both.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="cmc.OpticalFlow.OpticalFlow.run_eval">
-<code class="sig-name descname">run_eval</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cmc/OpticalFlow.html#OpticalFlow.run_eval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cmc.OpticalFlow.OpticalFlow.run_eval" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method is used to run the optical flow calculation to evaluate specified videos.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="cmc.OpticalFlow.OpticalFlow.run_manual_evaluation">
-<code class="sig-name descname">run_manual_evaluation</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cmc/OpticalFlow.html#OpticalFlow.run_manual_evaluation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cmc.OpticalFlow.OpticalFlow.run_manual_evaluation" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method is used to run optical flow process in DEBUG mode. A valid X-Server is needed to visualize the frame player.</p>
-</dd></dl>
-
-</dd></dl>
-
 </div>
 
 
@@ -161,7 +87,7 @@
         <li class="right" >
           <a href="CMC.html" title="CMC class"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">VHH Plugin Package: Camera Movements Classification (vhh_cmc) 1.0.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">VHH Plugin Package: Camera Movements Classification (vhh_cmc) 1.2.2 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

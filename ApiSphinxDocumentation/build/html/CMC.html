@@ -4,7 +4,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>CMC class &#8212; VHH Plugin Package: Camera Movements Classification (vhh_cmc) 1.0.0 documentation</title>
+    <title>CMC class &#8212; VHH Plugin Package: Camera Movements Classification (vhh_cmc) 1.2.2 documentation</title>
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -29,7 +29,7 @@
         <li class="right" >
           <a href="Configuration.html" title="Configuration class"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">VHH Plugin Package: Camera Movements Classification (vhh_cmc) 1.0.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">VHH Plugin Package: Camera Movements Classification (vhh_cmc) 1.2.2 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -40,60 +40,6 @@
             
   <div class="section" id="cmc-class">
 <h1>CMC class<a class="headerlink" href="#cmc-class" title="Permalink to this headline">¶</a></h1>
-<dl class="py class">
-<dt id="cmc.CMC.CMC">
-<em class="property">class </em><code class="sig-prename descclassname">cmc.CMC.</code><code class="sig-name descname">CMC</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config_file</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cmc/CMC.html#CMC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cmc.CMC.CMC" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Main class of camera movements classification (cmc) package.</p>
-<dl class="py method">
-<dt id="cmc.CMC.CMC.exportCmcResults">
-<code class="sig-name descname">exportCmcResults</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fName</span></em>, <em class="sig-param"><span class="n">cmc_results_np</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cmc/CMC.html#CMC.exportCmcResults"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cmc.CMC.CMC.exportCmcResults" title="Permalink to this definition">¶</a></dt>
-<dd><p>Method to export cmc results as csv file.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>fName</strong> – [required] name of result file.</p></li>
-<li><p><strong>cmc_results_np</strong> – numpy array holding the camera movements classification predictions for each shot of a movie.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="cmc.CMC.CMC.loadSbdResults">
-<code class="sig-name descname">loadSbdResults</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sbd_results_path</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cmc/CMC.html#CMC.loadSbdResults"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cmc.CMC.CMC.loadSbdResults" title="Permalink to this definition">¶</a></dt>
-<dd><p>Method for loading shot boundary detection results as numpy array</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Only used in debug_mode.</p>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>sbd_results_path</strong> – [required] path to results file of shot boundary detection module (vhh_sbd)</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>numpy array holding list of detected shots.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="cmc.CMC.CMC.runOnSingleVideo">
-<code class="sig-name descname">runOnSingleVideo</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">shots_per_vid_np</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">max_recall_id</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cmc/CMC.html#CMC.runOnSingleVideo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cmc.CMC.CMC.runOnSingleVideo" title="Permalink to this definition">¶</a></dt>
-<dd><p>Method to run cmc classification on specified video.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>shots_per_vid_np</strong> – [required] numpy array representing all detected shots in a video
-(e.g. sid | movie_name | start | end )</p></li>
-<li><p><strong>max_recall_id</strong> – [required] integer value holding unique video id from VHH MMSI system</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
 </div>
 
 
@@ -141,7 +87,7 @@
         <li class="right" >
           <a href="Configuration.html" title="Configuration class"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">VHH Plugin Package: Camera Movements Classification (vhh_cmc) 1.0.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">VHH Plugin Package: Camera Movements Classification (vhh_cmc) 1.2.2 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

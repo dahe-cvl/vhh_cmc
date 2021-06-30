@@ -4,7 +4,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>PreProcessing class &#8212; VHH Plugin Package: Camera Movements Classification (vhh_cmc) 1.0.0 documentation</title>
+    <title>PreProcessing class &#8212; VHH Plugin Package: Camera Movements Classification (vhh_cmc) 1.2.2 documentation</title>
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -29,7 +29,7 @@
         <li class="right" >
           <a href="OpticalFlow.html" title="OpticalFlow class"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">VHH Plugin Package: Camera Movements Classification (vhh_cmc) 1.0.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">VHH Plugin Package: Camera Movements Classification (vhh_cmc) 1.2.2 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -40,75 +40,6 @@
             
   <div class="section" id="preprocessing-class">
 <h1>PreProcessing class<a class="headerlink" href="#preprocessing-class" title="Permalink to this headline">¶</a></h1>
-<dl class="py class">
-<dt id="cmc.PreProcessing.PreProcessing">
-<em class="property">class </em><code class="sig-prename descclassname">cmc.PreProcessing.</code><code class="sig-name descname">PreProcessing</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config_instance</span><span class="p">:</span> <span class="n"><a class="reference internal" href="Configuration.html#cmc.Configuration.Configuration" title="cmc.Configuration.Configuration">cmc.Configuration.Configuration</a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cmc/PreProcessing.html#PreProcessing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cmc.PreProcessing.PreProcessing" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>This class is used to pre-process frames.</p>
-<dl class="py method">
-<dt id="cmc.PreProcessing.PreProcessing.applyTransformOnImg">
-<code class="sig-name descname">applyTransformOnImg</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">image</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference internal" href="_modules/cmc/PreProcessing.html#PreProcessing.applyTransformOnImg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cmc.PreProcessing.PreProcessing.applyTransformOnImg" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method is used to apply the configured pre-processing methods on a numpy frame.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>image</strong> – This parameter must hold a valid numpy image (WxHxC).</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>This methods returns the preprocessed numpy image.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="cmc.PreProcessing.PreProcessing.convertRGB2Gray">
-<code class="sig-name descname">convertRGB2Gray</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">img</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cmc/PreProcessing.html#PreProcessing.convertRGB2Gray"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cmc.PreProcessing.PreProcessing.convertRGB2Gray" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method is used to convert a RBG numpy image to a grayscale image.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>img</strong> – This parameter must hold a valid numpy image.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>This method returns a grayscale image (WxHx1).</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="cmc.PreProcessing.PreProcessing.crop">
-<code class="sig-name descname">crop</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">img</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">dim</span><span class="p">:</span> <span class="n">tuple</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cmc/PreProcessing.html#PreProcessing.crop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cmc.PreProcessing.PreProcessing.crop" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method is used to crop a specified region of interest from a given image.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>img</strong> – This parameter must hold a valid numpy image.</p></li>
-<li><p><strong>dim</strong> – This parameter must hold a valid tuple including the crop dimensions.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>This method returns the cropped image.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="cmc.PreProcessing.PreProcessing.resize">
-<code class="sig-name descname">resize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">img</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">dim</span><span class="p">:</span> <span class="n">tuple</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cmc/PreProcessing.html#PreProcessing.resize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cmc.PreProcessing.PreProcessing.resize" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method is used to resize a image.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>img</strong> – This parameter must hold a valid numpy image.</p></li>
-<li><p><strong>dim</strong> – This parameter must hold a valid tuple including the resize dimensions.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>This method returns the resized image.</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
 </div>
 
 
@@ -156,7 +87,7 @@
         <li class="right" >
           <a href="OpticalFlow.html" title="OpticalFlow class"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">VHH Plugin Package: Camera Movements Classification (vhh_cmc) 1.0.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">VHH Plugin Package: Camera Movements Classification (vhh_cmc) 1.2.2 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

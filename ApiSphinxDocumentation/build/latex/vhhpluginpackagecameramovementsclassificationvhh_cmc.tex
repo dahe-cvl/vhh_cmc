@@ -72,8 +72,8 @@
 
 
 \title{VHH Plugin Package: Camera Movements Classification (vhh\_cmc)}
-\date{Jun 08, 2020}
-\release{1.0.0}
+\date{Jun 30, 2021}
+\release{1.2.2}
 \author{Daniel Helm}
 \newcommand{\sphinxlogo}{\vbox{}}
 \renewcommand{\releasename}{Release}
@@ -212,6 +212,11 @@ This parameter is used to specify a SBD results file for debugging mode.
 
 
 
+PATH\_DEBUG\_RESULTS
+This parameter is used to specify the results path in debug mode
+
+
+
 SAVE\_DEBUG\_PKG
 This parameter is used to save a debug package (e.g. including some visualizations, … \sphinxhyphen{} not available yet).
 
@@ -237,36 +242,33 @@ This flag is used to to specify the resize dimension. (only usable if DOWNSCALE\
 
 
 
-SENSITIVITY
-This parameter is used to specify the number of consecutive frames which are needed to register a camera movement.
+MVI\_MV\_RATIO
+This parameter is used to specify the ratio between available motion\sphinxhyphen{}vectors\sphinxhyphen{}of\sphinxhyphen{}interest to the all motion\sphinxhyphen{}vectors.
 
 
 
-SPECIFICITY
-This parameter is used to specify the number of outliers (miss detections).
+THRESHOLD\_SIGNIFICANCE
+This parameter is used to specify the threshold (t1) for the significance check.
 
 
 
-BORDER
-This parameter is used to specify the frame border inside which random features are created
+THRESHOLD\_CONSISTENCY
+This parameter is used to specify the threshold (t2) for the consistency check.
 
 
 
-NUMBER\_OF\_FEATURES
-This parameter is used to specify the number of features number of features to be tracked for optical flow
+MVI\_WINDOW\_SIZE
+This parameter is used to specify the temporal window\_size (k) for the significance/consistency check.
 
 
 
-ANGLE\_DIFF\_LIMIT
-This parameter is used to specify the difference limit to most common angle such that still considered as background movement
+REGION\_WINDOW\_SIZE
+This parameter is used to specify the temporal window\_size (n) for the final movements classification over one shot.
 
 
 
-MODE
-NORMAL\_MODE = 0
-DEBUG\_MODE = 1
-SAVE\_MODE = 2
-DEBUG\_AND\_SAVE\_MODE = 3
+ACTIVE\_THRESHOLD
+This parameter is used to specify the percentage threshold to identify movement activities.
 
 
 
@@ -352,422 +354,19 @@ This section gives an overview of all classes and modules in \sphinxstyleemphasi
 
 
 \section{Configuration class}
-\label{\detokenize{Configuration:configuration-class}}\label{\detokenize{Configuration::doc}}\index{Configuration (class in cmc.Configuration)@\spxentry{Configuration}\spxextra{class in cmc.Configuration}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{Configuration:cmc.Configuration.Configuration}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{cmc.Configuration.}}\sphinxbfcode{\sphinxupquote{Configuration}}}{\emph{\DUrole{n}{config\_file}\DUrole{p}{:} \DUrole{n}{str}}}{}
-Bases: \sphinxcode{\sphinxupquote{object}}
-
-This class is needed to read the configuration parameters specified in the configuration.yaml file.
-The instance of the class is holding all parameters during runtime.
-
-\begin{sphinxadmonition}{note}{Note:}
-e.g. ./config/config\_vhh\_test.yaml
-\begin{quote}
-
-the yaml file is separated in multiple sections
-config{[}‘Development’{]}
-config{[}‘PreProcessing’{]}
-config{[}‘CmcCore’{]}
-config{[}‘Evaluation’{]}
-
-whereas each section should hold related and meaningful parameters.
-\end{quote}
-\end{sphinxadmonition}
-\index{loadConfig() (cmc.Configuration.Configuration method)@\spxentry{loadConfig()}\spxextra{cmc.Configuration.Configuration method}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{Configuration:cmc.Configuration.Configuration.loadConfig}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{loadConfig}}}{}{}
-Method to load configurables from the specified configuration file
-
-\end{fulllineitems}
-
-
-\end{fulllineitems}
-
-
+\label{\detokenize{Configuration:configuration-class}}\label{\detokenize{Configuration::doc}}
 
 \section{CMC class}
-\label{\detokenize{CMC:cmc-class}}\label{\detokenize{CMC::doc}}\index{CMC (class in cmc.CMC)@\spxentry{CMC}\spxextra{class in cmc.CMC}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{CMC:cmc.CMC.CMC}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{cmc.CMC.}}\sphinxbfcode{\sphinxupquote{CMC}}}{\emph{\DUrole{n}{config\_file}\DUrole{p}{:} \DUrole{n}{str}}}{}
-Bases: \sphinxcode{\sphinxupquote{object}}
-
-Main class of camera movements classification (cmc) package.
-\index{exportCmcResults() (cmc.CMC.CMC method)@\spxentry{exportCmcResults()}\spxextra{cmc.CMC.CMC method}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{CMC:cmc.CMC.CMC.exportCmcResults}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{exportCmcResults}}}{\emph{\DUrole{n}{fName}}, \emph{\DUrole{n}{cmc\_results\_np}\DUrole{p}{:} \DUrole{n}{numpy.ndarray}}}{}
-Method to export cmc results as csv file.
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{fName}} \textendash{} {[}required{]} name of result file.
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{cmc\_results\_np}} \textendash{} numpy array holding the camera movements classification predictions for each shot of a movie.
-
-\end{itemize}
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-\index{loadSbdResults() (cmc.CMC.CMC method)@\spxentry{loadSbdResults()}\spxextra{cmc.CMC.CMC method}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{CMC:cmc.CMC.CMC.loadSbdResults}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{loadSbdResults}}}{\emph{\DUrole{n}{sbd\_results\_path}}}{}
-Method for loading shot boundary detection results as numpy array
-
-\begin{sphinxadmonition}{note}{Note:}
-Only used in debug\_mode.
-\end{sphinxadmonition}
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode
-\sphinxstyleliteralstrong{\sphinxupquote{sbd\_results\_path}} \textendash{} {[}required{]} path to results file of shot boundary detection module (vhh\_sbd)
-
-\item[{Returns}] \leavevmode
-numpy array holding list of detected shots.
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-\index{runOnSingleVideo() (cmc.CMC.CMC method)@\spxentry{runOnSingleVideo()}\spxextra{cmc.CMC.CMC method}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{CMC:cmc.CMC.CMC.runOnSingleVideo}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{runOnSingleVideo}}}{\emph{\DUrole{n}{shots\_per\_vid\_np}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{max\_recall\_id}\DUrole{o}{=}\DUrole{default_value}{\sphinxhyphen{} 1}}}{}
-Method to run cmc classification on specified video.
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{shots\_per\_vid\_np}} \textendash{} {[}required{]} numpy array representing all detected shots in a video
-(e.g. sid | movie\_name | start | end )
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{max\_recall\_id}} \textendash{} {[}required{]} integer value holding unique video id from VHH MMSI system
-
-\end{itemize}
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-
-\end{fulllineitems}
-
-
+\label{\detokenize{CMC:cmc-class}}\label{\detokenize{CMC::doc}}
 
 \section{OpticalFlow class}
-\label{\detokenize{OpticalFlow:opticalflow-class}}\label{\detokenize{OpticalFlow::doc}}\index{OpticalFlow (class in cmc.OpticalFlow)@\spxentry{OpticalFlow}\spxextra{class in cmc.OpticalFlow}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{OpticalFlow:cmc.OpticalFlow.OpticalFlow}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{cmc.OpticalFlow.}}\sphinxbfcode{\sphinxupquote{OpticalFlow}}}{\emph{video\_frames=None}, \emph{fPath=\textquotesingle{}\textquotesingle{}}, \emph{debug\_path=\textquotesingle{}\textquotesingle{}}, \emph{sf=0}, \emph{ef=1}, \emph{mode=0}, \emph{pan\_classifier=\textless{}cmc.OpticalFlow.AngleClassifier object\textgreater{}}, \emph{tilt\_classifier=\textless{}cmc.OpticalFlow.AngleClassifier object\textgreater{}}, \emph{sensitivity=20}, \emph{specificity=3}, \emph{border=50}, \emph{number\_of\_features=100}, \emph{angle\_diff\_limit=20}, \emph{config=None}}{}
-Bases: \sphinxcode{\sphinxupquote{object}}
-
-This class is used for optical flow calculation.
-\index{\_\_init\_\_() (cmc.OpticalFlow.OpticalFlow method)@\spxentry{\_\_init\_\_()}\spxextra{cmc.OpticalFlow.OpticalFlow method}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{OpticalFlow:cmc.OpticalFlow.OpticalFlow.__init__}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{\_\_init\_\_}}}{\emph{video\_frames=None}, \emph{fPath=\textquotesingle{}\textquotesingle{}}, \emph{debug\_path=\textquotesingle{}\textquotesingle{}}, \emph{sf=0}, \emph{ef=1}, \emph{mode=0}, \emph{pan\_classifier=\textless{}cmc.OpticalFlow.AngleClassifier object\textgreater{}}, \emph{tilt\_classifier=\textless{}cmc.OpticalFlow.AngleClassifier object\textgreater{}}, \emph{sensitivity=20}, \emph{specificity=3}, \emph{border=50}, \emph{number\_of\_features=100}, \emph{angle\_diff\_limit=20}, \emph{config=None}}{}
-Constructor.
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{video\_frames}} \textendash{} This parameter holds a valid numpy array representing a range of frames (e.g. NxWxHxchannels).
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{fPath}} \textendash{} This parameter holds a valid path consisting of the absolute path and the correct video name.
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{debug\_path}} \textendash{} This parameter specifies a valid path to store results in debug mode.
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{sf}} \textendash{} This parameter represents the starting frame index.
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{ef}} \textendash{} This parameter represents the ending frame index.
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{mode}} \textendash{} This parameter represents runtime mode (e.g. DEBUG\_MODE=1 or SAVE\_MODE=2).
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{pan\_classifier}} \textendash{} This parameter holds a valid object of class type AngleClassifier.
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{tilt\_classifier}} \textendash{} This parameter holds a valid object of class type AngleClassifier.
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{sensitivity}} \textendash{} This parameter is used to configure the optical flow algorithm.
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{specificity}} \textendash{} This parameter is used to configure the optical flow algorithm.
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{border}} \textendash{} This parameter is used to configure the optical flow algorithm.
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{number\_of\_features}} \textendash{} This parameter is used to configure the optical flow algorithm.
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{angle\_diff\_limit}} \textendash{} This parameter is used to configure the optical flow algorithm.
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{config}} \textendash{} 
-
-\end{itemize}
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-\index{optical\_flow() (cmc.OpticalFlow.OpticalFlow method)@\spxentry{optical\_flow()}\spxextra{cmc.OpticalFlow.OpticalFlow method}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{OpticalFlow:cmc.OpticalFlow.OpticalFlow.optical_flow}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{optical\_flow}}}{\emph{\DUrole{n}{prev\_frame}}, \emph{\DUrole{n}{prev\_feat}}, \emph{\DUrole{n}{curr\_frame}}}{}
-This method is used to calculate the optical flow between two consecutive frames.
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{prev\_frame}} \textendash{} This parameter must hold a valid numpy frame (previous).
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{prev\_feat}} \textendash{} This parameter must hold valid features of the previous frame.
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{curr\_frame}} \textendash{} This parameter must hold a valid numpy frame (current).
-
-\end{itemize}
-
-\item[{Returns}] \leavevmode
-This method returns two arrays including the features of the previous frame as well as of the current frame.
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-\index{run() (cmc.OpticalFlow.OpticalFlow method)@\spxentry{run()}\spxextra{cmc.OpticalFlow.OpticalFlow method}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{OpticalFlow:cmc.OpticalFlow.OpticalFlow.run}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{run}}}{}{}
-This method is used to run the optical flow calculation process.
-\begin{quote}\begin{description}
-\item[{Returns}] \leavevmode
-This method returns a separate list for each movement class and holds the predicted frame ranges of both.
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-\index{run\_eval() (cmc.OpticalFlow.OpticalFlow method)@\spxentry{run\_eval()}\spxextra{cmc.OpticalFlow.OpticalFlow method}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{OpticalFlow:cmc.OpticalFlow.OpticalFlow.run_eval}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{run\_eval}}}{}{}
-This method is used to run the optical flow calculation to evaluate specified videos.
-
-\end{fulllineitems}
-
-\index{run\_manual\_evaluation() (cmc.OpticalFlow.OpticalFlow method)@\spxentry{run\_manual\_evaluation()}\spxextra{cmc.OpticalFlow.OpticalFlow method}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{OpticalFlow:cmc.OpticalFlow.OpticalFlow.run_manual_evaluation}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{run\_manual\_evaluation}}}{}{}
-This method is used to run optical flow process in DEBUG mode. A valid X\sphinxhyphen{}Server is needed to visualize the frame player.
-
-\end{fulllineitems}
-
-
-\end{fulllineitems}
-
-
+\label{\detokenize{OpticalFlow:opticalflow-class}}\label{\detokenize{OpticalFlow::doc}}
 
 \section{PreProcessing class}
-\label{\detokenize{PreProcessing:preprocessing-class}}\label{\detokenize{PreProcessing::doc}}\index{PreProcessing (class in cmc.PreProcessing)@\spxentry{PreProcessing}\spxextra{class in cmc.PreProcessing}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{PreProcessing:cmc.PreProcessing.PreProcessing}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{cmc.PreProcessing.}}\sphinxbfcode{\sphinxupquote{PreProcessing}}}{\emph{\DUrole{n}{config\_instance}\DUrole{p}{:} \DUrole{n}{{\hyperref[\detokenize{Configuration:cmc.Configuration.Configuration}]{\sphinxcrossref{cmc.Configuration.Configuration}}}}}}{}
-Bases: \sphinxcode{\sphinxupquote{object}}
-
-This class is used to pre\sphinxhyphen{}process frames.
-\index{applyTransformOnImg() (cmc.PreProcessing.PreProcessing method)@\spxentry{applyTransformOnImg()}\spxextra{cmc.PreProcessing.PreProcessing method}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{PreProcessing:cmc.PreProcessing.PreProcessing.applyTransformOnImg}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{applyTransformOnImg}}}{\emph{\DUrole{n}{image}\DUrole{p}{:} \DUrole{n}{numpy.ndarray}}}{{ $\rightarrow$ numpy.ndarray}}
-This method is used to apply the configured pre\sphinxhyphen{}processing methods on a numpy frame.
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode
-\sphinxstyleliteralstrong{\sphinxupquote{image}} \textendash{} This parameter must hold a valid numpy image (WxHxC).
-
-\item[{Returns}] \leavevmode
-This methods returns the preprocessed numpy image.
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-\index{convertRGB2Gray() (cmc.PreProcessing.PreProcessing method)@\spxentry{convertRGB2Gray()}\spxextra{cmc.PreProcessing.PreProcessing method}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{PreProcessing:cmc.PreProcessing.PreProcessing.convertRGB2Gray}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{convertRGB2Gray}}}{\emph{\DUrole{n}{img}\DUrole{p}{:} \DUrole{n}{numpy.ndarray}}}{}
-This method is used to convert a RBG numpy image to a grayscale image.
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode
-\sphinxstyleliteralstrong{\sphinxupquote{img}} \textendash{} This parameter must hold a valid numpy image.
-
-\item[{Returns}] \leavevmode
-This method returns a grayscale image (WxHx1).
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-\index{crop() (cmc.PreProcessing.PreProcessing method)@\spxentry{crop()}\spxextra{cmc.PreProcessing.PreProcessing method}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{PreProcessing:cmc.PreProcessing.PreProcessing.crop}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{crop}}}{\emph{\DUrole{n}{img}\DUrole{p}{:} \DUrole{n}{numpy.ndarray}}, \emph{\DUrole{n}{dim}\DUrole{p}{:} \DUrole{n}{tuple}}}{}
-This method is used to crop a specified region of interest from a given image.
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{img}} \textendash{} This parameter must hold a valid numpy image.
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{dim}} \textendash{} This parameter must hold a valid tuple including the crop dimensions.
-
-\end{itemize}
-
-\item[{Returns}] \leavevmode
-This method returns the cropped image.
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-\index{resize() (cmc.PreProcessing.PreProcessing method)@\spxentry{resize()}\spxextra{cmc.PreProcessing.PreProcessing method}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{PreProcessing:cmc.PreProcessing.PreProcessing.resize}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{resize}}}{\emph{\DUrole{n}{img}\DUrole{p}{:} \DUrole{n}{numpy.ndarray}}, \emph{\DUrole{n}{dim}\DUrole{p}{:} \DUrole{n}{tuple}}}{}
-This method is used to resize a image.
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{img}} \textendash{} This parameter must hold a valid numpy image.
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{dim}} \textendash{} This parameter must hold a valid tuple including the resize dimensions.
-
-\end{itemize}
-
-\item[{Returns}] \leavevmode
-This method returns the resized image.
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-
-\end{fulllineitems}
-
-
+\label{\detokenize{PreProcessing:preprocessing-class}}\label{\detokenize{PreProcessing::doc}}
 
 \section{Evaluation class}
-\label{\detokenize{Evaluation:evaluation-class}}\label{\detokenize{Evaluation::doc}}\index{Evaluation (class in cmc.Evaluation)@\spxentry{Evaluation}\spxextra{class in cmc.Evaluation}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{Evaluation:cmc.Evaluation.Evaluation}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{cmc.Evaluation.}}\sphinxbfcode{\sphinxupquote{Evaluation}}}{\emph{\DUrole{n}{config\_instance}\DUrole{p}{:} \DUrole{n}{{\hyperref[\detokenize{Configuration:cmc.Configuration.Configuration}]{\sphinxcrossref{cmc.Configuration.Configuration}}}}}}{}
-Bases: \sphinxcode{\sphinxupquote{object}}
-
-Evaluation class includes all methods to evaluate the implemented algorithms.
-\index{calculate\_metrics() (cmc.Evaluation.Evaluation method)@\spxentry{calculate\_metrics()}\spxextra{cmc.Evaluation.Evaluation method}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{Evaluation:cmc.Evaluation.Evaluation.calculate_metrics}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{calculate\_metrics}}}{\emph{\DUrole{n}{y\_score}}, \emph{\DUrole{n}{y\_test}}}{}
-This method is used to calculate the metrics: precision, recall, f1score.
-Furthermore, the confusion matrix is generated and stored as figure on a specified location.
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{y\_score}} \textendash{} This parameter must hold a valid numpy array with the class prediction per shot .
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{y\_test}} \textendash{} This parameter must hold a valid numpy array with the groundtruth labels per shot.
-
-\end{itemize}
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-\index{load\_dataset() (cmc.Evaluation.Evaluation method)@\spxentry{load\_dataset()}\spxextra{cmc.Evaluation.Evaluation method}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{Evaluation:cmc.Evaluation.Evaluation.load_dataset}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{load\_dataset}}}{}{}
-This method is used to load the dataset used to evaluate the algorithm.
-The dataset must have the following structure:
-dataset\_root\_dir/training\_data/
-dataset\_root\_dir/training\_data/tilt/
-dataset\_root\_dir/training\_data/pan/
-dataset\_root\_dir/training\_data/annotation/xxx.flist
-
-\end{fulllineitems}
-
-\index{plot\_confusion\_matrix() (cmc.Evaluation.Evaluation method)@\spxentry{plot\_confusion\_matrix()}\spxextra{cmc.Evaluation.Evaluation method}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{Evaluation:cmc.Evaluation.Evaluation.plot_confusion_matrix}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{plot\_confusion\_matrix}}}{\emph{\DUrole{n}{cm}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{target\_names}\DUrole{o}{=}\DUrole{default_value}{{[}{]}}}, \emph{\DUrole{n}{title}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}Confusion matrix\textquotesingle{}}}, \emph{\DUrole{n}{cmap}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{normalize}\DUrole{o}{=}\DUrole{default_value}{True}}, \emph{\DUrole{n}{path}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}\textquotesingle{}}}}{}
-given a sklearn confusion matrix (cm), make a nice plot
-
-cm:           confusion matrix from sklearn.metrics.confusion\_matrix
-\begin{description}
-\item[{target\_names: given classification classes such as {[}0, 1, 2{]}}] \leavevmode
-the class names, for example: {[}‘high’, ‘medium’, ‘low’{]}
-
-\end{description}
-
-title:        the text to display at the top of the matrix
-\begin{description}
-\item[{cmap:         the gradient of the values displayed from matplotlib.pyplot.cm}] \leavevmode
-see \sphinxurl{http://matplotlib.org/examples/color/colormaps\_reference.html}
-plt.get\_cmap(‘jet’) or plt.cm.Blues
-
-\item[{normalize:    If False, plot the raw numbers}] \leavevmode
-If True, plot the proportions
-
-\end{description}
-\begin{description}
-\item[{plot\_confusion\_matrix(cm           = cm,                  \# confusion matrix created by}] \leavevmode\begin{quote}
-
-\# sklearn.metrics.confusion\_matrix
-\end{quote}
-
-normalize    = True,                \# show proportions
-target\_names = y\_labels\_vals,       \# list of names of the classes
-title        = best\_estimator\_name) \# title of graph
-
-\end{description}
-
-\sphinxurl{http://scikit-learn.org/stable/auto\_examples/model\_selection/plot\_confusion\_matrix.html}
-:param cm:
-:param target\_names:
-:param title:
-:param cmap:
-:param normalize:
-:param path:
-
-\end{fulllineitems}
-
-\index{run\_evaluation() (cmc.Evaluation.Evaluation method)@\spxentry{run\_evaluation()}\spxextra{cmc.Evaluation.Evaluation method}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{Evaluation:cmc.Evaluation.Evaluation.run_evaluation}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{run\_evaluation}}}{}{}
-This method is used to start and run the evaluation process.
-
-\end{fulllineitems}
-
-
-\end{fulllineitems}
-
-
+\label{\detokenize{Evaluation:evaluation-class}}\label{\detokenize{Evaluation::doc}}
 
 \chapter{Indices and tables}
 \label{\detokenize{index:indices-and-tables}}\begin{itemize}

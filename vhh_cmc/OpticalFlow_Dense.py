@@ -19,7 +19,6 @@ class OpticalFlow_Dense(object):
                                             poly_n=5,  # 5
                                             poly_sigma=1.2,
                                             flags=0)
-
         mag, ang = cv2.cartToPolar(flow[...,0], flow[...,1], angleInDegrees=True)
 
         '''

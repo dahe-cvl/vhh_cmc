@@ -6,7 +6,8 @@ import matplotlib.gridspec as gridspec
 from vhh_cmc.OpticalFlow_ORB import OpticalFlow_ORB
 from vhh_cmc.OpticalFlow_SIFT import OpticalFlow_SIFT
 from vhh_cmc.OpticalFlow_Dense import OpticalFlow_Dense
-
+from datetime import datetime
+import pymp
 
 
 class OpticalFlow(object):
@@ -18,112 +19,133 @@ class OpticalFlow(object):
 
     def runDense(self):
         frames_np = np.squeeze(self.video_frames)
+        print(frames_np.shape)
+
+        if(len(frames_np) > 10000):
+            print("WARNING: shot is very very long! --> skip")
+            class_name = "NA"
+            return class_name
 
         of_dense_instance = OpticalFlow_Dense()
         hsv = np.zeros_like(frames_np[0])
         hsv[..., 1] = 255
 
         # calcuate optical flow for all frames in the shot
-        frm_u_l = []
-        frm_v_l = []
-        frm_mag_l = []
-        frm_ang_l = []
-        for i in range(0, len(frames_np)-1):
-            curr_frame = frames_np[i]
-            nxt_frame = frames_np[i + 1]
+        start_time1 = datetime.now()
+        frm_u_np = pymp.shared.array((frames_np.shape[0] - 1, frames_np.shape[1], frames_np.shape[2]), dtype='float32')
+        frm_v_np = pymp.shared.array((frames_np.shape[0] - 1, frames_np.shape[1], frames_np.shape[2]), dtype='float32')
+        frm_mag_np = pymp.shared.array((frames_np.shape[0] - 1, frames_np.shape[1], frames_np.shape[2]), dtype='float32')
+        frm_ang_np = pymp.shared.array((frames_np.shape[0] - 1, frames_np.shape[1], frames_np.shape[2]), dtype='float32')
+        with pymp.Parallel(4) as p:
+            #p.print(p.num_threads, p.thread_num)
+            for i in p.range(0, len(frames_np)-1):
 
-            curr_frame = cv2.equalizeHist(curr_frame)
-            nxt_frame = cv2.equalizeHist(nxt_frame)
+                # The parallel print function takes care of asynchronous output.
+                #p.print('Yay! {} done!'.format(i))
 
-            kernel = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]])
-            curr_frame = cv2.filter2D(curr_frame, -1, kernel)
-            nxt_frame = cv2.filter2D(nxt_frame, -1, kernel)
+                #frm_u_l = []
+                #frm_v_l = []
+                #frm_ang_l = []
+                #for i in range(0, len(frames_np)-step_size, step_size):
+                curr_frame = frames_np[i]
+                nxt_frame = frames_np[i + 1]
 
-            frm_mag, frm_ang, frm_u, frm_v = of_dense_instance.getFlow(curr_frame, nxt_frame)
-            frm_u_l.append(frm_u)
-            frm_v_l.append(frm_v)
-            frm_mag_l.append(frm_mag)
-            frm_ang_l.append(frm_ang)
+                curr_frame = cv2.equalizeHist(curr_frame)
+                nxt_frame = cv2.equalizeHist(nxt_frame)
 
-        frm_u_np = np.array(frm_u_l)
-        frm_v_np = np.array(frm_v_l)
-        frm_mag_np = np.array(frm_mag_l)
-        frm_ang_np = np.array(frm_ang_l)
+                kernel = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]])
+                curr_frame = cv2.filter2D(curr_frame, -1, kernel)
+                nxt_frame = cv2.filter2D(nxt_frame, -1, kernel)
+
+                frm_mag_np[i], frm_ang_np[i], frm_u_np[i], frm_v_np[i] = of_dense_instance.getFlow(curr_frame, nxt_frame)
+                #frm_mag, frm_ang, frm_u, frm_v = of_dense_instance.getFlow(curr_frame, nxt_frame)
+                #frm_u_l.append(frm_u)
+                #frm_v_l.append(frm_v)
+                #frm_ang_l.append(frm_ang)
+
+        #frm_u_np = np.array(frm_u_l)
+        #frm_v_np = np.array(frm_v_l)
+        #frm_ang_np = np.array(frm_ang_l)
+        print(frm_ang_np.shape)
         print(frm_u_np.shape)
         print(frm_v_np.shape)
-        print(frm_mag_np.shape)
-        print(frm_ang_np.shape)
+
+        end_time1 = datetime.now()
+        time_elapsed1 = end_time1 - start_time1
+        print(time_elapsed1)
 
         # split into blocks
+        start_time2 = datetime.now()
         all_mb_u_l = []
         all_mb_v_l = []
-        all_mb_mag_l = []
         all_mb_ang_l = []
-        all_mb_x_l = []
-        all_mb_y_l = []
-        for i in range(0, len(frm_u_np)):
-            frm_u = frm_u_np[i]
-            frm_v = frm_v_np[i]
-            frm_mag = frm_mag_np[i]
-            frm_ang = frm_ang_np[i]
 
-            frm_mb_u_l = []
-            frm_mb_v_l = []
-            frm_mb_mag_l = []
-            frm_mb_ang_l = []
-            mb_x_l = []
-            mb_y_l = []
-            for r in range(0, self.number_of_blocks):
-                for c in range(0, self.number_of_blocks):
-                    # block
-                    mb_u, (mb_center_x, mb_center_y) = self.getBlock(
-                        frame=frm_u,
-                        row=r,
-                        col=c,
-                        number_of_blocks=self.number_of_blocks)
-                    mb_v, (mb_center_x, mb_center_y) = self.getBlock(
-                        frame=frm_v,
-                        row=r,
-                        col=c,
-                        number_of_blocks=self.number_of_blocks)
-                    mb_mag, (mb_center_x, mb_center_y) = self.getBlock(
-                        frame=frm_mag,
-                        row=r,
-                        col=c,
-                        number_of_blocks=self.number_of_blocks)
-                    mb_ang, (mb_center_x, mb_center_y) = self.getBlock(
-                        frame=frm_ang,
-                        row=r,
-                        col=c,
-                        number_of_blocks=self.number_of_blocks)
+        all_mb_u_np = pymp.shared.array((frm_u_np.shape[0], self.number_of_blocks*self.number_of_blocks), dtype='float32')
+        all_mb_v_np = pymp.shared.array((frm_v_np.shape[0], self.number_of_blocks*self.number_of_blocks), dtype='float32')
+        all_mb_ang_np = pymp.shared.array((frm_ang_np.shape[0], self.number_of_blocks*self.number_of_blocks), dtype='float32')
 
-                    frm_mb_u_l.append(np.mean(mb_u))
-                    frm_mb_v_l.append(np.mean(mb_v))
-                    frm_mb_mag_l.append(np.mean(mb_mag))
-                    frm_mb_ang_l.append(np.mean(mb_ang))
-                    mb_x_l.append(mb_center_x)
-                    mb_y_l.append(mb_center_y)
+        with pymp.Parallel(4) as p:
+            #p.print(p.num_threads, p.thread_num)
+            for i in p.range(0, len(frm_u_np)):
+            #for i in range(0, len(frm_u_np)):
+                frm_u = frm_u_np[i]
+                frm_v = frm_v_np[i]
+                frm_ang = frm_ang_np[i]
 
-            all_mb_u_l.append(np.array(frm_mb_u_l))
-            all_mb_v_l.append(np.array(frm_mb_v_l))
-            all_mb_mag_l.append(np.array(frm_mb_mag_l))
-            all_mb_ang_l.append(np.array(frm_mb_ang_l))
-            all_mb_x_l.append(np.array(mb_x_l))
-            all_mb_y_l.append(np.array(mb_y_l))
+                frm_mb_u_l = []
+                frm_mb_v_l = []
+                frm_mb_ang_l = []
+                for r in range(0, self.number_of_blocks):
+                    for c in range(0, self.number_of_blocks):
+                        # block
+                        mb_u, (mb_center_x, mb_center_y) = self.getBlock(
+                            frame=frm_u,
+                            row=r,
+                            col=c,
+                            number_of_blocks=self.number_of_blocks)
+                        mb_v, (mb_center_x, mb_center_y) = self.getBlock(
+                            frame=frm_v,
+                            row=r,
+                            col=c,
+                            number_of_blocks=self.number_of_blocks)
+                        mb_ang, (mb_center_x, mb_center_y) = self.getBlock(
+                            frame=frm_ang,
+                            row=r,
+                            col=c,
+                            number_of_blocks=self.number_of_blocks)
 
-        all_mb_u_np = np.array(all_mb_u_l)
-        all_mb_v_np = np.array(all_mb_v_l)
-        all_mb_mag_np = np.array(all_mb_mag_l)
-        all_mb_ang_np = np.array(all_mb_ang_l)
-        all_mb_x_np = np.array(all_mb_x_l)
-        all_mb_y_np = np.array(all_mb_y_l)
+                        frm_mb_u_l.append(np.mean(mb_u))
+                        frm_mb_v_l.append(np.mean(mb_v))
+                        frm_mb_ang_l.append(np.mean(mb_ang))
+
+                all_mb_u_np[i] = np.array(frm_mb_u_l)
+                all_mb_v_np[i] = np.array(frm_mb_v_l)
+                all_mb_ang_np[i] = np.array(frm_mb_ang_l)
+
+            #all_mb_u_l.append(np.array(frm_mb_u_l))
+            #all_mb_v_l.append(np.array(frm_mb_v_l))
+            #all_mb_ang_l.append(np.array(frm_mb_ang_l))
+
+        #all_mb_u_np = np.array(all_mb_u_l)
+        #all_mb_v_np = np.array(all_mb_v_l)
+        #all_mb_ang_np = np.array(all_mb_ang_l)
+        print(all_mb_ang_np.shape)
         print(all_mb_u_np.shape)
         print(all_mb_v_np.shape)
-        print(all_mb_mag_np.shape)
-        print(all_mb_ang_np.shape)
-        print(all_mb_x_np.shape)
-        print(all_mb_y_np.shape)
+        end_time2 = datetime.now()
+        time_elapsed2 = end_time2 - start_time2
+        print(time_elapsed2)
+        #exit()
 
+        # cleanup allocated arrays
+        #del frm_u_l
+        #del frm_v_l
+        #del frm_ang_l
+        frm_u_np = None
+        frm_v_np = None
+        frm_ang_np = None
+
+        start_time3 = datetime.now()
         k = self.config_instance.mvi_window_size
         n = self.config_instance.region_window_size
         t1 = self.config_instance.threshold_significance
@@ -223,20 +245,21 @@ class OpticalFlow(object):
         all_seq_mb_delta_v_np = np.array(all_seq_mb_delta_v_l)
         print(all_seq_mb_delta_v_np.shape)
 
-        all_motion_l = []
-        all_mag_l = []
-        all_ang_l = []
+        end_time3 = datetime.now()
+        time_elapsed3 = end_time3 - start_time3
+        print('(DEBUG 1)Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed1))
+        print('(DEBUG 2)Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed2))
+        print('(DEBUG 3)Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed3))
+        #exit()
 
+        all_motion_l = []
         for i in range(0, len(all_mb_u_np) - n - k):
             motion_l = []
-            mag_l = []
-            ang_l = []
 
             filter_mask = all_filter_masks_np[i]
             mvi_u = all_mb_u_np[i][filter_mask == True]
             mvi_v = all_mb_v_np[i][filter_mask == True]
             mvi_ang = all_mb_ang_np[i][filter_mask == True]
-            mvi_mag = all_mb_mag_np[i][filter_mask == True]
             mvi_u_sum = np.sum(np.abs(mvi_u))
             mvi_v_sum = np.sum(np.abs(mvi_v))
 
@@ -267,9 +290,7 @@ class OpticalFlow(object):
                 print("OTHERS")
                 # calculate angle for region with n frames
                 print(f'DEBUG 1: {np.mean(mvi_ang)}')
-                print(f'DEBUG 2: {np.mean(mvi_mag)}')
                 mean_ang = np.mean(mvi_ang)
-                mean_mag = np.mean(mvi_mag)
                 if ((mean_ang > 45 and mean_ang < 135) or (mean_ang > 225 and mean_ang < 315)):
                     class_name = "TILT"
                 elif ((mean_ang > 135 and mean_ang < 225) or
@@ -279,8 +300,6 @@ class OpticalFlow(object):
                 else:
                     class_name = "NA"
                 motion_l.append(class_name)
-                mag_l.append(mean_mag)
-                ang_l.append(mean_ang)
 
             for j in range(1, n):
                 filter_mask = all_filter_masks_np[i + j]
@@ -288,7 +307,6 @@ class OpticalFlow(object):
                 mvi_u = all_mb_u_np[i + j][filter_mask == True]
                 mvi_v = all_mb_v_np[i + j][filter_mask == True]
                 mvi_ang = all_mb_ang_np[i + j][filter_mask == True]
-                mvi_mag = all_mb_mag_np[i + j][filter_mask == True]
                 mvi_u_sum = mvi_u_sum + np.sum(np.abs(mvi_u))
                 mvi_v_sum = mvi_v_sum + np.sum(np.abs(mvi_v))
 
@@ -309,10 +327,7 @@ class OpticalFlow(object):
                 else:
                     print("OTHERS")
                     print(f'DEBUG: {np.mean(mvi_ang)}')
-                    print(f'DEBUG: {np.mean(mvi_mag)}')
                     mean_ang = np.mean(mvi_ang)
-                    mean_mag = np.mean(mvi_mag)
-
                     if ((mean_ang > 45 and mean_ang < 135) or (mean_ang > 225 and mean_ang < 315)):
                         class_name = "TILT"
                     elif ((mean_ang > 135 and mean_ang < 225) or
@@ -322,29 +337,17 @@ class OpticalFlow(object):
                     else:
                         class_name = "NA"
                     motion_l.append(class_name)
-                    mag_l.append(mean_mag)
-                    ang_l.append(mean_ang)
 
             if (len(motion_l) <= 0):
                 motion_l.append("NA")
             motion_np = np.array(motion_l)
-            region_mag_np = np.array(mag_l)
-            region_ang_np = np.array(ang_l)
-            print(region_mag_np)
-            print(np.mean(region_mag_np))
-
 
             region_motion_names, region_motion_dist = np.unique(motion_np, return_counts=True)
             idx = np.argmax(region_motion_dist, axis=0)
             region_class_prediction = region_motion_names[idx]
             all_motion_l.append(region_class_prediction)
-            all_mag_l.append(np.mean(region_mag_np))
-            all_ang_l.append(np.mean(region_ang_np))
 
         all_motion_np = np.array(all_motion_l)
-        all_mag_np = np.array(all_mag_l)
-        all_ang_np = np.array(all_ang_l)
-
         #print(all_mag_np)
         #print(all_ang_np)
 

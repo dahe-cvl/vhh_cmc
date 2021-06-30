@@ -50,6 +50,7 @@ class Configuration:
         self.threshold_consistency = -1
         self.mvi_window_size = -1
         self.region_window_size = -1
+        self.active_threshold = -1
 
         # stc_core_config section
         self.class_names = None

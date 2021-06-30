@@ -45,7 +45,7 @@ OpticalFlow:
   REGION_WINDOW_SIZE: 5
   ###
   # This parameter is used to specify the percentage threshold to identify movement activities.
-  ACTIVE_THRESHOLD: 0.2
+  ACTIVE_THRESHOLD: 0.08
 
 CmcCore:
   ###

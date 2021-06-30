@@ -326,7 +326,7 @@ class Evaluation(object):
         print(self.config_instance.path_eval_results)
         fp = open(self.config_instance.path_eval_results + "/" + fName.split('/')[-1].split('.')[0] + ".csv", 'w')
 
-        header = "exp_name;mvi_mv_ratio;threshold_significance;threshold_consistency;mvi_window_size;region_window_size;acc;prec;rec;f1_score"
+        header = "exp_name;mvi_mv_ratio;threshold_significance;threshold_consistency;mvi_window_size;region_window_size;active_threshold;acc;prec;rec;f1_score"
         fp.write(header + "\n")
 
         for i in range(0, len(cmc_results_np)):

@@ -30,7 +30,7 @@ PreProcessing:
 OpticalFlow:
   ###
   # This parameter is used to specify the ratio between available motion-vectors-of-interest to the all motion-vectors.
-  MVI_MV_RATIO: 0.4
+  MVI_MV_RATIO: 0.2
   ###
   # This parameter is used to specify the threshold (t1) for the significance check.
   THRESHOLD_SIGNIFICANCE: 2.0
@@ -81,7 +81,7 @@ CmcCore:
 
   ###
   # This parameter is used to specify the path to the videos.
-  PATH_VIDEOS: "/data/share/datasets/vhh_mmsi_test_db_v3/videos/"
+  PATH_VIDEOS: "./debug/" #"/data/share/datasets/vhh_mmsi_test_db_v3/videos/"
 
 Evaluation:
   ###

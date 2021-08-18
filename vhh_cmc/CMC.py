@@ -258,15 +258,31 @@ class CMC(object):
             print(f'start: {start}, end: {stop}')
             print(f'camera_movement_class: {camera_movement_class}')
 
-            #if (camera_movement_class == "PAN" or camera_movement_class == "TILT" or camera_movement_class == "pan" or camera_movement_class == "tilt"):
-            if (camera_movement_class == "NA" or camera_movement_class == "na"):
+            if (camera_movement_class == "PAN" or camera_movement_class == "TILT" or camera_movement_class == "pan" or camera_movement_class == "tilt"):
+            #if (camera_movement_class == "NA" or camera_movement_class == "na"):
                 print("save video! ")
+
+                VIS_TEXT_FLAG = True
 
                 fourcc = cv2.VideoWriter_fourcc(*'MJPG')
                 out = cv2.VideoWriter(dst_path + "/" + camera_movement_class + "_" + str(i) + ".avi", fourcc, 12, (w, h))
 
+                font = cv2.FONT_HERSHEY_SIMPLEX
+                bottomLeftCornerOfText = (30, 50)
+                fontScale = 1
+                fontColor = (255, 255, 255)
+                lineType = 2
+
                 for j in range(0, len(frames_per_shots_np)):
                     frame = frames_per_shots_np[j]
+                    if(VIS_TEXT_FLAG == True):
+                        cv2.rectangle(frame, (0, 0), (450, 80), (0, 0, 255), -1)
+                        cv2.putText(frame, "Camera-Movement: " + camera_movement_class,
+                                    bottomLeftCornerOfText,
+                                    font,
+                                    fontScale,
+                                    fontColor,
+                                    lineType)
                     out.write(frame)
 
                 out.release()

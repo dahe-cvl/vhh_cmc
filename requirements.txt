@@ -7,3 +7,5 @@ scikit-learn
 Sphinx
 sphinxcontrib-bibtex
 sphinxcontrib-autoyaml
+pymp-pypi
+opencv-python

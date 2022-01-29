@@ -2,7 +2,6 @@ import numpy as np
 import cv2
 import datetime
 from PIL import Image
-import torch
 
 
 class Video(object):

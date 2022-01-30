@@ -30,7 +30,7 @@ PreProcessing:
 OpticalFlow:
   ###
   # This parameter is used to specify the ratio between available motion-vectors-of-interest to the all motion-vectors.
-  MVI_MV_RATIO: 0.2
+  MVI_MV_RATIO: 0.1
   ###
   # This parameter is used to specify the threshold (t1) for the significance check.
   THRESHOLD_SIGNIFICANCE: 2.0
@@ -45,7 +45,7 @@ OpticalFlow:
   REGION_WINDOW_SIZE: 5
   ###
   # This parameter is used to specify the percentage threshold to identify movement activities.
-  ACTIVE_THRESHOLD: 0.08
+  ACTIVE_THRESHOLD: 0.2
 
 CmcCore:
   ###
@@ -71,7 +71,7 @@ CmcCore:
   SAVE_FINAL_RESULTS: 1     # 1 ... yes 0 ... no
   ###
   # This parameter is used to specify the path for saving the final results.
-  PATH_FINAL_RESULTS: "/data/share/dhelm/cmc_debug_setup_20220129/experiments/"
+  PATH_FINAL_RESULTS: "/caa/Projects02/vhh/private/Results/comparison_crop_uncrop_nobackup/results/cmc/final_results/cropped/"
   ###
   # This parameter is used to specify the prefix for the results file.
   PREFIX_FINAL_RESULTS: "results_"
@@ -92,7 +92,7 @@ Evaluation:
   PATH_RAW_RESULTS: "/data/share/maxrecall_vhh_mmsi/videos/results/cmc/raw_results/"
   ###
   # This parameter is used to specify the path to store the evaluation results path.
-  PATH_EVAL_RESULTS: "/data/share/cmc_eval_20210614/vhhmmsi_eval_db_test/"
+  PATH_EVAL_RESULTS: "/data/share/dhelm/cmc_debug_setup_20220129/experiments/"
   ###
   # This parameter is used to groundtruth annotations used for evaluation.
   PATH_GT_ANNOTATIONS: "/caa/Projects02/vhh/private/database_nobackup/VHH_datasets/annotations/ShotBoundaryDetection/imediacities/sbd_imc_annotations_20191231.csv"

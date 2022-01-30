@@ -58,7 +58,7 @@ class CMC(object):
         if (self.config_instance.debug_flag == True):
             # load shot list from result file
             shots_np = self.loadSbdResults(self.config_instance.sbd_results_path)
-            debug_sid = 104 #tilt ids: 86  #104 73 108  pan ids: 5 7 21 13 28 na ids: 3 24 77
+            debug_sid = 24 #tilt ids: 86  104 73 108 125  pan ids: 5 7 21 13 28 127 na ids: 3 24 77
         else:
             shots_np = shots_per_vid_np
             debug_sid = -1
@@ -115,7 +115,7 @@ class CMC(object):
                 optical_flow_instance = OpticalFlow(video_frames=frames_per_shots_np,
                                                     algorithm=None,
                                                     config_instance=self.config_instance)
-                class_name = optical_flow_instance.runDense()
+                class_name = optical_flow_instance.runDense(start, stop)
 
             # prepare results
             print(str(vid_name) + ";" + str(shot_id) + ";" + str(start) + ";" + str(stop) + ";" + str(class_name))

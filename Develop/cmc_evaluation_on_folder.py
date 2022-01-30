@@ -8,7 +8,7 @@ exp_results = []
 
 
 exp_file_list = [
-                 "./config/config_cmc_evaluation_vhh_mmsi_eval_db_tiny_test.yaml",
+                 "./config/config_cmc_evaluation_vhh_mmsi_eval_db_tiny_XX.yaml",
                  #"./config/config_cmc_evaluation_vhh_mmsi_eval_db_tiny_1.yaml",
                  #"./config/config_cmc_evaluation_vhh_mmsi_eval_db_tiny_2.yaml",
                  #"./config/config_cmc_evaluation_vhh_mmsi_eval_db_tiny_3.yaml",

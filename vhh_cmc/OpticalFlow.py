@@ -17,7 +17,7 @@ class OpticalFlow(object):
 
         self.number_of_blocks = 32
 
-    def runDense(self):
+    def runDense(self, shot_start, shot_end):
         frames_np = np.squeeze(self.video_frames)
         print(frames_np.shape)
 
@@ -256,13 +256,14 @@ class OpticalFlow(object):
         for i in range(0, len(all_mb_u_np) - n - k):
             motion_l = []
 
+
+            # calculate ratio - initial frame at position 0 
             filter_mask = all_filter_masks_np[i]
             mvi_u = all_mb_u_np[i][filter_mask == True]
             mvi_v = all_mb_v_np[i][filter_mask == True]
             mvi_ang = all_mb_ang_np[i][filter_mask == True]
             mvi_u_sum = np.sum(np.abs(mvi_u))
             mvi_v_sum = np.sum(np.abs(mvi_v))
-
             mvi_u_cnt = len(mvi_u)
             mvi_v_cnt = len(mvi_v)
 
@@ -273,6 +274,7 @@ class OpticalFlow(object):
             mv_u_cnt = len(mv_u)
             mv_v_cnt = len(mv_v)
 
+            '''
             print(mvi_u_sum)
             print(mvi_v_sum)
             print(mvi_u_cnt)
@@ -281,15 +283,16 @@ class OpticalFlow(object):
             print(mv_v_sum)
             print(mv_u_cnt)
             print(mv_v_cnt)
+            '''
 
             if (mvi_u_sum < mv_u_sum * mvi_mv_ratio) and (mvi_v_sum < mv_v_sum * mvi_mv_ratio) and \
                (mvi_u_cnt < mv_u_cnt * mvi_mv_ratio) and (mvi_v_cnt < mv_v_cnt * mvi_mv_ratio):
-                print("STATIC")
+                #print("STATIC")
                 motion_l.append("NA")
             else:
-                print("OTHERS")
+                #print("OTHERS")
                 # calculate angle for region with n frames
-                print(f'DEBUG 1: {np.mean(mvi_ang)}')
+                #print(f'DEBUG 1: {np.mean(mvi_ang)}')
                 mean_ang = np.mean(mvi_ang)
                 if ((mean_ang > 45 and mean_ang < 135) or (mean_ang > 225 and mean_ang < 315)):
                     class_name = "TILT"
@@ -300,7 +303,8 @@ class OpticalFlow(object):
                 else:
                     class_name = "NA"
                 motion_l.append(class_name)
-
+            
+            # calculate ratio - frame position 1 to position n-1 
             for j in range(1, n):
                 filter_mask = all_filter_masks_np[i + j]
 
@@ -315,18 +319,18 @@ class OpticalFlow(object):
                 mv_u_sum = mv_u_sum + np.sum(np.abs(mv_u))
                 mv_v_sum = mv_v_sum + np.sum(np.abs(mv_v))
 
-                print(mvi_u_sum)
-                print(mvi_v_sum)
-                print(mv_u_sum)
-                print(mv_v_sum)
+                #print(mvi_u_sum)
+                #print(mvi_v_sum)
+                #print(mv_u_sum)
+                #print(mv_v_sum)
 
                 if (mvi_u_sum < mv_u_sum * mvi_mv_ratio) and (mvi_v_sum < mv_v_sum * mvi_mv_ratio) and \
                    (mvi_u_cnt < mv_u_cnt * mvi_mv_ratio) and (mvi_v_cnt < mv_v_cnt * mvi_mv_ratio):
-                    print("STATIC")
+                    #print("STATIC")
                     motion_l.append("NA")
                 else:
-                    print("OTHERS")
-                    print(f'DEBUG: {np.mean(mvi_ang)}')
+                    #print("OTHERS")
+                    #print(f'DEBUG: {np.mean(mvi_ang)}')
                     mean_ang = np.mean(mvi_ang)
                     if ((mean_ang > 45 and mean_ang < 135) or (mean_ang > 225 and mean_ang < 315)):
                         class_name = "TILT"
@@ -348,26 +352,106 @@ class OpticalFlow(object):
             all_motion_l.append(region_class_prediction)
 
         all_motion_np = np.array(all_motion_l)
-        #print(all_mag_np)
-        #print(all_ang_np)
+        print(all_motion_l)
+        print(all_motion_np.shape)
 
-        #plt.figure()
-        #plt.scatter(np.arange(len(all_mag_np)), all_mag_np)
-        #plt.figure()
-        #plt.scatter(np.arange(len(all_ang_np)), all_ang_np)
-        #plt.show()
+        # separate pan and tilt list
+        print("#################################")
+        print("split into pan and tilt list ... ")
+        pan_list = self.find_movement_in_sequence(find_class="PAN", motion_np=all_motion_np)
+        tilt_list = self.find_movement_in_sequence(find_class="TILT", motion_np=all_motion_np)
+        pans_np = np.array(pan_list)
+        tilts_np = np.array(tilt_list)
+        print(pans_np)
+        print(tilts_np)
+        
+        # condition A --> remove short movements  
+        condition_a_flag = True
+        if(condition_a_flag == True):   
+            print("########################################")  
+            print("Condition A: remove short movements ... ")
+            min_length_of_motion = 20
+            pans_np = self.filter_short_movements(pans_np, min_length_of_motion=min_length_of_motion)
+            tilts_np = self.filter_short_movements(tilts_np, min_length_of_motion=min_length_of_motion)
+            print(pans_np)
+            print(tilts_np)
+        else:
+            print("#######################################################")  
+            print("Condition A: remove short movements --> NOT ACTIVE ... ")
+            print()
 
+        # Condition B --> Find Gaps
+        condition_b_flag = True
+        if(condition_b_flag == True):   
+            print("######################################")
+            print("Condition B: find and filter gaps ... ")
+            max_length_of_gap = 5
 
-        #plt.figure()
-        #plt.scatter(np.arange(len(all_motion_np)), all_motion_np)
-        #plt.show()
+            if (len(tilts_np) >= 2):
+                tilts_np = self.filter_movements_gaps(tilts_np, max_length_of_gap=max_length_of_gap)
+                pans_np = self.filter_movements_gaps(pans_np, max_length_of_gap=max_length_of_gap)
+                print(tilts_np)
+                print(pans_np)
+        else:
+            print("#######################################################")  
+            print("Condition B: find and filter gaps --> NOT ACTIVE ... ")
+            print()
 
+        # map movment lists to shot boundaries
+        final_movements_np = None
+        if(len(tilts_np) > 0 and len(pans_np) > 0):
+            final_movements_np = np.concatenate((tilts_np, pans_np), axis=0)
+        elif(len(tilts_np) > 0 and len(pans_np) <= 0):
+            final_movements_np = tilts_np
+        elif(len(pans_np) > 0 and len(tilts_np) <= 0):
+            final_movements_np = pans_np
+        #print(final_movements_np)
+
+        # TODO: save final movements numpy into file
+        if(final_movements_np is not None):    
+            final_movements_np[:,:2] = final_movements_np[:,:2].astype('int') + shot_start 
+            print(final_movements_np)
+            #print(shot_start)
+            #print(shot_end)
+
+            final_movements_duration_np = np.abs(final_movements_np[:,0:1].astype('int') - final_movements_np[:,1:2].astype('int'))
+
+            final_movements_duration_np = np.concatenate((final_movements_duration_np, final_movements_np[:,2:]), axis=1)
+            print(final_movements_duration_np)
+
+            idx = np.where(final_movements_duration_np[:, 1:] == "PAN")[0]
+            pan_duration = np.sum(final_movements_duration_np[idx, :1].astype('int'))
+            print(pan_duration)
+
+            idx = np.where(final_movements_duration_np[:, 1:] == "TILT")[0]
+            tilt_duration = np.sum(final_movements_duration_np[idx, :1].astype('int'))
+            print(tilt_duration)
+
+            if(pan_duration >= tilt_duration): 
+                class_name = "PAN"
+            elif(tilt_duration > pan_duration): 
+                class_name = "TILT"
+            else:
+                class_name = "NA"
+            print(class_name)
+        else:
+            class_name = "NA"
+            print(class_name)
+
+        return class_name
+                        
+        '''        
+        plt.figure()
+        plt.scatter(np.arange(len(all_motion_np)), all_motion_np)
+        plt.show()
+        '''
+   
+        '''
         class_names, class_dist = np.unique(all_motion_np, return_counts=True)
         print(class_names)
         print(class_dist)
-
-        # ratio check
-
+   
+        # final ratio check or class distribution
         all_detections = np.sum(class_dist)
         print(all_detections)
 
@@ -419,6 +503,7 @@ class OpticalFlow(object):
             final_class_prediction = "NA"
 
         print(final_class_prediction)
+        '''
 
         '''
         # visualize vectors and frames
@@ -516,6 +601,75 @@ class OpticalFlow(object):
             print("ERROR: something is wrong with the frame shape.")
 
         return frame_block, (block_center_x, block_center_y)
+
+    def find_movement_in_sequence(self, find_class="TILT", motion_np=None):
+        state = "start"
+        start = 0
+        stop = len(motion_np)
+        class_name_prev = "NA"
+        movement_list = []
+        for h in range(0, len(motion_np)):
+            #print(h)
+            class_name = motion_np[h]
+
+            # find start of movement
+            if(class_name == find_class and state == "start"):
+                #print("state: start")
+                start = h
+                state = "stop"
+                
+            elif(class_name_prev != class_name and state == "stop"):
+                #print("state: stop")
+                stop = h-1
+                movement_list.append([start, stop, class_name_prev])
+                state = "start"
+
+            class_name_prev = class_name
+        return movement_list
+
+    def filter_short_movements(self, motion_np, min_length_of_motion=5):
+        filtered_motion_list = []
+        for h in range(0, len(motion_np)):
+            start = int(motion_np[h][0])
+            stop = int(motion_np[h][1])
+            class_name = motion_np[h][2]
+            if(stop < start):
+                print("ERROR: something is wrong(DEBUG Point C)!!")
+                exit()
+
+            difference = stop - start
+            if(difference >= min_length_of_motion):
+                filtered_motion_list.append([start, stop, class_name])
+
+        return np.array(filtered_motion_list)
+
+    def filter_movements_gaps(self, motion_np, max_length_of_gap=5):
+        m_l = []
+
+        if (len(motion_np) <= 0):
+            return np.array(m_l)
+
+        start_seed = motion_np[0][0]
+        stop_seed = motion_np[0][1]
+        class_seed = motion_np[0][2]
+
+        for h in range(1, len(motion_np)):
+            start_nxt = motion_np[h][0]
+            stop_nxt = motion_np[h][1]
+            class_nxt = motion_np[h][2]
+
+            difference = abs(int(stop_seed) - int(start_nxt))
+            if(difference <= max_length_of_gap):
+                stop_seed = stop_nxt
+            else:
+                m_l.append([start_seed, stop_seed, class_seed])
+                start_seed = start_nxt
+                stop_seed = stop_nxt
+                class_seed = class_nxt
+
+            if (h >= len(motion_np) - 1):
+                m_l.append([start_seed, stop_seed, class_seed])
+        return np.array(m_l)
 
     def filter1D(self, data_np, alpha=2.0):
         # print(type(data_np))

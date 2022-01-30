@@ -2,13 +2,13 @@
 Development:
   ###
   # This parameter is used to activate or deactivate the debug mode.
-  DEBUG_FLAG: 0             # 1 ... activate 0 ... deactivate
+  DEBUG_FLAG: 1             # 1 ... activate 0 ... deactivate
   ###
   # This parameter is used to specify a SBD results file for debugging mode.
-  SBD_RESULTS_PATH: "/data/share/datasets/vhh_mmsi_test_db_v3/annotations/sbd/58.csv"
+  SBD_RESULTS_PATH: "/data/share/datasets/vhh_mmsi_test_db_v3/annotations/cmc/58.csv"
   ###
   # This parameter is used to specify the results path in debug mode
-  PATH_DEBUG_RESULTS: "/data/share/"
+  PATH_DEBUG_RESULTS: "/data/share/dhelm/cmc_debug_setup_20220129/debug_results/"
   ###
   # This parameter is used to save a debug package (e.g. including some visualizations, ... - not available yet).
   SAVE_DEBUG_PKG: 0
@@ -30,7 +30,7 @@ PreProcessing:
 OpticalFlow:
   ###
   # This parameter is used to specify the ratio between available motion-vectors-of-interest to the all motion-vectors.
-  MVI_MV_RATIO: 0.2
+  MVI_MV_RATIO: 0.1
   ###
   # This parameter is used to specify the threshold (t1) for the significance check.
   THRESHOLD_SIGNIFICANCE: 2.0
@@ -81,7 +81,7 @@ CmcCore:
 
   ###
   # This parameter is used to specify the path to the videos.
-  PATH_VIDEOS: "./debug/" #"/data/share/datasets/vhh_mmsi_test_db_v3/videos/"
+  PATH_VIDEOS: "/data/share/datasets/vhh_mmsi_test_db_v3/videos/" #"/data/share/datasets/vhh_mmsi_test_db_v3/videos/"
 
 Evaluation:
   ###

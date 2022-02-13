@@ -30,7 +30,7 @@ PreProcessing:
 OpticalFlow:
   ###
   # This parameter is used to specify the ratio between available motion-vectors-of-interest to the all motion-vectors.
-  MVI_MV_RATIO: 0.1
+  MVI_MV_RATIO: 0.4
   ###
   # This parameter is used to specify the threshold (t1) for the significance check.
   THRESHOLD_SIGNIFICANCE: 2.0
@@ -81,7 +81,7 @@ CmcCore:
 
   ###
   # This parameter is used to specify the path to the videos.
-  PATH_VIDEOS: "/data/share/datasets/vhh_mmsi_eval_db_tiny/"
+  PATH_VIDEOS: "/data/share/datasets/vhh_mmsi_eval_db_debug/"
 
 Evaluation:
   ###
@@ -92,10 +92,10 @@ Evaluation:
   PATH_RAW_RESULTS: "/data/share/maxrecall_vhh_mmsi/videos/results/cmc/raw_results/"
   ###
   # This parameter is used to specify the path to store the evaluation results path.
-  PATH_EVAL_RESULTS: "/data/share/dhelm/cmc_debug_setup_20220129/experiments/"
+  PATH_EVAL_RESULTS: "/data/share/dhelm/cmc_debug_setup_20220129/experiments/test2/"
   ###
   # This parameter is used to groundtruth annotations used for evaluation.
   PATH_GT_ANNOTATIONS: "/caa/Projects02/vhh/private/database_nobackup/VHH_datasets/annotations/ShotBoundaryDetection/imediacities/sbd_imc_annotations_20191231.csv"
   ###
   # This parameter is used to specify the path to the dataset used for the evaluation.
-  PATH_EVAL_DATASET: "/data/share/datasets/vhh_mmsi_eval_db_tiny/"
+  PATH_EVAL_DATASET: "/data/share/datasets/vhh_mmsi_eval_db_debug/"

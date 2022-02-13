@@ -17,12 +17,13 @@ def csvWriter(dst_folder="", name="metrics_history.log", entries_list=None):
     fp.close()
 
 
-video_path = "/data/share/datasets/cmc_final_dataset_v3/training_data/"
+video_path = "/data/ext/VHH/datasets/HistShotDS_V2/eval_cmc/training_data/"
+dst_folder= "/data/ext/VHH/datasets/HistShotDS_V2/eval_cmc/annotation_new/"
 
 class_name_list = os.listdir(video_path)
 
 print(class_name_list)
-class_name_list.remove("track")
+#class_name_list.remove("track")
 print(class_name_list)
 
 samples_l = []
@@ -33,7 +34,7 @@ for i, class_name in enumerate(class_name_list):
     if("pan" == class_name): label = 0
     if ("tilt" == class_name): label = 1
     if ("na" == class_name): label = 2
-    if ("track" == class_name): label = 3
+    #if ("track" == class_name): label = 3
 
     for sample in samples_list:
         path = os.path.join(video_path, class_name, sample)
@@ -47,4 +48,4 @@ samples_np = np.array(samples_l)
 print(samples_np)
 
 for entry in samples_l:
-    csvWriter(dst_folder="./", name="annotations.csv", entries_list=entry)
+    csvWriter(dst_folder=dst_folder, name="annotations.csv", entries_list=entry)

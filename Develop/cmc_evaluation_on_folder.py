@@ -8,18 +8,27 @@ exp_results = []
 
 
 exp_file_list = [
-                 "./config/config_cmc_evaluation_vhh_mmsi_eval_db_tiny_XX.yaml",
-                 #"./config/config_cmc_evaluation_vhh_mmsi_eval_db_tiny_1.yaml",
-                 #"./config/config_cmc_evaluation_vhh_mmsi_eval_db_tiny_2.yaml",
-                 #"./config/config_cmc_evaluation_vhh_mmsi_eval_db_tiny_3.yaml",
-                 #"./config/config_cmc_evaluation_vhh_mmsi_eval_db_tiny_4.yaml",
-                 #"./config/config_cmc_evaluation_vhh_mmsi_eval_db_tiny_5.yaml",
-                 #"./config/config_cmc_evaluation_vhh_mmsi_eval_db_tiny_6.yaml",
-                 #"./config/config_cmc_evaluation_vhh_mmsi_eval_db_tiny_7.yaml",
-                 #"./config/config_cmc_evaluation_vhh_mmsi_eval_db_tiny_8.yaml",
+                 "./config/config_cmc_evaluation_historian_1.yaml",
+                 #"./config/config_cmc_evaluation_historian_2.yaml",
+                 #"./config/config_cmc_evaluation_historian_3.yaml",
+                 #"./config/config_cmc_evaluation_historian_4.yaml",
+                 #"./config/config_cmc_evaluation_historian_5.yaml",
                  ]
 
-''''''
+'''
+exp_file_list = [
+                 #"./config/config_cmc_evaluation_vhh_mmsi_eval_db_tiny_XX.yaml",
+                 "./config/config_cmc_evaluation_vhh_mmsi_eval_db_tiny_1.yaml",
+                 "./config/config_cmc_evaluation_vhh_mmsi_eval_db_tiny_2.yaml",
+                 "./config/config_cmc_evaluation_vhh_mmsi_eval_db_tiny_3.yaml",
+                 "./config/config_cmc_evaluation_vhh_mmsi_eval_db_tiny_4.yaml",
+                 "./config/config_cmc_evaluation_vhh_mmsi_eval_db_tiny_5.yaml",
+                 "./config/config_cmc_evaluation_vhh_mmsi_eval_db_tiny_6.yaml",
+                 "./config/config_cmc_evaluation_vhh_mmsi_eval_db_tiny_7.yaml",
+                 "./config/config_cmc_evaluation_vhh_mmsi_eval_db_tiny_8.yaml",
+                 ]
+
+'''
 
 '''
 exp_file_list = [
@@ -67,12 +76,14 @@ for i, exp_file in enumerate(exp_file_list):
     ACTIVE_FLAG = True
     if(ACTIVE_FLAG == True):
         all_shots_np = eval_instance.final_dataset_np
+        print(all_shots_np)
         vids_idx = np.unique(all_shots_np[:, :1])
 
         for s, idx in enumerate(vids_idx.tolist()):    
             shot_idx = np.where(all_shots_np[:, :1] == idx)[0]
             shot_np = all_shots_np[shot_idx]
             shots_final = shot_np[:, :4]
+            print(shots_final)
             cmc_instance.runOnSingleVideo(shots_per_vid_np=shots_final, max_recall_id=s+1)
 
     # run evaluation process

@@ -57,7 +57,7 @@ CmcCore:
   SAVE_RAW_RESULTS: 0       # 1 ... yes 0 ... no
   ###
   # This parameter is used to specify the path for saving the raw results.
-  PATH_RAW_RESULTS: "/data/share/maxrecall_vhh_mmsi/videos/results/cmc/raw_results/"
+  PATH_RAW_RESULTS: "./"
   NUMBER_OF_FRAMES_PER_SHOT: 5  # save x frames per shot
   ###
   # This parameter is used to specify the prefix for the results file.

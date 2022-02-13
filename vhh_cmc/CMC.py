@@ -58,7 +58,7 @@ class CMC(object):
         if (self.config_instance.debug_flag == True):
             # load shot list from result file
             shots_np = self.loadSbdResults(self.config_instance.sbd_results_path)
-            debug_sid = 24 #tilt ids: 86  104 73 108 125  pan ids: 5 7 21 13 28 127 na ids: 3 24 77
+            debug_sid = 73 #tilt ids: 86  104 73 108 125  pan ids: 5 7 21 13 28 127 na ids: 3 24 77
         else:
             shots_np = shots_per_vid_np
             debug_sid = -1
@@ -68,7 +68,18 @@ class CMC(object):
             exit()
 
         # read all frames of video
-        vid_name = shots_np[0][0]
+        vid_name = shots_np[0][0]       
+
+        # map vid name with origianl file names for icprs paper
+        '''
+        orig_file_names = os.listdir(self.config_instance.path_videos)
+        print(orig_file_names)
+        for orig_name in orig_file_names:
+            if(vid_name.split('.')[0] + "_(" in orig_name):
+                vid_name = orig_name
+        '''
+        print(vid_name)
+
 
         if(self.config_instance.save_eval_results == 1):
             print("Evaluation mode is activated ...")
@@ -90,6 +101,7 @@ class CMC(object):
 
         print(shots_np)
         results_cmc_l = []
+        results_seq_cmc_l = []
         for data in vid_instance.getFramesByShots(shots_np, preprocess=self.pre_processing_instance.applyTransformOnImg):
             frames_per_shots_np = data['Images']
             shot_id = data['sid']
@@ -106,20 +118,23 @@ class CMC(object):
             print(f'start: {start}, end: {stop}')
 
             shot_len = stop - start
-            MIN_NUMBER_OF_FRAMES_PER_SHOT = 40
+            MIN_NUMBER_OF_FRAMES_PER_SHOT = 10
             if(shot_len <= MIN_NUMBER_OF_FRAMES_PER_SHOT ):
                 #print("shot length is too small!")
                 class_name = "NA"
+                seq_dict_l = []
             else:
                 # add new optical flow version
                 optical_flow_instance = OpticalFlow(video_frames=frames_per_shots_np,
                                                     algorithm=None,
                                                     config_instance=self.config_instance)
-                class_name = optical_flow_instance.runDense(start, stop)
-
+                class_name, seq_dict_l = optical_flow_instance.runDense(vid_name, shot_id, start, stop)
+            
             # prepare results
             print(str(vid_name) + ";" + str(shot_id) + ";" + str(start) + ";" + str(stop) + ";" + str(class_name))
             results_cmc_l.append([str(vid_name) + ";" + str(shot_id) + ";" + str(start) + ";" + str(stop) + ";" + str(class_name)])
+
+            results_seq_cmc_l.extend(seq_dict_l)
 
             if (shot_id == debug_sid and self.config_instance.debug_flag == True):
                 break
@@ -128,12 +143,17 @@ class CMC(object):
 
         if(self.config_instance.debug_flag == True):
             print(results_cmc_np)
-            exit()
+            
         # export results
         if (self.config_instance.save_eval_results == 1):
             self.exportCmcResults(vid_name, results_cmc_np)
         else:
-            self.exportCmcResults(str(max_recall_id), results_cmc_np)
+            #self.exportCmcResults(str(max_recall_id), results_cmc_np)
+
+            # sequence-based results
+            import json
+            with open(self.config_instance.path_raw_results + "/" + str(vid_name.split('.')[0] + "." + vid_name.split('.')[1]) + ".json", 'w') as fp:
+                json.dump(results_seq_cmc_l, fp)
 
     def loadSbdResults(self, sbd_results_path):
         """
@@ -161,6 +181,63 @@ class CMC(object):
 
         return lines_np
 
+    def loadStcResultsFromJson(self, stc_results_path):
+        """
+        tbd
+
+        .. note::
+            Only used in debug_mode.
+
+        :param stc_results_path: [required] path to results file of shot boundary detection module (vhh_sbd)
+        :return: numpy array holding list of detected shots.
+        """
+        
+        vid_name = stc_results_path.split('/')[-1]
+        #print(vid_name)
+        vid_name = vid_name.split('.')[0]
+        #print(vid_name)
+        vid_name = vid_name.split('-')[0]
+       
+        import json
+        with open(stc_results_path) as f:
+            shots_per_vid = json.load(f)
+
+        lines_n = []
+        for shot in shots_per_vid:
+            #print(shot)
+            lines_n.append([vid_name + ".m4v", shot['shotId'], shot['inPoint'], shot['outPoint'], shot['shotType']])
+        lines_np = np.array(lines_n)
+        #print(lines_np)
+        return lines_np
+
+    def loadCmcResultsFromJson(self, cmc_results_path):
+        """
+        Method for loading camera movments results as numpy array
+
+        .. note::
+            Only used in debug_mode.
+
+        :param cmc_results_path: [required] path to results file of shot boundary detection module (vhh_sbd)
+        :return: numpy array holding list of detected shots.
+        """
+
+        vid_name = cmc_results_path.split('/')[-1]
+        vid_name = vid_name.split('.')[0] + "." + vid_name.split('.')[1]
+        print(vid_name)
+        #exit()
+
+        import json
+        with open(cmc_results_path) as f:
+            shots_per_vid = json.load(f)
+
+        lines_n = []
+        for shot in shots_per_vid:
+            #print(shot)
+            lines_n.append([vid_name + ".m4v", shot['shotId'], shot['start'], shot['stop'], shot['cmcType']])
+        lines_np = np.array(lines_n)
+        #print(lines_np)
+        return lines_np
+
     def loadCmcResults(self, cmc_results_path):
         """
         Method for loading camera movments results as numpy array
@@ -171,6 +248,8 @@ class CMC(object):
         :param cmc_results_path: [required] path to results file of shot boundary detection module (vhh_sbd)
         :return: numpy array holding list of detected shots.
         """
+        #print(cmc_results_path)
+        #exit()
 
         # open sbd results
         fp = open(cmc_results_path, 'r')
@@ -186,6 +265,80 @@ class CMC(object):
         # print(lines_np.shape)
 
         return lines_np
+
+    def export_cmc_sequences_as_file(self, seq_np, dst_path="./vhh_mmsi_eval_db_tiny/shots/"):
+        print("export shot as video")
+
+        print(seq_np.shape)
+        
+        vid_name = seq_np[0][0]
+        # map vid name with origianl file names for icprs paper
+        orig_file_names = os.listdir(self.config_instance.path_videos)
+        print(orig_file_names)
+        for orig_name in orig_file_names:
+            if(vid_name.split('.')[0] + "_(" in orig_name):
+                vid_name = orig_name
+        ''''''
+        print(vid_name)
+       
+
+        vid_instance = Video()
+        vid_instance.load(self.config_instance.path_videos + "/" + vid_name)
+
+        h = int(vid_instance.height)
+        w = int(vid_instance.width)
+        fps = int(vid_instance.frame_rate)
+
+        print(h)
+        print(w)
+        print(fps)
+
+        for i, data in enumerate(vid_instance.getFramesByShots(seq_np)):
+            frames_per_shots_np = data['Images']
+            shot_id = data['sid']
+            #vid_name = data['video_name']
+            start = data['start']
+            stop = data['end']
+            cmc_class = data['cmc_class']
+
+            print("######################")
+            print(i)
+            print(i % 32 == 0)
+            print(f'sid: {shot_id}')
+            #print(f'vid_name: {vid_name}')
+            print(f'frames_per_shot: {frames_per_shots_np.shape}')
+            print(f'start: {start}, end: {stop}')
+            print(f'cmc_class: {cmc_class}')
+            file_name = "vid_" + str(vid_name.split('_')[0]) + "_sid_" + str(shot_id) + "_start_" + str(start) + "_stop_" + str(stop) + "_classname_" + str(cmc_class)
+            #"vid_xxx_sid_xxx_start_yyy_stop_xxxx_classname_XXX"
+
+            print("save video! ")
+            fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+            out = cv2.VideoWriter(dst_path + "/" + file_name + ".avi", fourcc, 12, (w, h))
+            
+            '''
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            bottomLeftCornerOfText = (30, 50)
+            fontScale = 1
+            fontColor = (255, 255, 255)
+            lineType = 2
+            '''
+            for j in range(0, len(frames_per_shots_np)):
+                frame = frames_per_shots_np[j]
+                '''
+                cv2.rectangle(frame, (0, 0), (350, 80), (0, 0, 255), -1)
+                cv2.putText(frame, "CameraMovement-Type: " + cmc_class,
+                            bottomLeftCornerOfText,
+                            font,
+                            fontScale,
+                            fontColor,
+                            lineType)
+                '''
+                out.write(frame)
+                #cv2.imshow("test", frame)
+                #k = cv2.waitKey(10)
+            
+            out.release()
 
     def exportCmcResults(self, fName, cmc_results_np: np.ndarray):
         """

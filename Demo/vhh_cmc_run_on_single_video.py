@@ -1,7 +1,7 @@
 from vhh_cmc.CMC import CMC
 import os
 
-config_file = "./config/config_cmc.yaml"
+config_file = "./config/config_cmc_debug.yaml"
 cmc_instance = CMC(config_file)
 
 if(cmc_instance.config_instance.debug_flag == True):

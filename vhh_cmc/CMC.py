@@ -58,7 +58,7 @@ class CMC(object):
         if (self.config_instance.debug_flag == True):
             # load shot list from result file
             shots_np = self.loadSbdResults(self.config_instance.sbd_results_path)
-            debug_sid = 73 #tilt ids: 86  104 73 108 125  pan ids: 5 7 21 13 28 127 na ids: 3 24 77
+            debug_sid = 125 # 33 12 14 4 #tilt ids: 86  104 73 108 125  pan ids: 5 7 21 13 28 127 na ids: 3 24 77
         else:
             shots_np = shots_per_vid_np
             debug_sid = -1
@@ -118,7 +118,7 @@ class CMC(object):
             print(f'start: {start}, end: {stop}')
 
             shot_len = stop - start
-            MIN_NUMBER_OF_FRAMES_PER_SHOT = 10
+            MIN_NUMBER_OF_FRAMES_PER_SHOT = 5 # 10
             if(shot_len <= MIN_NUMBER_OF_FRAMES_PER_SHOT ):
                 #print("shot length is too small!")
                 class_name = "NA"

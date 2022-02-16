@@ -9,8 +9,8 @@ exp_results = []
 
 exp_file_list = [
                  "./config/config_cmc_evaluation_historian_1.yaml",
-                 #"./config/config_cmc_evaluation_historian_2.yaml",
-                 #"./config/config_cmc_evaluation_historian_3.yaml",
+                 "./config/config_cmc_evaluation_historian_2.yaml",
+                 "./config/config_cmc_evaluation_historian_3.yaml",
                  #"./config/config_cmc_evaluation_historian_4.yaml",
                  #"./config/config_cmc_evaluation_historian_5.yaml",
                  ]
@@ -78,13 +78,22 @@ for i, exp_file in enumerate(exp_file_list):
         all_shots_np = eval_instance.final_dataset_np
         print(all_shots_np)
         vids_idx = np.unique(all_shots_np[:, :1])
+        #print(all_shots_np)
+        #print("/training_data/pan/vid_8242_sid_10_start_8560_stop_8645_classname_pan.avi" in all_shots_np)
+        #exit()
+        #i = 132
+        #vids_idx = vids_idx[i:i+1]
+        #print(vids_idx)
+        #exit()
 
         for s, idx in enumerate(vids_idx.tolist()):    
             shot_idx = np.where(all_shots_np[:, :1] == idx)[0]
             shot_np = all_shots_np[shot_idx]
             shots_final = shot_np[:, :4]
-            print(shots_final)
+            #print(shots_final)
+            #continue
             cmc_instance.runOnSingleVideo(shots_per_vid_np=shots_final, max_recall_id=s+1)
+        #exit()
 
     # run evaluation process
     accuracy, precision, recall, f1_score = eval_instance.run_evaluation(idx=None)

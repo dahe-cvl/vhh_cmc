@@ -166,6 +166,107 @@ class OpticalFlow(object):
             cv2.resizeWindow(win_name, frame_rgb.shape[0], frame_rgb.shape[1])
             s = cv2.waitKey(100)
 
+    def filter_motion_vectors_of_interest_OLD(self, all_mb_u_np, all_mb_v_np, all_mb_pos_x_np, all_mb_pos_y_np, k, n, t1, t2, VISUALIZE_ACTIVE_FLAG=True):
+        all_filter_masks_l = []
+        all_seq_mb_delta_u_l = []
+        all_seq_mb_delta_v_l = []
+        last_conditions = np.zeros((self.number_of_blocks*self.number_of_blocks)).astype('bool')
+        last_conditions.fill(False)
+
+        for i in range(0, len(all_mb_u_np) - k):
+            # calculate delta_u and delta_v - horizontal and vertical displacements
+            seq_mb_delta_u = []
+            seq_mb_delta_v = []
+            for j in range(0, k):
+                u_curr = all_mb_u_np[i + j]
+                v_curr = all_mb_v_np[i + j]
+                u_next = all_mb_u_np[i + j + 1]
+                v_next = all_mb_v_np[i + j + 1]
+
+                delta_u = u_next - u_curr
+                delta_v = v_next - v_curr
+                seq_mb_delta_u.append(delta_u)
+                seq_mb_delta_v.append(delta_v)
+            seq_mb_delta_u_np = np.array(seq_mb_delta_u)
+            seq_mb_delta_v_np = np.array(seq_mb_delta_v)
+
+            print("####### DELTA U-V #########")
+            print(i)
+            print(seq_mb_delta_u_np)
+            print(seq_mb_delta_u_np.shape)
+            print(seq_mb_delta_v_np)
+            print(seq_mb_delta_v_np.shape)
+            #continue
+
+            # check significance and consistency
+            seq_mb_mu_delta_u = np.mean(seq_mb_delta_u_np, axis=0)
+            seq_mb_mu_delta_v = np.mean(seq_mb_delta_v_np, axis=0)
+
+            all_seq_mb_delta_u_l.append(seq_mb_mu_delta_u)
+            all_seq_mb_delta_v_l.append(seq_mb_mu_delta_v)
+
+            sum_seq_mb_sigma_delta_u = np.square(seq_mb_delta_u_np[0] - seq_mb_mu_delta_u)
+            sum_seq_mb_sigma_delta_v = np.square(seq_mb_delta_v_np[0] - seq_mb_mu_delta_v)
+            for j in range(1, k):
+                sum_seq_mb_sigma_delta_u = sum_seq_mb_sigma_delta_u + np.square(seq_mb_delta_u_np[j] - seq_mb_mu_delta_u)
+                sum_seq_mb_sigma_delta_v = sum_seq_mb_sigma_delta_v + np.square(seq_mb_delta_v_np[j] - seq_mb_mu_delta_v)
+            seq_mb_sigma_delta_u = np.sqrt((1 / (k - 1)) * sum_seq_mb_sigma_delta_u)
+            seq_mb_sigma_delta_v = np.sqrt((1 / (k - 1)) * sum_seq_mb_sigma_delta_v)
+
+            print("####### SIGMA U-V #########")
+            print(i)
+            print(seq_mb_sigma_delta_u)
+            print(seq_mb_sigma_delta_u.shape)
+            print(seq_mb_sigma_delta_v)
+            print(seq_mb_sigma_delta_v.shape)
+
+            sum_seq_mb_mu_dist = np.sqrt((np.square(all_mb_u_np[i]) + np.square(all_mb_v_np[i])))
+            for j in range(1, k):
+                sum_seq_mb_mu_dist = sum_seq_mb_mu_dist + np.sqrt((np.square(all_mb_u_np[i+j]) + np.square(all_mb_v_np[i+j])))
+            seq_mb_mu_dist = (1 / k) * sum_seq_mb_mu_dist
+
+            print("####### Mean Magnitude #########")
+            print(i)
+            print(seq_mb_mu_dist)
+            print(seq_mb_mu_dist.shape)
+
+            print("####### MIN/MAX values #########")
+            print(np.min(seq_mb_mu_dist))
+            print(np.max(seq_mb_mu_dist))
+            print(np.min(np.sqrt(np.square(seq_mb_sigma_delta_u) + np.square(seq_mb_sigma_delta_v))))
+            print(np.max(np.sqrt(np.square(seq_mb_sigma_delta_u) + np.square(seq_mb_sigma_delta_v))))
+
+            significance_condition1 = seq_mb_mu_dist > t1
+            consistency_condition2 = np.sqrt(np.square(seq_mb_sigma_delta_u) + np.square(seq_mb_sigma_delta_v)) < t2
+            final_condition = np.logical_and(significance_condition1, consistency_condition2)
+
+            print("####### Conditions #########")
+            print(significance_condition1)
+            print(significance_condition1.shape)
+            print(np.unique(significance_condition1, return_counts=True))
+            print(consistency_condition2)
+            print(consistency_condition2.shape)
+            print(np.unique(consistency_condition2, return_counts=True))
+            print(final_condition)
+            print(final_condition.shape)
+            print(np.unique(final_condition, return_counts=True))
+            ''''''
+            all_filter_masks_l.append(final_condition)
+
+        all_filter_masks_np = np.array(all_filter_masks_l)
+        print(all_filter_masks_np.shape)
+        all_seq_mb_delta_u_np = np.array(all_seq_mb_delta_u_l)
+        print(all_seq_mb_delta_u_np.shape)
+        all_seq_mb_delta_v_np = np.array(all_seq_mb_delta_v_l)
+        print(all_seq_mb_delta_v_np.shape)
+
+        if(VISUALIZE_ACTIVE_FLAG == True):
+            frames_np = np.squeeze(self.video_frames)
+            print(frames_np.shape)
+            self.visualize_motion_vectors(frames_np, all_mb_u_np, all_mb_v_np, all_mb_pos_x_np, all_mb_pos_y_np, all_filter_masks_np)
+        
+        return all_filter_masks_np
+
     def filter_motion_vectors_of_interest(self, all_mb_u_np, all_mb_v_np, all_mb_pos_x_np, all_mb_pos_y_np, k, n, t1, t2, VISUALIZE_ACTIVE_FLAG=True):
         start_time3 = datetime.now()
         
@@ -462,7 +563,8 @@ class OpticalFlow(object):
         mvi_mv_ratio = self.config_instance.mvi_mv_ratio
 
         #self.filter_motion_vectors_of_interest(all_mb_u_np, all_mb_v_np, k, n, t1, t2)
-        mvi_mask = self.filter_motion_vectors_of_interest(all_mb_u_np, all_mb_v_np, all_mb_pos_x_np, all_mb_pos_y_np, k, n, t1, t2, VISUALIZE_ACTIVE_FLAG=False)
+        mvi_mask = self.filter_motion_vectors_of_interest_OLD(all_mb_u_np, all_mb_v_np, all_mb_pos_x_np, all_mb_pos_y_np, k, n, t1, t2, VISUALIZE_ACTIVE_FLAG=False)
+        #mvi_mask = self.filter_motion_vectors_of_interest(all_mb_u_np, all_mb_v_np, all_mb_pos_x_np, all_mb_pos_y_np, k, n, t1, t2, VISUALIZE_ACTIVE_FLAG=False)
 
         # region estimation
         all_motion_np = self.region_estimation(all_mb_u_np, all_mb_v_np, all_mb_mag_np, all_mb_ang_np, mvi_mask, n, k, mvi_mv_ratio, VISUALIZE_ACTIVE_FLAG=False)

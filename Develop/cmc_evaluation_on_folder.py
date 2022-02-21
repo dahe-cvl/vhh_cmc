@@ -11,8 +11,8 @@ exp_file_list = [
                  "./config/config_cmc_evaluation_historian_1.yaml",
                  "./config/config_cmc_evaluation_historian_2.yaml",
                  "./config/config_cmc_evaluation_historian_3.yaml",
-                 #"./config/config_cmc_evaluation_historian_4.yaml",
-                 #"./config/config_cmc_evaluation_historian_5.yaml",
+                 "./config/config_cmc_evaluation_historian_4.yaml",
+                 "./config/config_cmc_evaluation_historian_5.yaml",
                  ]
 
 '''

@@ -377,7 +377,7 @@ class CMC(object):
 
         fp.close()
 
-    def export_shots_as_file(self, shots_np, dst_path="./vhh_mmsi_eval_db_tiny/shots/"):
+    def export_shots_as_file(self, shots_np, dst_path="./vhh_mmsi_eval_db_tiny/shots/", max_num_of_shots=10, VIS_TEXT_FLAG=False):
         print("export shot as video")
 
         print(shots_np.shape)
@@ -394,6 +394,7 @@ class CMC(object):
         print(w)
         print(fps)
 
+        shot_cnt = 0
         for i, data in enumerate(vid_instance.getFramesByShots(shots_np, preprocess=None)):
             frames_per_shots_np = data['Images']
             shot_id = data['sid']
@@ -411,14 +412,15 @@ class CMC(object):
             print(f'start: {start}, end: {stop}')
             print(f'camera_movement_class: {camera_movement_class}')
 
-            if (camera_movement_class == "PAN" or camera_movement_class == "TILT" or camera_movement_class == "pan" or camera_movement_class == "tilt"):
-            #if (camera_movement_class == "NA" or camera_movement_class == "na"):
+            #if (camera_movement_class == "PAN" or camera_movement_class == "TILT" or camera_movement_class == "pan" or camera_movement_class == "tilt"):
+            if (camera_movement_class == "NA" or camera_movement_class == "na"):
                 print("save video! ")
 
-                VIS_TEXT_FLAG = True
+                if (shot_cnt >= max_num_of_shots and max_num_of_shots != -1):
+                    break
 
                 fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-                out = cv2.VideoWriter(dst_path + "/" + camera_movement_class + "_" + str(i) + ".avi", fourcc, 12, (w, h))
+                out = cv2.VideoWriter(dst_path + "/vid_" + str(vid_name.split('.')[0]) + "_sid_" + str(shot_id) + "_" + camera_movement_class + "_" + str(i) + ".avi", fourcc, 12, (w, h))
 
                 font = cv2.FONT_HERSHEY_SIMPLEX
                 bottomLeftCornerOfText = (30, 50)
@@ -439,6 +441,8 @@ class CMC(object):
                     out.write(frame)
 
                 out.release()
+
+                shot_cnt = shot_cnt + 1
 
 
 

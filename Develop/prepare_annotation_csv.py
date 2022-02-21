@@ -48,4 +48,4 @@ samples_np = np.array(samples_l)
 print(samples_np)
 
 for entry in samples_l:
-    csvWriter(dst_folder=dst_folder, name="annotations.csv", entries_list=entry)
+    csvWriter(dst_folder=dst_folder, name="annotations_NNNNN.csv", entries_list=entry)

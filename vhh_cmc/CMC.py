@@ -151,7 +151,7 @@ class CMC(object):
 
             # sequence-based results
             import json
-            with open(self.config_instance.path_final_results + "/" + str(vid_name.split('.')[0] + "." + vid_name.split('.')[1]) + ".json", 'w') as fp:
+            with open(self.config_instance.path_final_results + "/" + str(vid_name.split('.')[0]) + ".json", 'w') as fp:
                 json.dump(results_seq_cmc_l, fp)
 
     def loadSbdResults(self, sbd_results_path):

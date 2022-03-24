@@ -30,19 +30,19 @@ PreProcessing:
 OpticalFlow:
   ###
   # This parameter is used to specify the ratio between available motion-vectors-of-interest to the all motion-vectors.
-  MVI_MV_RATIO: 0.1
+  MVI_MV_RATIO: 0.001
   ###
   # This parameter is used to specify the threshold (t1) for the significance check.
-  THRESHOLD_SIGNIFICANCE: 2.0
+  THRESHOLD_SIGNIFICANCE: 2.1
   ###
   # This parameter is used to specify the threshold (t2) for the consistency check.
-  THRESHOLD_CONSISTENCY: 2.3
+  THRESHOLD_CONSISTENCY: 2.2
   ###
   # This parameter is used to specify the temporal window_size (k) for the significance/consistency check.
-  MVI_WINDOW_SIZE: 10
+  MVI_WINDOW_SIZE: 5
   ###
   # This parameter is used to specify the temporal window_size (n) for the final movements classification over one shot.
-  REGION_WINDOW_SIZE: 5
+  REGION_WINDOW_SIZE: 3
   ###
   # This parameter is used to specify the percentage threshold to identify movement activities.
   ACTIVE_THRESHOLD: 0.2
@@ -50,11 +50,11 @@ OpticalFlow:
 CmcCore:
   ###
   # This parameter is used to specify the class names.
-  CLASS_NAMES: ["PAN","TILT","NA"]
+  CLASS_NAMES: ["pan","tilt", "na"]
 
   ###
   # This parameter is used to save raw results (e.g. debug visualizations).
-  SAVE_RAW_RESULTS: 1       # 1 ... yes 0 ... no
+  SAVE_RAW_RESULTS: 0       # 1 ... yes 0 ... no
   ###
   # This parameter is used to specify the path for saving the raw results.
   PATH_RAW_RESULTS: "/data/ext/VHH/datasets/HistShotDS_V2/tmp_cmc_sequences/annotations/"
@@ -68,10 +68,10 @@ CmcCore:
 
   ###
   # This parameter is used to save final results (e.g. csv list).
-  SAVE_FINAL_RESULTS: 0     # 1 ... yes 0 ... no
+  SAVE_FINAL_RESULTS: 1     # 1 ... yes 0 ... no
   ###
   # This parameter is used to specify the path for saving the final results.
-  PATH_FINAL_RESULTS: "./results/cmc/final_results/"
+  PATH_FINAL_RESULTS: "/data/ext/VHH/datasets/HistShotDS_V2/tmp_cmc_sequences/cmc_sequence_results/"
   ###
   # This parameter is used to specify the prefix for the results file.
   PREFIX_FINAL_RESULTS: "results_"

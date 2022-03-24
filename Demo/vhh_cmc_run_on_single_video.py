@@ -1,7 +1,7 @@
 from vhh_cmc.CMC import CMC
 import os
 
-config_file = "./config/config_cmc_debug.yaml"
+config_file = "./config/config_cmc.yaml"
 cmc_instance = CMC(config_file)
 
 if(cmc_instance.config_instance.debug_flag == True):
@@ -20,12 +20,13 @@ else:
     results_file_list = glob.glob(os.path.join(results_path, "*-shot_annotations.json"))
     #results_file_list = os.listdir(results_path)
     results_file_list.sort()
-    #print(results_file_list[7:109])
+    print(results_file_list)
 
-    for file in results_file_list[:7]:
+    for file in results_file_list:
         #shots_np = cmc_instance.loadSbdResults(results_path + file)
         #shots_np = cmc_instance.loadStcResultsFromJson(results_path + file)
         shots_np = cmc_instance.loadStcResultsFromJson(file)
+
         max_recall_id = file.split('/')[-1]
         #print(max_recall_id)
         max_recall_id = max_recall_id.split('.')[0]

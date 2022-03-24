@@ -70,16 +70,15 @@ class CMC(object):
         # read all frames of video
         vid_name = shots_np[0][0]       
 
-        # map vid name with origianl file names for icprs paper
         '''
+        # map vid name with origianl file names for icprs paper
         orig_file_names = os.listdir(self.config_instance.path_videos)
         print(orig_file_names)
         for orig_name in orig_file_names:
             if(vid_name.split('.')[0] + "_(" in orig_name):
                 vid_name = orig_name
-        '''
         print(vid_name)
-
+        '''
 
         if(self.config_instance.save_eval_results == 1):
             print("Evaluation mode is activated ...")
@@ -109,7 +108,7 @@ class CMC(object):
             start = data['start']
             stop = data['end']
 
-            if(shot_id != debug_sid and self.config_instance.debug_flag == True):
+            if(shot_id != debug_sid) and (self.config_instance.debug_flag == True):
                 continue
 
             print(f'sid: {shot_id}')
@@ -152,7 +151,7 @@ class CMC(object):
 
             # sequence-based results
             import json
-            with open(self.config_instance.path_raw_results + "/" + str(vid_name.split('.')[0] + "." + vid_name.split('.')[1]) + ".json", 'w') as fp:
+            with open(self.config_instance.path_final_results + "/" + str(vid_name.split('.')[0] + "." + vid_name.split('.')[1]) + ".json", 'w') as fp:
                 json.dump(results_seq_cmc_l, fp)
 
     def loadSbdResults(self, sbd_results_path):

@@ -1,3 +1,4 @@
+from tracemalloc import start
 import cv2
 import numpy as np
 import argparse
@@ -597,7 +598,7 @@ class OpticalFlow(object):
         if(condition_a_flag == True):   
             print("########################################")  
             print("Condition A: remove short movements ... ")
-            min_length_of_motion = 10
+            min_length_of_motion = 20 #10
             pans_np = self.filter_short_movements(pans_np, min_length_of_motion=min_length_of_motion)
             tilts_np = self.filter_short_movements(tilts_np, min_length_of_motion=min_length_of_motion)
             print(pans_np)
@@ -612,7 +613,7 @@ class OpticalFlow(object):
         if(condition_b_flag == True):   
             print("######################################")
             print("Condition B: find and filter gaps ... ")
-            max_length_of_gap = 2
+            max_length_of_gap = 5 #2
 
             if (len(tilts_np) >= 2):
                 tilts_np = self.filter_movements_gaps(tilts_np, max_length_of_gap=max_length_of_gap)
@@ -636,16 +637,11 @@ class OpticalFlow(object):
             final_movements_np = pans_np
         
         #exit()
-
         seq_dict_l = []
         if(final_movements_np is not None):    
-            final_movements_np[:,:2] = final_movements_np[:,:2].astype('int') + shot_start 
-            print(final_movements_np)
-            #print(shot_start)
-            #print(shot_end)
-
-            # save sequences to disc
-            import json
+            tmp1 = final_movements_np[:,:2].astype('int') + shot_start 
+            tmp2 = final_movements_np[:,2:]
+            final_movements_np = np.concatenate((tmp1, tmp2), axis=1)
             
             for g in range(0, len(final_movements_np)):
                 seq_start = final_movements_np[g][0]

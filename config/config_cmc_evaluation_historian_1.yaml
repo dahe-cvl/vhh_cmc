@@ -33,16 +33,16 @@ OpticalFlow:
   MVI_MV_RATIO: 0.001
   ###
   # This parameter is used to specify the threshold (t1) for the significance check.
-  THRESHOLD_SIGNIFICANCE: 1.8
+  THRESHOLD_SIGNIFICANCE: 1.9
   ###
   # This parameter is used to specify the threshold (t2) for the consistency check.
   THRESHOLD_CONSISTENCY: 2.2
   ###
   # This parameter is used to specify the temporal window_size (k) for the significance/consistency check.
-  MVI_WINDOW_SIZE: 6
+  MVI_WINDOW_SIZE: 7
   ###
   # This parameter is used to specify the temporal window_size (n) for the final movements classification over one shot.
-  REGION_WINDOW_SIZE: 2
+  REGION_WINDOW_SIZE: 4
   ###
   # This parameter is used to specify the percentage threshold to identify movement activities.
   ACTIVE_THRESHOLD: 0.2

@@ -4,8 +4,8 @@ Development:
   # This parameter is used to activate or deactivate the debug mode.
   DEBUG_FLAG: 1             # 1 ... activate 0 ... deactivate
   ###
-  # This parameter is used to specify a SBD results file for debugging mode.
-  SBD_RESULTS_PATH: "/data/share/datasets/vhh_mmsi_test_db_v3/annotations/cmc/58.csv"
+  # This parameter is used to specify a SBD results file for debugging mode.  64
+  SBD_RESULTS_PATH: "/data/share/datasets/vhh_mmsi_test_db_v3/annotations/cmc/58.csv"  
   ###
   # This parameter is used to specify the results path in debug mode
   PATH_DEBUG_RESULTS: "/data/share/dhelm/cmc_debug_setup_20220129/debug_results/"
@@ -30,13 +30,13 @@ PreProcessing:
 OpticalFlow:
   ###
   # This parameter is used to specify the ratio between available motion-vectors-of-interest to the all motion-vectors.
-  MVI_MV_RATIO: 0.1
+  MVI_MV_RATIO: 0.001
   ###
   # This parameter is used to specify the threshold (t1) for the significance check.
-  THRESHOLD_SIGNIFICANCE: 2.0
+  THRESHOLD_SIGNIFICANCE: 1.9
   ###
   # This parameter is used to specify the threshold (t2) for the consistency check.
-  THRESHOLD_CONSISTENCY: 2.3
+  THRESHOLD_CONSISTENCY: 156.3
   ###
   # This parameter is used to specify the temporal window_size (k) for the significance/consistency check.
   MVI_WINDOW_SIZE: 10

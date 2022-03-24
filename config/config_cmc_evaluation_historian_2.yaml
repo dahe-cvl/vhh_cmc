@@ -2,13 +2,13 @@
 Development:
   ###
   # This parameter is used to activate or deactivate the debug mode.
-  DEBUG_FLAG: 1             # 1 ... activate 0 ... deactivate
+  DEBUG_FLAG: 0             # 1 ... activate 0 ... deactivate
   ###
-  # This parameter is used to specify a SBD results file for debugging mode.  64
-  SBD_RESULTS_PATH: "/data/share/datasets/vhh_mmsi_test_db_v3/annotations/cmc/58.csv"  
+  # This parameter is used to specify a SBD results file for debugging mode.
+  SBD_RESULTS_PATH: "/data/share/maxrecall_vhh_mmsi/videos/results/sbd/final_results/8.csv"
   ###
   # This parameter is used to specify the results path in debug mode
-  PATH_DEBUG_RESULTS: "/data/share/dhelm/cmc_debug_setup_20220129/debug_results/"
+  PATH_DEBUG_RESULTS: "/data/share/maxrecall_vhh_mmsi/develop/videos/results/cmc/develop/"
   ###
   # This parameter is used to save a debug package (e.g. including some visualizations, ... - not available yet).
   SAVE_DEBUG_PKG: 0
@@ -33,16 +33,16 @@ OpticalFlow:
   MVI_MV_RATIO: 0.001
   ###
   # This parameter is used to specify the threshold (t1) for the significance check.
-  THRESHOLD_SIGNIFICANCE: 1.9
+  THRESHOLD_SIGNIFICANCE: 2.0
   ###
   # This parameter is used to specify the threshold (t2) for the consistency check.
-  THRESHOLD_CONSISTENCY: 156.3
+  THRESHOLD_CONSISTENCY: 2.2
   ###
   # This parameter is used to specify the temporal window_size (k) for the significance/consistency check.
-  MVI_WINDOW_SIZE: 10
+  MVI_WINDOW_SIZE: 7
   ###
   # This parameter is used to specify the temporal window_size (n) for the final movements classification over one shot.
-  REGION_WINDOW_SIZE: 5
+  REGION_WINDOW_SIZE: 4
   ###
   # This parameter is used to specify the percentage threshold to identify movement activities.
   ACTIVE_THRESHOLD: 0.2
@@ -50,14 +50,14 @@ OpticalFlow:
 CmcCore:
   ###
   # This parameter is used to specify the class names.
-  CLASS_NAMES: ["PAN","TILT","NA"]
+  CLASS_NAMES: ["pan","tilt", "na"]
 
   ###
   # This parameter is used to save raw results (e.g. debug visualizations).
   SAVE_RAW_RESULTS: 0       # 1 ... yes 0 ... no
   ###
   # This parameter is used to specify the path for saving the raw results.
-  PATH_RAW_RESULTS: "./"
+  PATH_RAW_RESULTS: "/data/share/maxrecall_vhh_mmsi/videos/results/cmc/raw_results/"
   NUMBER_OF_FRAMES_PER_SHOT: 5  # save x frames per shot
   ###
   # This parameter is used to specify the prefix for the results file.
@@ -68,10 +68,10 @@ CmcCore:
 
   ###
   # This parameter is used to save final results (e.g. csv list).
-  SAVE_FINAL_RESULTS: 0     # 1 ... yes 0 ... no
+  SAVE_FINAL_RESULTS: 1     # 1 ... yes 0 ... no
   ###
   # This parameter is used to specify the path for saving the final results.
-  PATH_FINAL_RESULTS: "/data/share/maxrecall_vhh_mmsi/videos/results/cmc/final_results/"
+  PATH_FINAL_RESULTS: "/caa/Projects02/vhh/private/Results/comparison_crop_uncrop_nobackup/results/cmc/final_results/cropped/"
   ###
   # This parameter is used to specify the prefix for the results file.
   PREFIX_FINAL_RESULTS: "results_"
@@ -81,21 +81,21 @@ CmcCore:
 
   ###
   # This parameter is used to specify the path to the videos.
-  PATH_VIDEOS: "/data/share/datasets/vhh_mmsi_test_db_v3/videos/" #"/data/share/datasets/vhh_mmsi_test_db_v3/videos/"
+  PATH_VIDEOS: "/data/ext/VHH/datasets/HistShotDS_V2/eval_cmc/"
 
 Evaluation:
   ###
   # This parameter is used to save evaluation results (e.g. visualizations, ... ).
-  SAVE_EVAL_RESULTS: 0
+  SAVE_EVAL_RESULTS: 1
   ###
   # This parameter is used the raw results path.
   PATH_RAW_RESULTS: "/data/share/maxrecall_vhh_mmsi/videos/results/cmc/raw_results/"
   ###
   # This parameter is used to specify the path to store the evaluation results path.
-  PATH_EVAL_RESULTS: "/data/share/maxrecall_vhh_mmsi/videos/results/cmc/develop/"
+  PATH_EVAL_RESULTS: "/data/ext/VHH/datasets/HistShotDS_V2/eval_cmc/exeriments/exp2/"
   ###
   # This parameter is used to groundtruth annotations used for evaluation.
   PATH_GT_ANNOTATIONS: "/caa/Projects02/vhh/private/database_nobackup/VHH_datasets/annotations/ShotBoundaryDetection/imediacities/sbd_imc_annotations_20191231.csv"
   ###
   # This parameter is used to specify the path to the dataset used for the evaluation.
-  PATH_EVAL_DATASET: "/data/share/cmc_eval_dataset/"
+  PATH_EVAL_DATASET: "/data/ext/VHH/datasets/HistShotDS_V2/eval_cmc/"

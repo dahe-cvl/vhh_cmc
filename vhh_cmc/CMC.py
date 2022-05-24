@@ -101,7 +101,7 @@ class CMC(object):
         print(shots_np)
         results_cmc_l = []
         results_seq_cmc_l = []
-        for data in vid_instance.getFramesByShots(shots_np, preprocess=self.pre_processing_instance.applyTransformOnImg):
+        for data in vid_instance.getFramesByShots(shots_np, batch_size=self.config_instance.batch_size, preprocess=self.pre_processing_instance.applyTransformOnImg):
             frames_per_shots_np = data['Images']
             shot_id = data['sid']
             vid_name = data['video_name']
@@ -123,12 +123,20 @@ class CMC(object):
                 class_name = "NA"
                 seq_dict_l = []
             else:
-                # add new optical flow version
-                optical_flow_instance = OpticalFlow(video_frames=frames_per_shots_np,
-                                                    algorithm=None,
-                                                    config_instance=self.config_instance)
-                class_name, seq_dict_l = optical_flow_instance.runDense(vid_name, shot_id, start, stop)
-            
+                # Create one optical flow instance per shot
+                if data["is_first_batch_in_shot"]:
+                    self.optical_flow_instance = OpticalFlow(start, stop, None, self.config_instance)
+
+                # Aggregate data over batches
+                self.optical_flow_instance.aggregateInBatches(frames_per_shots_np, start, stop)
+
+                if data["is_last_batch_in_shot"]:
+                    # Compute class of entire shot
+                    class_name, seq_dict_l = self.optical_flow_instance.classify(vid_name, shot_id, start, stop)
+                else: 
+                    # Go to next batch
+                    continue
+                    
             # prepare results
             print(str(vid_name) + ";" + str(shot_id) + ";" + str(start) + ";" + str(stop) + ";" + str(class_name))
             results_cmc_l.append([str(vid_name) + ";" + str(shot_id) + ";" + str(start) + ";" + str(stop) + ";" + str(class_name)])

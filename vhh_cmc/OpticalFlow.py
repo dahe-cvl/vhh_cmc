@@ -14,15 +14,23 @@ from scipy.stats import multivariate_normal
 
 
 class OpticalFlow(object):
-    def __init__(self, video_frames=None, algorithm=None, config_instance=None):
-        self.video_frames = video_frames
+    def __init__(self, start, end, algorithm=None, config_instance=None):
         self.config_instance = config_instance
 
         self.number_of_blocks = 32
 
-    def calculate_displacements_u_v(self):
+        nr_timepoints = end - start
+        self.all_mb_u_np = pymp.shared.array((nr_timepoints, self.number_of_blocks*self.number_of_blocks), dtype='float32')
+        self.all_mb_v_np = pymp.shared.array((nr_timepoints, self.number_of_blocks*self.number_of_blocks), dtype='float32')
+        self.all_mb_mag_np = pymp.shared.array((nr_timepoints, self.number_of_blocks*self.number_of_blocks), dtype='float32')
+        self.all_mb_ang_np = pymp.shared.array((nr_timepoints, self.number_of_blocks*self.number_of_blocks), dtype='float32')
+        self.all_mb_pos_x_np = pymp.shared.array((nr_timepoints, self.number_of_blocks*self.number_of_blocks), dtype='int')
+        self.all_mb_pos_y_np = pymp.shared.array((nr_timepoints, self.number_of_blocks*self.number_of_blocks), dtype='int')
+        self.curr_position = 0
+
+    def calculate_displacements_u_v(self, video_frames):
         print("INFO: calculate dense optical flow for entire shot ...")
-        frames_np = np.squeeze(self.video_frames)
+        frames_np = np.squeeze(video_frames)
         print(frames_np.shape)
 
         of_dense_instance = OpticalFlow_Dense()
@@ -60,13 +68,6 @@ class OpticalFlow(object):
         # split into macro blocks (mb) - calculate one representative vector for each macro block (mean)
         start_time2 = datetime.now()
         
-        all_mb_u_np = pymp.shared.array((frm_u_np.shape[0], self.number_of_blocks*self.number_of_blocks), dtype='float32')
-        all_mb_v_np = pymp.shared.array((frm_v_np.shape[0], self.number_of_blocks*self.number_of_blocks), dtype='float32')
-        all_mb_mag_np = pymp.shared.array((frm_mag_np.shape[0], self.number_of_blocks*self.number_of_blocks), dtype='float32')
-        all_mb_ang_np = pymp.shared.array((frm_ang_np.shape[0], self.number_of_blocks*self.number_of_blocks), dtype='float32')
-        all_mb_pos_x_np = pymp.shared.array((frm_mag_np.shape[0], self.number_of_blocks*self.number_of_blocks), dtype='int')
-        all_mb_pos_y_np = pymp.shared.array((frm_ang_np.shape[0], self.number_of_blocks*self.number_of_blocks), dtype='int')
-
         with pymp.Parallel(4) as p:
             #p.print(p.num_threads, p.thread_num)
             for i in p.range(0, len(frm_u_np)):
@@ -113,19 +114,20 @@ class OpticalFlow(object):
                         frm_mb_pos_x_l.append(mb_center_x)
                         frm_mb_pos_y_l.append(mb_center_y)
 
-                all_mb_u_np[i] = np.array(frm_mb_u_l)
-                all_mb_v_np[i] = np.array(frm_mb_v_l)
-                all_mb_mag_np[i] = np.array(frm_mb_mag_l)
-                all_mb_ang_np[i] = np.array(frm_mb_ang_l)
-                all_mb_pos_x_np[i] = np.array(frm_mb_pos_x_l)
-                all_mb_pos_y_np[i] = np.array(frm_mb_pos_y_l)
+                self.all_mb_u_np[self.curr_position + i] = np.array(frm_mb_u_l)
+                self.all_mb_v_np[self.curr_position + i] = np.array(frm_mb_v_l)
+                self.all_mb_mag_np[self.curr_position + i] = np.array(frm_mb_mag_l)
+                self.all_mb_ang_np[self.curr_position + i] = np.array(frm_mb_ang_l)
+                self.all_mb_pos_x_np[self.curr_position + i] = np.array(frm_mb_pos_x_l)
+                self.all_mb_pos_y_np[self.curr_position + i] = np.array(frm_mb_pos_y_l)
 
-        print(all_mb_mag_np.shape)
-        print(all_mb_ang_np.shape)
-        print(all_mb_u_np.shape)
-        print(all_mb_v_np.shape)
-        print(all_mb_pos_x_np.shape)
-        print(all_mb_pos_y_np.shape)
+        self.curr_position += len(frm_u_np)
+        print(self.all_mb_mag_np.shape)
+        print(self.all_mb_ang_np.shape)
+        print(self.all_mb_u_np.shape)
+        print(self.all_mb_v_np.shape)
+        print(self.all_mb_pos_x_np.shape)
+        print(self.all_mb_pos_y_np.shape)
         
         end_time2 = datetime.now()
         time_elapsed2 = end_time2 - start_time2
@@ -135,8 +137,6 @@ class OpticalFlow(object):
             frames_np = np.squeeze(self.video_frames)
             print(frames_np.shape)
             self.visualize_motion_vectors(frames_np, all_mb_u_np, all_mb_v_np, all_mb_pos_x_np, all_mb_pos_y_np)
-
-        return all_mb_mag_np, all_mb_ang_np, all_mb_u_np, all_mb_v_np, all_mb_pos_x_np, all_mb_pos_y_np
 
     def visualize_motion_vectors(self, frames_np, u_np, v_np, x_np, y_np, mask=None):
         # visualize vectors and frames
@@ -541,8 +541,8 @@ class OpticalFlow(object):
         return all_motion_np
 
 
-    def runDense(self, vid_name, shot_id, shot_start, shot_end):
-        frames_np = np.squeeze(self.video_frames)
+    def aggregateInBatches(self, video_frames, shot_start, shot_end):
+        frames_np = np.squeeze(video_frames)
         print(frames_np.shape)
 
         if(len(frames_np) > 10000):
@@ -551,11 +551,14 @@ class OpticalFlow(object):
             return class_name, []
 
         #calculate dense optical flow vectors (u, v, mag, ang)
-        frm_mag_np, frm_ang_np, frm_u_np, frm_v_np = self.calculate_displacements_u_v()
+        frm_mag_np, frm_ang_np, frm_u_np, frm_v_np = self.calculate_displacements_u_v(video_frames)
 
         # split into macro blocks (mb)
-        all_mb_mag_np, all_mb_ang_np, all_mb_u_np, all_mb_v_np, all_mb_pos_x_np, all_mb_pos_y_np = self.create_macro_blocks(frm_u_np, frm_v_np, frm_mag_np, frm_ang_np)
+        self.create_macro_blocks(frm_u_np, frm_v_np, frm_mag_np, frm_ang_np)
         
+
+    def classify(self, vid_name, shot_id, shot_start, shot_end):
+        all_mb_mag_np, all_mb_ang_np, all_mb_u_np, all_mb_v_np, all_mb_pos_x_np, all_mb_pos_y_np = self.all_mb_mag_np, self.all_mb_ang_np, self.all_mb_u_np, self.all_mb_v_np, self.all_mb_pos_x_np, self.all_mb_pos_y_np
         # motion vector of interest detection (MVI)
         k = self.config_instance.mvi_window_size
         n = self.config_instance.region_window_size

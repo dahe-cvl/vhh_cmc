@@ -83,6 +83,10 @@ CmcCore:
   # This parameter is used to specify the path to the videos.
   PATH_VIDEOS: "/data/ext/VHH/datasets/HistShotDS_V2/films/" #"/data/share/datasets/vhh_mmsi_test_db_v3/videos/"
 
+  ###
+  # Maximum number of frames in a batch
+  BATCH_SIZE: 2048
+
 Evaluation:
   ###
   # This parameter is used to save evaluation results (e.g. visualizations, ... ).

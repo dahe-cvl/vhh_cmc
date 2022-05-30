@@ -122,6 +122,7 @@ class Configuration:
         self.path_final_results = cmc_core_config['PATH_FINAL_RESULTS']
 
         self.path_videos = cmc_core_config['PATH_VIDEOS']
+        self.batch_size = int(cmc_core_config['BATCH_SIZE'])
 
         # evaluation section
         self.path_eval_dataset = evaluation_config['PATH_EVAL_DATASET']
